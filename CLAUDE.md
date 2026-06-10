@@ -10,11 +10,13 @@ Rust rewrite of the Perseus Morpheus C morphological parser for Ancient Greek (a
 ## Build & Test
 
 ```bash
-cargo build
+cargo build --release              # tests use the release binary when present
 cargo test
-echo "λόγος" | ./target/debug/morpheus -m ~/dev/morpheus/stemlib
-python3 tests/sample_corpus.py     # regenerate 2000-word corpus benchmark
-pytest tests/ -v                   # corpus consistency tests (recall ≥ 97%)
+echo "λόγος" | ./target/release/morpheus -m ~/dev/morpheus/stemlib
+python3 tests/sample_corpus.py --refresh-rust  # re-run Rust only on cached corpus (fast)
+python3 tests/sample_corpus.py     # full regen incl. C run (4000-word corpus)
+pytest tests/ -q                   # corpus consistency tests (recall = 100%)
+MORPHEUS_TIMING=1 ./target/release/morpheus ...  # print load-phase timings
 ```
 
 Use `rtk proxy cargo build` to see full compiler output (RTK filters cargo by default).
@@ -26,7 +28,13 @@ Use `rtk proxy cargo build` to see full compiler output (RTK filters cargo by de
 - **Analysis engine**: sliding stem+ending split at grapheme cluster boundaries.
 - **Three analysis paths**: `check_indecl` (whole-word `:wd:` entries), `check_nom` (nouns/adj), `check_verb` (verbs).
 - **Nu-movable**: `engine.rs` retries analysis without final ν and sets `MorphFlags::NU_MOVABLE`.
-- **Derived stems**: `conjsys.rs` expands `:de:` Deriv entries into present/aorist/future/perfect stems at load time.
+- **Fallback chain in `check_string_inner`**: direct → nu-movable → crasis (κἀκεῖνος, τοὔνομα) → doric ᾱ→η retry; preverb stripping runs unconditionally (a word can be both simple and compound).
+- **Derived stems**: `conjsys.rs` expands `:de:` Deriv entries at load time, driven by `derivs/source/*.deriv` tables (gated by `;pr`/`;fu`/… ppart bits) plus hand-rolled special cases.
+- **Iota subscript ≡ adscript**: `strip_diacritics` turns U+0345 into ι (ῳ → ωι). Subscript-bearing stems are dual-indexed with and without the iota (σῴζ → σωιζ and σωζ).
+- **`:vb:` lines are whole-word forms** (ἐστί), matched by `check_indecl`, not stem+ending splits.
+- **`@` continuation lines** after `:no:`/`:vs:` stems add alternative form-sets for the same stem; `@ end:xxx` makes a whole-word form (τέσσαρσι).
+- **`;` qualifier modifiers**: `-suffix` overrides the generated stem (δύναμαι `;ap,-hq` → δυνηθ), stemtype tokens override the target table (κιχάνω `;ao,aor2`). `;` blocks survive interleaved `:vs:`/`:vb:` lines.
+- **Preverbs**: remainder analyzed as verb only; compound lemma composed with elision/aspiration/assimilation (ἀπο+στρέφω→ἀποστρέφω, κατα+ἁγιστεύω→καθαγιστεύω, ἐν+καλέω→ἐγκαλέω, ἐξ+φέρω→ἐκφέρω).
 - **Forward generation**: Rust pre-expands all stems at load time (unlike C's backward analysis). All consonant euphony runs at index build time in `end_table.rs::apply_dental_euphony`.
 - **Leading `-` stems**: `stem_dict.rs` strips leading `-` from `-:vs:` / `-:no:` / `-:de:` entries (363 in `vbs.simp.ml`) — these mark compound-verb stems but are needed for simple-form analysis too.
 
@@ -64,15 +72,15 @@ Use `rtk proxy cargo build` to see full compiler output (RTK filters cargo by de
 - `prim_deriv` derivtypes (`reg_conj`): stem IS the present stem → match `w_stem` (num=1) only.
 - Final fallback: scan all whitespace-separated tokens in `key_str` for a direct name match (handles `irreg_superl os_h_on` etc.).
 
-## Contracted Verb Endings (end_table.rs)
+## Vowel Contraction (end_table.rs::emit_contracted_variants)
 
-Contraction is applied at index build time for contracted stemtypes. Each function strips the leading contract vowel + following vowel into the contracted form:
-
-| Stemtype | Contract fn | Example |
-|----------|------------|---------|
-| `ew_pr` | `contract_epsilon_norm` | `εετε` → `ειτε` |
-| `ow_pr` | `contract_omicron_norm` | `οετε` → `ουτε` |
-| `aw_pr`, `ajw_pr` | `contract_alpha_norm` | `αεται` → `αται` |
+Mirrors C `mkend.c`/`contract.c`: every uncontracted ending also emits contracted
+variants from `rule_files/vowcontr.table` (leftmost-longest match, one
+contraction per ending, contiguous same-raw rows each emit one variant with the
+row's dialect/`contr` flags). Both contracted and uncontracted norms live in
+the index, so Ionic uncontracted forms (πωλεομένων) and Attic contracted forms
+(παντελῶς) both match. The vowcontr file's reverse-alphabetical ordering is a
+load-bearing invariant.
 
 ## Consonant Euphony (end_table.rs::apply_dental_euphony)
 
@@ -81,44 +89,47 @@ Applied at index build time. Full rules from `conseuph.table` + `mkend.c` diphth
 - **Dental + sigma**: `ts`/`ds`/`qs` → `s`
 - **Velar assimilation**: `gt`/`xt` → `kt`, `gs`/`xs`/`ks` → `c` (= ξ), `gq`/`kq` → `xq` (= χ)
 - **Labial assimilation**: `ps`/`bs`/`fs` → `y` (= ψ), `ft`/`bt` → `pt`
-- **Nasal/liquid**: `dm`/`nm` → `sm`, `dt`/`qt` → `st`, `ns` → `s`
+- **Nasal/liquid**: `dm`/`nm`/`vm` → `sm`, `dt`/`qt` → `st`, `ns` → `s`, `pm` → `mm`
 - **Multi-char**: `onts`→`ous`, `ents`→`eis`, `ants`→`as`
 - **Diphthong expansion** (from `mkend.c`): `e_` → `ei`, `o_` → `ou`
 - **Null endings**: trailing `*` stripped (`h*` → `h`, `*` → `""`)
 
 ## Derived Stem Expansion (conjsys.rs)
 
-Called from `loader.rs` after `load_stem_files`. Expands all `StemKind::Deriv` entries:
+Called from `loader.rs` after `load_stem_files` (parallelized with rayon).
+Primary source: **`derivs/source/*.deriv` tables** — one file per derivtype,
+each line `suffix stemtype [dialect keys]` (`*` = empty suffix). Lines are
+gated by `ppart_class_bit(stemtype)` against the entry's `;`-qualifier mask
+(mask 0 = unrestricted). Perfect-class lines reduplicate the root first.
+Hand-rolled expansions remain on top (deduped): contraction-sensitive cases
+(εinw φα+ειν→φαιν), n_infix (λαβ→λαμβ), pres_redupl (γν→γιγν, applied to
+joined stem), nhmi/iaw_denom stem shapes, izw Attic future, aor2 overrides.
 
-- **RegDeriv** (e.g. `ew_denom`, `izw`, `aw_denom`): appends suffixes for present/σ-aorist/σ-future/aorist-passive stems and pushes new `StemKind::Verb` entries.
-- **PrimDeriv** (`reg_conj`): stem IS present stem; generates σ-aorist via stop+sigma contraction, σ-future, and aorist-passive (stem+θ) from ppart_mask bits.
-- **VerbStem** (`ainw`, `einw`, `skw`, `numi`, etc.): appends present-stem suffix to root; `einw` with α-final root contracts α+ε→αι.
-- **e_stem**: generates η/ε-grade future (`ησ`/`εσ`), aorist (`ησ`/`εσ`), and aorist-passive (`ηθ`/`εθ`) stems.
-- **azw xi-aorist**: generates `αξ` aorist stem in addition to `ασ` sigma-aorist.
-- **Perfect stems**: pre-generated for all derivtypes via `PERFECT_EXPANSIONS` table using `apply_reduplication` (C+ε+root, with φ→π, θ→τ, χ→κ deaspirations). Covers `perf_act`, `perfp_vow`, `perfp_s`, `perfp_d`, `perfp_g`, `perfp_n`, `perfp_p`.
+Key stem-formation rules:
+- `join_suffix_euphony`: dental/ζ drops before σ/κ (σωζ+σ→σωσ, πειθ+κ→πεικ),
+  labial+θ→φθ (πεμφθ), velar+θ→χθ, θ+σκ→σχ (πασχ).
+- `apply_reduplication`: full C+ε+root for stop(+liquid) and most clusters
+  (κέκτημαι, πέπτωκα, μέμνημαι); plain ε- for ρ/ζ/ξ/ψ and σ+consonant
+  (ἐστραφ); vowel-initial roots unchanged (temporal augment is reversed at
+  analysis time by `unaugment`). Classification is on diacritic-stripped chars.
+- Second perfect: labial/velar-final roots drop the κ and aspirate
+  (γραφ → γεγραφ perf_act, not *γεγραφκ).
+- reg_conj consonant-class perfect passive: final stop dropped, class table
+  carries it (πεπατ → πεπα + perfp_d, γεγραφ → γεγρα + perfp_p).
 
-## Corpus Recall
+## Corpus Metrics (4000-word freed-corpus sample, seed 42)
 
-Benchmark: 2000 random words from freed-corpus. C finds analyses for 610 words; Rust finds 596 of those (**97.7%**). pytest: 599 passed, 14 failed.
-
-### Remaining Misses (14 words, ~2.3%)
-
-| Word | Stemtype | Root cause |
-|------|---------|------------|
-| `γῆς` | `eh_ehs` | contracted η-noun stemtype |
-| `παντελῶς` | `hs_es adverbial` | adverbial `-ως` ending for `hs_es` |
-| `κατῃσίμωσε` | `aor1,ow_denom` | `ow_denom` aor1 stem not generated |
-| `διῃρήσθω` | `perfp_vow,e_stem` | `e_stem` perfect passive vowel not matching |
-| `δυνηθῶσι` | `aor_pass,a_stem` | alpha-contract `aor_pass` not generated |
-| `συζευξομένους` | `reg_fut,reg_conj` | future participle of mi-verb |
-| `χρῆσθαι` | `ajw_pr,a_stem contr` | alpha-contract pres mp ending contraction |
-| `κέλευ` | `w_stem contr` | irregular contracted form |
-| `χαρίεσσάν` | `eis_essa` | `eis_essa` adjective declension type |
-| `γίγνωνται` | `pres_redupl,w_stem` | reduplicated present stem `γιγν-` |
-| `πεπασμένον` | `perfp_d,reg_conj` | dental-boundary euphony (θ+σμ→σμ) at stem+ending juncture |
-| `περιειλημμένους` | `perfp_p raw_preverb` | compound perfect; preverb stripping not implemented |
-| `δείκνυσι` | `umi_pr,numi` | mi-verb `numi` endings not fully implemented |
-| `κίχεν` | `aor2,anw pres_redupl` | aorist2 of `anw`-type verbs |
+- C analyzes 3374/4000; **Rust recall 100%** (0 missed), pytest 3377 passed.
+- **Lemma agreement 98.8%** (words both analyze whose lemma sets intersect).
+- Rust-only 7.4% (270 words Rust analyzes that C doesn't — about half are
+  unaccented words C refuses by design; rest are lowercase proper names and
+  fallback noise).
+- The comparison harness had two historical bugs (fixed): the C output parser
+  swallowed the word after every unknown word, and `uni_to_beta` dropped
+  breathings (NFD names are COMMA ABOVE, not SMOOTH/PSILI), failing every
+  vowel-initial word in C.
+- Performance (release): stemlib load ≈ 0.5 s (232k stems), analysis
+  ≈ 115 µs/word. `MORPHEUS_TIMING=1` prints load-phase breakdown.
 
 ## C Morpheus Comparison
 

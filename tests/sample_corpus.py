@@ -20,7 +20,13 @@ from pathlib import Path
 CORPUS_DIR   = Path("~/dev/freed-corpus/data").expanduser()
 MORPHLIB_C   = Path("~/dev/morpheus/dist/stemlib").expanduser()
 CRUNCHER_BIN = Path("~/dev/morpheus/bin/cruncher").expanduser()
-RUST_BIN     = Path(__file__).resolve().parent.parent / "target" / "debug" / "morpheus"
+_TARGET = Path(__file__).resolve().parent.parent / "target"
+# Prefer the release binary (≈6× faster); fall back to debug.
+RUST_BIN = (
+    _TARGET / "release" / "morpheus"
+    if (_TARGET / "release" / "morpheus").exists()
+    else _TARGET / "debug" / "morpheus"
+)
 MORPHLIB_RUST = Path("~/dev/morpheus/stemlib").expanduser()
 SAMPLE_SIZE  = 4000
 OUTPUT_FILE  = Path(__file__).resolve().parent / "corpus_sample.json"

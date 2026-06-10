@@ -248,16 +248,34 @@ static AZW_EXTRA_AOR: &str = "αξ"; // azw xi-aorist suffix (from azw.deriv: ac
 /// Expand `:de:` derivation entries into concrete verb stems.
 /// Call once after `load_stem_files`, before analysis.
 pub fn expand_derivation_entries(dict: &mut StemDict, deriv_tables: &DerivTables) {
-    let new_entries: Vec<StemEntry> = {
-        let existing: Vec<StemEntry> = dict
-            .all_entries()
-            .filter(|e| matches!(e.kind, StemKind::Deriv))
-            .cloned()
-            .collect();
+    use rayon::prelude::*;
+    let existing: Vec<StemEntry> = dict
+        .all_entries()
+        .filter(|e| matches!(e.kind, StemKind::Deriv))
+        .cloned()
+        .collect();
 
-        let mut out = Vec::new();
+    let new_entries: Vec<StemEntry> = existing
+        .par_iter()
+        .flat_map_iter(|entry| expand_one_entry(entry, deriv_tables))
+        .collect();
 
-        for entry in &existing {
+    // The deriv-table pass and the hand-rolled expansions overlap; drop exact
+    // duplicates (same lemma + stem + keys) to keep the index lean.
+    let mut seen: std::collections::HashSet<(String, String, String)> =
+        std::collections::HashSet::new();
+    for entry in new_entries {
+        if seen.insert((entry.lemma.clone(), entry.stem_norm.clone(), entry.key_str.clone())) {
+            dict.insert(entry);
+        }
+    }
+}
+
+/// Generate all derived stems for one :de: entry.
+fn expand_one_entry(entry: &StemEntry, deriv_tables: &DerivTables) -> Vec<StemEntry> {
+    let mut out = Vec::new();
+    {
+        {
             let entry_has_pres_redupl =
                 entry.key_str.split_whitespace().any(|t| t == "pres_redupl");
             let entry_has_n_infix =
@@ -508,19 +526,8 @@ pub fn expand_derivation_entries(dict: &mut StemDict, deriv_tables: &DerivTables
                 }
             }
         }
-
-        out
-    };
-
-    // The deriv-table pass and the hand-rolled expansions overlap; drop exact
-    // duplicates (same lemma + stem + keys) to keep the index lean.
-    let mut seen: std::collections::HashSet<(String, String, String)> =
-        std::collections::HashSet::new();
-    for entry in new_entries {
-        if seen.insert((entry.lemma.clone(), entry.stem_norm.clone(), entry.key_str.clone())) {
-            dict.insert(entry);
-        }
     }
+    out
 }
 
 /// Aspirate a root-final stop (second-perfect formation): π/β→φ, κ/γ→χ.

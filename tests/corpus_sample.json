@@ -8514,6 +8514,7 @@
       "εκμάσσω:verb",
       "εξεμάγνυμι:verb",
       "εξεμάγω:verb",
+      "εξεμαΐσσω:verb",
       "εξεμαξιάω:verb"
     ]
   },
@@ -12874,6 +12875,7 @@
       "V a)cio/w  pres ind act 1st sg\t\tcontr\tow_pr,ow_denom"
     ],
     "rust": [
+      "ἀΐσσω:verb",
       "ἀξιάω:verb",
       "ἀξιόω:verb",
       "ἄγνυμι:verb",
@@ -20480,10 +20482,11 @@
       "P a)/gw  fut part act masc nom/voc sg\t\t\treg_fut,reg_conj"
     ],
     "rust": [
-      "ἀξιάω:verb",
+      "ἀΐσσω:participle",
+      "ἀξιάω:participle",
       "ἄγνυμι:verb",
       "ἄγω:verb",
-      "ἄξος:participle",
+      "ἄξος:verb",
       "ἄξων:participle"
     ]
   },
@@ -25949,6 +25952,7 @@
       "V a)xqe/w  pres imperat act 2nd sg\tdoric aeolic\tcontr\tew_pr,ew_denom"
     ],
     "rust": [
+      "ἀΐσσω:verb",
       "ἀχθέω:verb",
       "ἄγνυμι:verb",
       "ἄγω:verb",
@@ -38241,6 +38245,7 @@
       "V a)cio/w  pres ind act 2nd sg\t\tcontr\tow_pr,ow_denom"
     ],
     "rust": [
+      "ἀΐσσω:verb",
       "ἀξιόω:verb",
       "ἄγνυμι:verb",
       "ἄγω:verb",

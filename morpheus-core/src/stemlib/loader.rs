@@ -91,23 +91,36 @@ impl StemlibIndex {
         // ── Ending tables ───────────────────────────────────────────────
         // load_end_tables reads from endtables/source/ (stemtype-named files)
         // and resolves @-references into endtables/basics/.
+        let timing = std::env::var_os("MORPHEUS_TIMING").is_some();
+        let t = std::time::Instant::now();
         let basics_dir = lang_dir.join("endtables");
         let end_index = load_end_tables(&basics_dir)
             .map_err(|e| MorpheusError::StemlibLoad(format!("endtables: {e}")))?;
+        if timing {
+            eprintln!("endtables: {:?}", t.elapsed());
+        }
 
         // ── Stem dictionaries ───────────────────────────────────────────
+        let t = std::time::Instant::now();
         let stemsrc_dir = lang_dir.join("stemsrc");
         let stem_files = collect_stem_files(&stemsrc_dir, language);
         let stem_paths: Vec<&Path> = stem_files.iter().map(PathBuf::as_path).collect();
         let mut stem_dict = load_stem_files(&stem_paths)
             .map_err(|e| MorpheusError::StemlibLoad(format!("stem files: {e}")))?;
+        if timing {
+            eprintln!("stem files: {:?}", t.elapsed());
+        }
 
         // Expand derivation entries into concrete present / aorist / future stems,
         // driven by the per-derivtype tables in derivs/source/*.deriv.
+        let t = std::time::Instant::now();
         let deriv_tables = crate::stemlib::conjsys::load_deriv_tables(
             &lang_dir.join("derivs").join("source"),
         );
         crate::stemlib::conjsys::expand_derivation_entries(&mut stem_dict, &deriv_tables);
+        if timing {
+            eprintln!("deriv expansion: {:?}", t.elapsed());
+        }
 
         Ok(StemlibIndex {
             language,

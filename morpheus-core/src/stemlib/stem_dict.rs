@@ -46,13 +46,11 @@ pub struct StemEntry {
     pub ppart_stemtypes: Vec<(u32, String)>,
 }
 
-/// Stem dictionary: two indices built from stem source files.
+/// Stem dictionary indexed by normalized stem.
 #[derive(Debug, Default)]
 pub struct StemDict {
     /// key = normalized (accent-stripped) stem → all stem entries with that stem
     pub by_stem:  HashMap<String, Vec<StemEntry>>,
-    /// key = Unicode lemma → all stem entries for that lemma
-    pub by_lemma: HashMap<String, Vec<StemEntry>>,
 }
 
 impl StemDict {
@@ -60,8 +58,9 @@ impl StemDict {
         self.by_stem.get(stem_norm).map(Vec::as_slice).unwrap_or(&[])
     }
 
-    pub fn get_by_lemma(&self, lemma: &str) -> &[StemEntry] {
-        self.by_lemma.get(lemma).map(Vec::as_slice).unwrap_or(&[])
+    /// Linear scan — debugging/inspection only.
+    pub fn get_by_lemma(&self, lemma: &str) -> Vec<&StemEntry> {
+        self.all_entries().filter(|e| e.lemma == lemma).collect()
     }
 
     pub fn len(&self) -> usize {
@@ -69,20 +68,23 @@ impl StemDict {
     }
 
     pub fn insert(&mut self, entry: StemEntry) {
-        self.by_lemma
-            .entry(entry.lemma.clone())
-            .or_default()
-            .push(entry.clone());
         // Stems with iota subscript also occur without the iota in derived
-        // forms (σῴζω → ἔσωσα): index under both normalizations.
-        let without_iota =
-            crate::unicode::normalize::strip_diacritics_drop_subscript(&entry.stem)
-                .replace('ς', "σ");
-        if without_iota != entry.stem_norm {
-            self.by_stem
-                .entry(without_iota)
-                .or_default()
-                .push(entry.clone());
+        // forms (σῴζω → ἔσωσα): index under both normalizations. All
+        // subscript-bearing precomposed letters are ≥ U+1F80.
+        if entry
+            .stem
+            .chars()
+            .any(|c| c >= '\u{1F80}' || c == '\u{0345}')
+        {
+            let without_iota =
+                crate::unicode::normalize::strip_diacritics_drop_subscript(&entry.stem)
+                    .replace('ς', "σ");
+            if without_iota != entry.stem_norm {
+                self.by_stem
+                    .entry(without_iota)
+                    .or_default()
+                    .push(entry.clone());
+            }
         }
         self.by_stem
             .entry(entry.stem_norm.clone())
@@ -97,16 +99,23 @@ impl StemDict {
 }
 
 /// Load one or more stem source files into a `StemDict`.
+/// Files are parsed in parallel; results are merged in input order.
 pub fn load_stem_files(paths: &[&Path]) -> Result<StemDict> {
+    use rayon::prelude::*;
+    let lists: Result<Vec<Vec<StemEntry>>> =
+        paths.par_iter().map(|path| parse_stem_file(path)).collect();
     let mut dict = StemDict::default();
-    for path in paths {
-        parse_stem_file(path, &mut dict)?;
+    for list in lists? {
+        for entry in list {
+            dict.insert(entry);
+        }
     }
     Ok(dict)
 }
 
 /// Parse one stem source file (e.g. lsj.nom) into `dict`.
-fn parse_stem_file(path: &Path, dict: &mut StemDict) -> Result<()> {
+fn parse_stem_file(path: &Path) -> Result<Vec<StemEntry>> {
+    let mut dict: Vec<StemEntry> = Vec::new();
     let content = fs::read_to_string(path).map_err(MorpheusError::Io)?;
     let mut current_lemma = String::new();
     let mut current_lemma_unicode = String::new();
@@ -183,7 +192,7 @@ fn parse_stem_file(path: &Path, dict: &mut StemDict) -> Result<()> {
         // explicit ending ("@ end:rsi dat pl" → whole form τέσσαρσι).
         if let Some(rest) = line.strip_prefix('@') {
             if let Some(base) = &last_plain {
-                insert_at_variant(dict, base, rest.trim());
+                insert_at_variant(&mut dict, base, rest.trim());
             }
             continue;
         }
@@ -195,7 +204,7 @@ fn parse_stem_file(path: &Path, dict: &mut StemDict) -> Result<()> {
         let bare = line.strip_prefix('-').unwrap_or(line);
         if line.starts_with(":le:") || bare.starts_with(":de:") {
             if let Some(entry) = pending_deriv.take() {
-                dict.insert(entry);
+                dict.push(entry);
             }
         }
 
@@ -277,21 +286,21 @@ fn parse_stem_file(path: &Path, dict: &mut StemDict) -> Result<()> {
             last_plain = None;
         } else {
             last_plain = Some(entry.clone());
-            dict.insert(entry);
+            dict.push(entry);
         }
     }
     // Flush any trailing pending :de: entry
     if let Some(entry) = pending_deriv.take() {
-        dict.insert(entry);
+        dict.push(entry);
     }
-    Ok(())
+    Ok(dict)
 }
 
 /// Insert the variant entry described by an `@` continuation line.
 /// The variant keeps the base entry's non-form tokens (stemtype, flags,
 /// dialects) and replaces its form tokens (case/number/gender/…) with the
 /// `@` line's. An `end:xxx` token makes it a whole-word form (stem + ending).
-fn insert_at_variant(dict: &mut StemDict, base: &StemEntry, at_line: &str) {
+fn insert_at_variant(dict: &mut Vec<StemEntry>, base: &StemEntry, at_line: &str) {
     let tokens: Vec<&str> = at_line.split_whitespace().collect();
     if tokens.is_empty() {
         return;
@@ -325,7 +334,7 @@ fn insert_at_variant(dict: &mut StemDict, base: &StemEntry, at_line: &str) {
             crate::unicode::betacode::beta_to_unicode(ending_beta)
         );
         let stem_norm = strip_diacritics(&word).replace('ς', "σ");
-        dict.insert(StemEntry {
+        dict.push(StemEntry {
             lemma: base.lemma.clone(),
             stem: word,
             stem_norm,
@@ -337,7 +346,7 @@ fn insert_at_variant(dict: &mut StemDict, base: &StemEntry, at_line: &str) {
             kind: StemKind::WholeWord,
         });
     } else {
-        dict.insert(StemEntry {
+        dict.push(StemEntry {
             key_str,
             morph_flags: features.morph_flags,
             ..base.clone()
