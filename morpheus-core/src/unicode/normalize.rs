@@ -29,6 +29,15 @@ pub fn strip_diacritics(s: &str) -> String {
         .collect()
 }
 
+/// Like `strip_diacritics`, but drops the iota subscript instead of turning it
+/// into ι. Used to index stems under both spellings (σῴζ → σωιζ and σωζ).
+pub fn strip_diacritics_drop_subscript(s: &str) -> String {
+    s.nfd()
+        .filter(|c| !is_combining_mark(*c) && *c != '-' && *c != '\u{0345}')
+        .nfc()
+        .collect()
+}
+
 /// Strip only quantitative markers (macron U+0304, breve U+0306) while keeping
 /// accents and breathings. Used for morphological comparison where accent position
 /// matters but vowel quantity is secondary.

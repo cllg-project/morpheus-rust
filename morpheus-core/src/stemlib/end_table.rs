@@ -290,18 +290,10 @@ fn parse_source_file(
 ) -> Result<()> {
     let content = fs::read_to_string(path).map_err(MorpheusError::Io)?;
 
-    // For contracted-verb stemtypes the prefix (`e`, `o`, `aj`, …) encodes the
-    // contract vowel that has merged into the ending.  We apply contraction to
-    // the norm so that `εετε` (ε-prefix + `ete`) becomes `ειτε`, matching the
-    // actual contracted word form that is split from the input.
-    let contract: Option<fn(&str) -> String> = match stem_type_name {
-        "ew_pr"  => Some(contract_epsilon_norm),
-        "ow_pr"  => Some(contract_omicron_norm),
-        "aw_pr"  => Some(contract_alpha_norm),
-        "ajw_pr" => Some(contract_alpha_norm),
-        _ => None,
-    };
-
+    // Contraction (ε-prefix + `ete` → `ειτε` etc.) is handled generically by
+    // `emit_contracted_variants` from vowcontr.table, which emits the
+    // contracted forms *in addition to* the uncontracted ones (the latter are
+    // real dialect forms: ionic πωλεομένων).
     for raw_line in content.lines() {
         let line = strip_comment(raw_line).trim();
         if line.is_empty() {
@@ -343,7 +335,7 @@ fn parse_source_file(
                     } else {
                         format!("{} {}", be.key_str, &extra_key_str)
                     };
-                    emit_entry(&ending_beta, &key_str, stem_type_name, contract, contr_rules, index);
+                    emit_entry(&ending_beta, &key_str, stem_type_name, contr_rules, index);
                 }
             }
             // If the ref_name is not found in basics, skip silently.
@@ -361,7 +353,7 @@ fn parse_source_file(
             let filtered_keys = filter_stemtype_token(key_str, stem_type_name);
 
             for ending_beta in expand_ending_alternates(ending_raw) {
-                emit_entry(&ending_beta, &filtered_keys, stem_type_name, contract, contr_rules, index);
+                emit_entry(&ending_beta, &filtered_keys, stem_type_name, contr_rules, index);
             }
         }
     }
@@ -463,7 +455,6 @@ fn emit_entry(
     ending_beta: &str,
     key_str: &str,
     stem_type_name: &str,
-    contract: Option<fn(&str) -> String>,
     contr_rules: &[ContrRule],
     index: &mut EndIndex,
 ) {
@@ -481,11 +472,7 @@ fn emit_entry(
         apply_final_sigma_ending(&beta_to_unicode(&ending_beta_clean))
     };
 
-    let raw_norm = strip_diacritics(&ending_unicode);
-    let ending_norm = match contract {
-        Some(f) => f(&raw_norm),
-        None    => raw_norm,
-    };
+    let ending_norm = strip_diacritics(&ending_unicode);
     let features = parse_key_string(key_str);
 
     let entry = EndEntry {
@@ -604,96 +591,13 @@ fn load_end_tables_basics_only(basics_dir: &Path) -> Result<EndIndex> {
             .to_string();
         let raw = parse_basics_file(&path, &HashMap::default())?;
         for be in raw {
-            emit_entry(&be.ending_beta, &be.key_str, &stem_type_name, None, &[], &mut index);
+            emit_entry(&be.ending_beta, &be.key_str, &stem_type_name, &[], &mut index);
         }
     }
     Ok(index)
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
-
-/// Apply ε-contraction to a norm ending that starts with `ε` (the contract vowel).
-/// Rules: ε+ε→ει, ε+ο→ου, ε+ω→ω, ε+η→η, ε+ει→ει, ε+ου→ου, ε+α→η.
-fn contract_epsilon_norm(norm: &str) -> String {
-    // Check diphthong cases first (longer prefixes, to avoid partial matches).
-    if let Some(rest) = norm.strip_prefix("εει") {
-        return format!("ει{rest}");          // ε + ει → ει
-    }
-    if let Some(rest) = norm.strip_prefix("εου") {
-        return format!("ου{rest}");          // ε + ου → ου
-    }
-    if let Some(rest) = norm.strip_prefix("εε") {
-        return format!("ει{rest}");          // ε + ε → ει
-    }
-    if let Some(rest) = norm.strip_prefix("εο") {
-        return format!("ου{rest}");          // ε + ο → ου
-    }
-    // For ε+ω and ε+η: the ε is absorbed and the following vowel is kept.
-    // strip_prefix removes both chars; we must re-add the kept vowel.
-    if let Some(rest) = norm.strip_prefix("εω") {
-        return format!("ω{rest}");           // ε + ω → ω (keep ω, drop ε)
-    }
-    if let Some(rest) = norm.strip_prefix("εη") {
-        return format!("η{rest}");           // ε + η → η (keep η, drop ε)
-    }
-    if let Some(rest) = norm.strip_prefix("εα") {
-        return format!("η{rest}");           // ε + α → η
-    }
-    norm.to_string()
-}
-
-/// Apply ο-contraction to a norm ending that starts with `ο` (the contract vowel).
-/// Rules: ο+ε→ου, ο+ο→ου, ο+ω→ω, ο+η→ω, ο+ει→οι, ο+ου→ου.
-fn contract_omicron_norm(norm: &str) -> String {
-    if let Some(rest) = norm.strip_prefix("οει") {
-        return format!("οι{rest}");          // ο + ει → οι
-    }
-    if let Some(rest) = norm.strip_prefix("οου") {
-        return format!("ου{rest}");          // ο + ου → ου
-    }
-    if let Some(rest) = norm.strip_prefix("οε") {
-        return format!("ου{rest}");          // ο + ε → ου
-    }
-    if let Some(rest) = norm.strip_prefix("οο") {
-        return format!("ου{rest}");          // ο + ο → ου
-    }
-    // ο+ω and ο+η both give ω; strip_prefix removes both chars, re-add ω.
-    if let Some(rest) = norm.strip_prefix("οω") {
-        return format!("ω{rest}");           // ο + ω → ω (keep ω, drop ο)
-    }
-    if let Some(rest) = norm.strip_prefix("οη") {
-        return format!("ω{rest}");           // ο + η → ω (both collapse to ω)
-    }
-    norm.to_string()
-}
-
-/// Apply α-contraction to a norm ending that starts with `α` (the contract vowel).
-/// Rules (Attic): α+ε→α, α+ει→αι, α+η→α, α+ο→ω, α+ω→ω, α+ου→ω, α+οι→ω.
-fn contract_alpha_norm(norm: &str) -> String {
-    // Longer sequences first to avoid partial matches
-    if let Some(rest) = norm.strip_prefix("αει") {
-        return format!("αι{rest}");          // α + ει → αι
-    }
-    if let Some(rest) = norm.strip_prefix("αοι") {
-        return format!("ω{rest}");           // α + οι → ῳ (strip→ω)
-    }
-    if let Some(rest) = norm.strip_prefix("αου") {
-        return format!("ω{rest}");           // α + ου → ω
-    }
-    if let Some(rest) = norm.strip_prefix("αε") {
-        return format!("α{rest}");           // α + ε → ᾱ (strip→α)
-    }
-    if let Some(rest) = norm.strip_prefix("αη") {
-        return format!("α{rest}");           // α + η → ᾱ (strip→α)
-    }
-    if let Some(rest) = norm.strip_prefix("αο") {
-        return format!("ω{rest}");           // α + ο → ω
-    }
-    if let Some(rest) = norm.strip_prefix("αω") {
-        return format!("ω{rest}");           // α + ω → ω
-    }
-    norm.to_string()
-}
 
 fn strip_comment(line: &str) -> &str {
     if let Some(pos) = line.find('#') {

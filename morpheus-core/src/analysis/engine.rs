@@ -75,13 +75,98 @@ fn check_string_inner(
         }
     }
 
-    // Preverb stripping: try stripping known Greek preverbs and analyzing the remainder.
-    // This handles compound verbs such as καταφέρω, παραβαίνω, etc.
+    // Preverb stripping: try stripping known Greek preverbs and analyzing the
+    // remainder. This handles compound verbs such as καταφέρω, παραβαίνω.
+    // Run unconditionally (like C): a word can be both a simple form and a
+    // compound (ὑπάρχοι is ὕπαρχος dat as well as ὑπ-άρχω opt).
+    results.extend(check_with_preverb(word, stemlib));
+
+    // Crasis: καί/τό/τά merge with a following vowel-initial word, leaving a
+    // smooth breathing mid-word (κἀκεῖνος = καὶ ἐκεῖνος, τοὔνομα = τὸ ὄνομα).
+    // Recursing into check_string_inner gives the remainder preverb handling
+    // (κἀφαγιστεύσας = καὶ ἐφ-αγιστεύσας); crasis_splits of the remainder is
+    // empty, so the recursion terminates.
     if results.is_empty() {
-        results.extend(check_with_preverb(word, stemlib));
+        for candidate in crasis_splits(word) {
+            results.extend(check_string_inner(&candidate, stemlib, opts));
+        }
+    }
+
+    // Doric/Aeolic ᾱ for η (ἀλλάλαις = ἀλλήλαις): retry with each single
+    // α→η substitution. Last resort, recall-oriented.
+    if results.is_empty() {
+        let chars: Vec<char> = word.chars().collect();
+        let alpha_positions: Vec<usize> = chars
+            .iter()
+            .enumerate()
+            .filter(|(_, c)| {
+                use unicode_normalization::UnicodeNormalization;
+                c.to_string().nfd().next() == Some('α')
+            })
+            .map(|(i, _)| i)
+            .collect();
+        if alpha_positions.len() <= 4 {
+            for pos in alpha_positions {
+                let mut variant: Vec<char> = chars.clone();
+                variant[pos] = 'η';
+                let variant: String = variant.into_iter().collect();
+                results.extend(check_string_inner_base(&variant, stemlib, opts));
+            }
+        }
     }
 
     results
+}
+
+/// Detect crasis and return the possible underlying second words.
+/// Trigger: word starts with κ or τ and a vowel with smooth breathing follows
+/// within the next two letters (the coronis of the merged article/καί).
+fn crasis_splits(word: &str) -> Vec<String> {
+    use unicode_normalization::UnicodeNormalization;
+    let chars: Vec<char> = word.chars().collect();
+    if chars.len() < 3 {
+        return Vec::new();
+    }
+    let base = |c: char| {
+        c.to_string()
+            .nfd()
+            .find(|x| !matches!(x, '\u{0300}'..='\u{036F}' | '\u{1DC0}'..='\u{1DFF}'))
+            .unwrap_or(c)
+    };
+    let has_psili = |c: char| c.to_string().nfd().any(|x| x == '\u{0313}' || x == '\u{0343}');
+    if !matches!(base(chars[0]), 'κ' | 'τ' | 'θ' | 'χ') {
+        return Vec::new();
+    }
+    // Find the breathing-bearing vowel at position 1 (κἀκεῖνος) or 2 (τοὔνομα).
+    let Some(idx) = (1..=2.min(chars.len() - 2)).find(|&i| has_psili(chars[i])) else {
+        return Vec::new();
+    };
+    let tail: String = chars[idx + 1..].iter().collect();
+    let mut out = Vec::new();
+    if idx == 1 {
+        // The remainder is itself the second word (τἀνθρώπων → ἀνθρώπων) …
+        out.push(chars[1..].iter().collect());
+        // … or the merged vowel replaced ε (κἀκεῖνος → ἐκεῖνος, crasis α+ε→α).
+        match base(chars[1]) {
+            'α' => out.push(format!("ε{tail}")),
+            'ω' => out.push(format!("ο{tail}")),
+            'η' => out.push(format!("ε{tail}")),
+            _ => {}
+        }
+    } else {
+        // Digraph crasis: το + ὄνομα → τοὔνομα (ο+ο→ου), το + ἐλάχιστον →
+        // τοὐλάχιστον (ο+ε→ου).
+        let cluster = format!("{}{}", base(chars[1]), base(chars[2]));
+        if cluster == "ου" {
+            out.push(format!("ο{tail}"));
+            out.push(format!("ε{tail}"));
+        }
+        if cluster == "αυ" {
+            // τὸ αὐτό → ταὐτό keeps αυ
+            out.push(format!("αυ{tail}"));
+        }
+    }
+    out
 }
 
 fn check_string_inner_base(

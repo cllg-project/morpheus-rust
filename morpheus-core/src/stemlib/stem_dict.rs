@@ -73,6 +73,17 @@ impl StemDict {
             .entry(entry.lemma.clone())
             .or_default()
             .push(entry.clone());
+        // Stems with iota subscript also occur without the iota in derived
+        // forms (σῴζω → ἔσωσα): index under both normalizations.
+        let without_iota =
+            crate::unicode::normalize::strip_diacritics_drop_subscript(&entry.stem)
+                .replace('ς', "σ");
+        if without_iota != entry.stem_norm {
+            self.by_stem
+                .entry(without_iota)
+                .or_default()
+                .push(entry.clone());
+        }
         self.by_stem
             .entry(entry.stem_norm.clone())
             .or_default()
@@ -101,6 +112,8 @@ fn parse_stem_file(path: &Path, dict: &mut StemDict) -> Result<()> {
     let mut current_lemma_unicode = String::new();
     // Pending :de: entry that may collect ;pr ;fu ;ao qualifiers
     let mut pending_deriv: Option<StemEntry> = None;
+    // Last plain (:no:/:aj:/:vs:/:vb:) entry — `@` lines add case/form variants.
+    let mut last_plain: Option<StemEntry> = None;
 
     for raw_line in content.lines() {
         let line = raw_line.trim();
@@ -165,16 +178,32 @@ fn parse_stem_file(path: &Path, dict: &mut StemDict) -> Result<()> {
         if line.starts_with('@') && pending_deriv.is_some() {
             continue;
         }
+        // `@` after a plain stem entry: an additional allowed form set for the
+        // same stem (":no:e(aut art_adj gen" + "@ acc"), optionally with an
+        // explicit ending ("@ end:rsi dat pl" → whole form τέσσαρσι).
+        if let Some(rest) = line.strip_prefix('@') {
+            if let Some(base) = &last_plain {
+                insert_at_variant(dict, base, rest.trim());
+            }
+            continue;
+        }
 
-        // Any new tag flushes the pending :de: entry.
-        if let Some(entry) = pending_deriv.take() {
-            dict.insert(entry);
+        // A new :le: or :de: tag flushes the pending :de: entry. Interleaved
+        // :vs:/:vb: lines do NOT — their following `;` qualifiers still refer
+        // to the open :de: (δίδωμι has a -:vb: line in the middle of its
+        // :de:d o_stem qualifier block).
+        let bare = line.strip_prefix('-').unwrap_or(line);
+        if line.starts_with(":le:") || bare.starts_with(":de:") {
+            if let Some(entry) = pending_deriv.take() {
+                dict.insert(entry);
+            }
         }
 
         if let Some(rest) = line.strip_prefix(":le:") {
             let beta_lemma = rest.trim();
             current_lemma = beta_lemma.to_string();
             current_lemma_unicode = beta_to_unicode_word(beta_lemma);
+            last_plain = None;
             continue;
         }
 
@@ -189,7 +218,9 @@ fn parse_stem_file(path: &Path, dict: &mut StemDict) -> Result<()> {
         } else if let Some(r) = line.strip_prefix(":vs:") {
             (StemKind::Verb, r)
         } else if let Some(r) = line.strip_prefix(":vb:") {
-            (StemKind::Verb, r)  // alternate verb stem tag
+            // :vb: lines are complete inflected forms (ἐστί, ζευγνῦμεν),
+            // matched as whole words, not stem+ending splits.
+            (StemKind::WholeWord, r)
         } else if let Some(r) = line.strip_prefix(":de:") {
             (StemKind::Deriv, r)
         } else if let Some(r) = line.strip_prefix(":wd:") {
@@ -243,7 +274,9 @@ fn parse_stem_file(path: &Path, dict: &mut StemDict) -> Result<()> {
         if kind == StemKind::Deriv {
             // Hold it: ;qualifier lines may follow
             pending_deriv = Some(entry);
+            last_plain = None;
         } else {
+            last_plain = Some(entry.clone());
             dict.insert(entry);
         }
     }
@@ -252,6 +285,72 @@ fn parse_stem_file(path: &Path, dict: &mut StemDict) -> Result<()> {
         dict.insert(entry);
     }
     Ok(())
+}
+
+/// Insert the variant entry described by an `@` continuation line.
+/// The variant keeps the base entry's non-form tokens (stemtype, flags,
+/// dialects) and replaces its form tokens (case/number/gender/…) with the
+/// `@` line's. An `end:xxx` token makes it a whole-word form (stem + ending).
+fn insert_at_variant(dict: &mut StemDict, base: &StemEntry, at_line: &str) {
+    let tokens: Vec<&str> = at_line.split_whitespace().collect();
+    if tokens.is_empty() {
+        return;
+    }
+    let end_tok = tokens.iter().find_map(|t| t.strip_prefix("end:"));
+    let feature_toks: Vec<&str> = tokens
+        .iter()
+        .copied()
+        .filter(|t| !t.starts_with("end:"))
+        .collect();
+
+    let kept: Vec<&str> = base
+        .key_str
+        .split_whitespace()
+        .filter(|t| !is_form_token(t))
+        .collect();
+    let mut key_str = kept.join(" ");
+    if !feature_toks.is_empty() {
+        if !key_str.is_empty() {
+            key_str.push(' ');
+        }
+        key_str.push_str(&feature_toks.join(" "));
+    }
+    let features = parse_key_string(&key_str);
+
+    if let Some(ending_beta) = end_tok {
+        // Whole-word form: stem + explicit ending (τεσσα + ρσι).
+        let word = format!(
+            "{}{}",
+            base.stem,
+            crate::unicode::betacode::beta_to_unicode(ending_beta)
+        );
+        let stem_norm = strip_diacritics(&word).replace('ς', "σ");
+        dict.insert(StemEntry {
+            lemma: base.lemma.clone(),
+            stem: word,
+            stem_norm,
+            key_str,
+            morph_flags: features.morph_flags,
+            ppart_mask: 0,
+            ppart_overrides: Vec::new(),
+            ppart_stemtypes: Vec::new(),
+            kind: StemKind::WholeWord,
+        });
+    } else {
+        dict.insert(StemEntry {
+            key_str,
+            morph_flags: features.morph_flags,
+            ..base.clone()
+        });
+    }
+}
+
+/// True if the token sets any WordForm field (case, number, gender, tense, …)
+/// when parsed on its own — i.e. it is a form restriction, not a stemtype,
+/// dialect, or morph flag.
+fn is_form_token(tok: &str) -> bool {
+    use crate::types::WordForm;
+    parse_key_string(tok).form != WordForm::default()
 }
 
 /// Map a `;` qualifier keyword to an independent bit in ppart_mask.

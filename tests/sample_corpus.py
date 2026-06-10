@@ -57,9 +57,10 @@ def uni_to_beta(s: str) -> str:
                 beta = '*' + beta
             for m in marks:
                 n = unicodedata.name(m, '')
-                if 'SMOOTH' in n or 'PSILI' in n:
+                # NFD breathings are U+0313/U+0314 "(REVERSED) COMMA ABOVE"
+                if m == '̓' or 'SMOOTH' in n or 'PSILI' in n:
                     beta += ')'
-                elif 'ROUGH' in n or 'DASIA' in n:
+                elif m == '̔' or 'ROUGH' in n or 'DASIA' in n:
                     beta += '('
                 if 'ACUTE' in n or 'OXIA' in n:
                     beta += '/'
@@ -67,6 +68,8 @@ def uni_to_beta(s: str) -> str:
                     beta += '\\'
                 elif 'PERISPOMENI' in n or 'CIRCUMFLEX' in n:
                     beta += '='
+                if 'DIAERESIS' in n:
+                    beta += '+'
                 if 'YPOGEGRAMMENI' in n or 'SUBSCRIPT' in n:
                     beta += '|'
             result.append(beta)
@@ -169,14 +172,19 @@ def run_c_morpheus(words: list[str]) -> dict[str, list[str]]:
         if line.startswith(':') or line.startswith('FINAL'):
             i += 1
             continue
-        # Check if line is an echoed beta-code word
-        if line in beta_set and i + 1 < len(lines):
-            analysis_line = lines[i + 1].strip()
-            analyses = re.findall(r'<NL>([^<]*)</NL>', analysis_line)
+        # Check if line is an echoed beta-code word.
+        # Unknown words are echoed with NO analysis line following — in that
+        # case the next line is the next word's echo and must not be consumed.
+        if line in beta_set:
+            if i + 1 < len(lines) and '<NL>' in lines[i + 1]:
+                analyses = re.findall(r'<NL>([^<]*)</NL>', lines[i + 1])
+                i += 2
+            else:
+                analyses = []
+                i += 1
             unicode_w = beta_to_unicode.get(line)
-            if unicode_w is not None:
+            if unicode_w is not None and not results[unicode_w]:
                 results[unicode_w] = analyses
-            i += 2
         else:
             i += 1
 
@@ -227,6 +235,55 @@ def run_rust_morpheus(words: list[str]) -> dict[str, list[str]]:
     return results
 
 
+# ── Metrics ────────────────────────────────────────────────────────────────────
+_BETA_STRIP = str.maketrans('', '', "/\\=^_|+*'()")
+
+
+def _beta_lemma_norm(beta: str) -> str:
+    """Normalize a beta-code lemma for comparison: drop diacritics and digits."""
+    return beta.translate(_BETA_STRIP).replace('-', '').rstrip('0123456789').lower()
+
+
+def c_lemma_set(analyses: list[str]) -> set[str]:
+    """Lemma set from C analyses ('V ble/pw  pres ind …' → {'blepw'})."""
+    out = set()
+    for a in analyses:
+        parts = a.split()
+        if len(parts) >= 2:
+            # 'form,lemma' pairs keep only the lemma
+            out.add(_beta_lemma_norm(parts[1].split(',')[-1]))
+    return out
+
+
+def rust_lemma_set(analyses: list[str]) -> set[str]:
+    """Lemma set from Rust analyses ('βλέπω:verb' → {'blepw'})."""
+    return {
+        _beta_lemma_norm(uni_to_beta(a.rsplit(':', 1)[0]))
+        for a in analyses
+    }
+
+
+def print_summary(records: list[dict]) -> None:
+    n = len(records)
+    c_found    = sum(1 for r in records if r['c'])
+    rust_found = sum(1 for r in records if r['rust'])
+    missed     = [r['word'] for r in records if r['c'] and not r['rust']]
+    rust_only  = sum(1 for r in records if r['rust'] and not r['c'])
+    both       = [r for r in records if r['c'] and r['rust']]
+    agree      = sum(1 for r in both if c_lemma_set(r['c']) & rust_lemma_set(r['rust']))
+
+    print(f"C found analyses:    {c_found}/{n}")
+    print(f"Rust found analyses: {rust_found}/{n}")
+    print(f"Recall   (C had, Rust missed): {len(missed)}/{c_found} "
+          f"({100*len(missed)/max(c_found,1):.1f}% missed)")
+    print(f"Precision(Rust had, C didn't): {rust_only}/{rust_found} "
+          f"({100*rust_only/max(rust_found,1):.1f}% rust-only)")
+    print(f"Lemma agreement (both found):  {agree}/{len(both)} "
+          f"({100*agree/max(len(both),1):.1f}%)")
+    if missed:
+        print("Missing: " + " ".join(missed))
+
+
 # ── Main ───────────────────────────────────────────────────────────────────────
 def refresh_rust() -> None:
     """Re-run only the Rust morpheus on the existing sample (fast iteration).
@@ -243,13 +300,7 @@ def refresh_rust() -> None:
     for r in records:
         r['rust'] = rust_results.get(r['word'], [])
     OUTPUT_FILE.write_text(json.dumps(records, ensure_ascii=False, indent=2))
-
-    c_found = sum(1 for r in records if r['c'])
-    missed  = [r['word'] for r in records if r['c'] and not r['rust']]
-    print(f"C found analyses:    {c_found}/{len(records)}")
-    print(f"Rust missed (C had): {len(missed)}/{c_found} ({100*len(missed)/max(c_found,1):.1f}%)")
-    if missed:
-        print("Missing: " + " ".join(missed))
+    print_summary(records)
 
 
 def main() -> None:
@@ -280,14 +331,7 @@ def main() -> None:
 
     OUTPUT_FILE.write_text(json.dumps(records, ensure_ascii=False, indent=2))
     print(f"Saved {len(records)} records to {OUTPUT_FILE}", file=sys.stderr)
-
-    # Quick summary
-    c_found    = sum(1 for r in records if r['c'])
-    rust_found = sum(1 for r in records if r['rust'])
-    missed     = sum(1 for r in records if r['c'] and not r['rust'])
-    print(f"C found analyses:    {c_found}/{len(records)}")
-    print(f"Rust found analyses: {rust_found}/{len(records)}")
-    print(f"Rust missed (C had): {missed}/{c_found} ({100*missed/max(c_found,1):.1f}%)")
+    print_summary(records)
 
 
 if __name__ == '__main__':

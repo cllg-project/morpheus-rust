@@ -16,6 +16,17 @@ pub fn unaugment(stem: &str) -> Vec<String> {
     // If the stem starts with ε (epsilon, possibly with smooth breathing),
     // try dropping it to get the un-augmented form.
     if let Some(rest) = try_strip_epsilon(stem) {
+        // ρ doubles after the augment (ἐρράπτετο ← ῥάπτω): degeminate too.
+        let chars: Vec<char> = rest.chars().collect();
+        let base = |c: char| {
+            c.to_string()
+                .nfd()
+                .find(|x| !is_combining(*x))
+                .unwrap_or(c)
+        };
+        if chars.len() >= 2 && base(chars[0]) == 'ρ' && base(chars[1]) == 'ρ' {
+            variants.push(chars[1..].iter().collect());
+        }
         variants.push(rest);
     }
 
@@ -141,7 +152,14 @@ fn temporal_unaugment(stem: &str) -> Vec<String> {
     // e.g. εἶχεν (impf of ἔχω): ε-augment + εχ- → ε+εχ → ει-χ.
     // De-augment: if stem starts with ει, try ε as well (not ι alone).
     if chars.len() >= 2 && first_base == 'ε' {
-        if chars[1] == 'ι' || chars[1] == 'ί' || chars[1] == 'ῖ' || chars[1] == 'ΐ' {
+        // Compare the *base letter* — the iota may carry diacritics (εἶχον).
+        let second_base = chars[1]
+            .to_string()
+            .nfd()
+            .find(|c| !is_combining(*c))
+            .map(|c| c.to_lowercase().next().unwrap_or(c))
+            .unwrap_or(chars[1]);
+        if second_base == 'ι' {
             // ει... → ε... (drop the iota, keep the epsilon)
             let rest = rest_from(2);
             results.push(format!("ε{rest}"));

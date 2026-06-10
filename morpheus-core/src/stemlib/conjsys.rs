@@ -282,6 +282,14 @@ pub fn expand_derivation_entries(dict: &mut StemDict, deriv_tables: &DerivTables
                         entry.stem.clone()
                     };
                     let mut stem = join_suffix_euphony(&root, &suffix);
+                    // Labial/velar-final roots take the second perfect: no κ,
+                    // final stop aspirated (γραφ → γέγραφα, not *γεγραφκα).
+                    if class_bit == 1 << 3 && suffix == "κ" {
+                        let bare = strip_diacritics(&root);
+                        if bare.ends_with(|c| matches!(c, 'π' | 'β' | 'φ' | 'κ' | 'γ' | 'χ')) {
+                            stem = aspirate_final(&root);
+                        }
+                    }
                     if class_bit & ((1 << 3) | (1 << 4)) != 0 {
                         // perfects reduplicate
                         stem = apply_reduplication(&stem);
@@ -515,6 +523,19 @@ pub fn expand_derivation_entries(dict: &mut StemDict, deriv_tables: &DerivTables
     }
 }
 
+/// Aspirate a root-final stop (second-perfect formation): π/β→φ, κ/γ→χ.
+fn aspirate_final(root: &str) -> String {
+    let mut chars: Vec<char> = root.chars().collect();
+    if let Some(last) = chars.last_mut() {
+        match *last {
+            'π' | 'β' => *last = 'φ',
+            'κ' | 'γ' => *last = 'χ',
+            _ => {}
+        }
+    }
+    chars.into_iter().collect()
+}
+
 /// Insert the class-appropriate nasal before the final consonant of a root
 /// (n_infix qualifier): λαβ → λαμβ, τυχ → τυγχ, μαθ → μανθ.
 fn insert_nasal_infix(root: &str) -> String {
@@ -590,8 +611,8 @@ fn sigma_aorist_stem(stem: &str) -> String {
             let without = &stem[..stem.len() - last.len_utf8()];
             format!("{without}ξ")
         }
-        'τ' | 'δ' | 'θ' => {
-            // dental drops before σ
+        'τ' | 'δ' | 'θ' | 'ζ' => {
+            // dental (and ζ) drops before σ: σῴζω → ἔσωσα
             let without = &stem[..stem.len() - last.len_utf8()];
             format!("{without}σ")
         }
@@ -653,8 +674,8 @@ fn join_suffix_euphony(root: &str, suffix: &str) -> String {
             return out;
         }
         match (last, first) {
-            // dental drops before σ
-            ('τ' | 'δ' | 'θ', 'σ') => {
+            // dental (and ζ) drops before σ or κ (πείθω → πέπεικα)
+            ('τ' | 'δ' | 'θ' | 'ζ', 'σ' | 'κ') => {
                 root_chars.pop();
             }
             // labial + θ → φθ, velar + θ → χθ, dental + θ → σθ
