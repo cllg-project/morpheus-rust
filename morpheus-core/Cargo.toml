@@ -1,0 +1,23 @@
+[package]
+name = "morpheus-core"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "morpheus"
+path = "src/main.rs"
+
+[dependencies]
+anyhow.workspace               = true
+thiserror.workspace            = true
+bitflags.workspace             = true
+hashbrown.workspace            = true
+unicode-normalization.workspace = true
+unicode-segmentation.workspace  = true
+quick-xml.workspace            = true
+serde                          = { workspace = true, optional = true }
+clap                           = { workspace = true, features = ["env"] }
+
+[features]
+default = []
+serde   = ["dep:serde"]

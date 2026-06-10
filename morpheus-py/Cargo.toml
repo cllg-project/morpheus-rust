@@ -1,0 +1,13 @@
+[package]
+name = "morpheus-py"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "morpheus"
+crate-type = ["cdylib"]
+
+[dependencies]
+morpheus-core = { path = "../morpheus-core" }
+pyo3.workspace = true
+anyhow.workspace = true

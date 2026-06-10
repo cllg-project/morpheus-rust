@@ -1,0 +1,18 @@
+[build-system]
+requires = ["maturin>=1.7,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "morpheus"
+version = "0.1.0"
+description = "Ancient Greek and Latin morphological parser"
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Rust",
+    "Programming Language :: Python :: 3",
+]
+
+[tool.maturin]
+manifest-path = "morpheus-py/Cargo.toml"
+features = ["pyo3/extension-module"]
+python-source = "python"

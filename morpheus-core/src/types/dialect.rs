@@ -1,0 +1,45 @@
+use bitflags::bitflags;
+
+bitflags! {
+    /// Dialect bitmask (mirrors C `Dialect` short from dialect.h).
+    /// `Dialect::empty()` = ALL_DIAL (no restriction) — same semantics as C `ALL_DIAL = 0`.
+    #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Hash)]
+    pub struct Dialect: u16 {
+        const ATTIC           = 0o0002;
+        const IONIC           = 0o0010;
+        const AEOLIC          = 0o0020;
+        const LESBIAN         = 0o0040;
+        const HOMERIC         = 0o0100;
+        const DORIC           = 0o0200;
+        const PARADIGM        = 0o0400;
+        const NON_HOMERIC_EPIC = 0o2000;
+        const PROSE           = 0o4000;
+        const EPIC            = Self::NON_HOMERIC_EPIC.bits() | Self::HOMERIC.bits();
+        const RHO_ETA_DIAL    = Self::EPIC.bits() | Self::IONIC.bits();
+        const RHO_ALPHA_DIAL  = Self::ATTIC.bits() | Self::DORIC.bits() | Self::AEOLIC.bits();
+    }
+}
+
+impl Dialect {
+    /// Returns true if there is no dialect restriction (ALL_DIAL = 0).
+    #[inline]
+    pub fn is_any(&self) -> bool {
+        self.is_empty()
+    }
+
+    /// Two dialect sets are compatible if either is unrestricted or they share a dialect.
+    #[inline]
+    pub fn compatible_with(&self, other: Dialect) -> bool {
+        self.is_empty() || other.is_empty() || self.intersects(other)
+    }
+
+    /// Intersect dialects, keeping unrestricted (empty) semantics:
+    /// if one side is unrestricted, adopt the other side.
+    pub fn and_dialect(&mut self, other: Dialect) {
+        if self.is_empty() {
+            *self = other;
+        } else if !other.is_empty() {
+            *self &= other;
+        }
+    }
+}

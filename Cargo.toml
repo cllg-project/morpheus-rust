@@ -1,0 +1,15 @@
+[workspace]
+members = ["morpheus-core", "morpheus-py"]
+resolver = "2"
+
+[workspace.dependencies]
+anyhow                = "1.0"
+thiserror             = "2.0"
+bitflags              = "2.6"
+hashbrown             = "0.15"
+serde                 = { version = "1.0", features = ["derive"] }
+quick-xml             = "0.37"
+unicode-normalization = "0.1"
+unicode-segmentation  = "1.10"
+pyo3                  = { version = "0.22", features = ["extension-module"] }
+clap                  = { version = "4", features = ["derive", "env"] }
