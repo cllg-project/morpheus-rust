@@ -46,12 +46,29 @@ pub struct StemlibIndex {
     pub deriv_types:  StemTypeTable,
     pub preverbs:     Vec<PreverbEntry>,
     pub contractions: Vec<ContractionRule>,
+    /// Per-derivtype expansion tables (kept for the edit-server preview).
+    pub deriv_tables: crate::stemlib::conjsys::DerivTables,
+    /// Overlay directories whose stemsrc files were loaded on top of the
+    /// main stemlib (additive: they extend the stem dict).
+    pub overlay_dirs: Vec<PathBuf>,
 }
 
 impl StemlibIndex {
     /// Load all stemlib data for `language` from `morphlib_path`
     /// (the path that contains the `Greek/`, `Latin/` etc. subdirectories).
     pub fn load(morphlib_path: &Path, language: Language) -> Result<Self> {
+        Self::load_with_overlays(morphlib_path, language, &[])
+    }
+
+    /// Like [`StemlibIndex::load`], additionally loading stem files from each
+    /// overlay directory (`<overlay>/<Lang>/stemsrc/*`). Overlay entries are
+    /// additive — they extend the upstream stemlib and go through the same
+    /// derivation expansion.
+    pub fn load_with_overlays(
+        morphlib_path: &Path,
+        language: Language,
+        overlays: &[PathBuf],
+    ) -> Result<Self> {
         let lang_dir = morphlib_path.join(language.dir_name());
 
         if !lang_dir.exists() {
@@ -103,7 +120,12 @@ impl StemlibIndex {
         // ── Stem dictionaries ───────────────────────────────────────────
         let t = std::time::Instant::now();
         let stemsrc_dir = lang_dir.join("stemsrc");
-        let stem_files = collect_stem_files(&stemsrc_dir, language);
+        let mut stem_files = collect_stem_files(&stemsrc_dir, language);
+        // Overlay stem files load after the main set, before deriv expansion.
+        for overlay in overlays {
+            let overlay_src = overlay.join(language.dir_name()).join("stemsrc");
+            stem_files.extend(collect_stem_files(&overlay_src, language));
+        }
         let stem_paths: Vec<&Path> = stem_files.iter().map(PathBuf::as_path).collect();
         let mut stem_dict = load_stem_files(&stem_paths)
             .map_err(|e| MorpheusError::StemlibLoad(format!("stem files: {e}")))?;
@@ -130,13 +152,15 @@ impl StemlibIndex {
             deriv_types,
             preverbs,
             contractions,
+            deriv_tables,
+            overlay_dirs: overlays.to_vec(),
         })
     }
 }
 
 /// Collect the stem source files to load, in priority order.
 /// Primary files first (lsj.nom, lsj.vbs), then supplementary.
-fn collect_stem_files(stemsrc_dir: &Path, language: Language) -> Vec<PathBuf> {
+pub(crate) fn collect_stem_files(stemsrc_dir: &Path, language: Language) -> Vec<PathBuf> {
     let mut paths = Vec::new();
 
     let primary = match language {

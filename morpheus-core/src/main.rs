@@ -35,6 +35,10 @@ struct Cli {
     #[arg(short = 'V', long)]
     verbs_only: bool,
 
+    /// Overlay directories with extra stem files (repeatable)
+    #[arg(long, env = "MORPHEUS_OVERLAY")]
+    overlay: Vec<PathBuf>,
+
     /// Words to analyze (if not provided, reads from stdin)
     words: Vec<String>,
 }
@@ -47,6 +51,32 @@ enum Command {
     /// accents); compare accent-insensitively. Full output is very large —
     /// use --lemma or pipe through a compressor.
     Generate(GenerateArgs),
+    /// Start the local lemma-editing web UI.
+    ///
+    /// Browse/search the loaded stemlib, add or edit lemma entries with a
+    /// live paradigm preview, and save them to an overlay directory (the
+    /// upstream stemlib is never modified). Pass the overlay to the analyzer
+    /// with --overlay (or MORPHEUS_OVERLAY).
+    Edit(EditArgs),
+}
+
+#[derive(Args, Debug)]
+struct EditArgs {
+    /// Path to the morphlib directory (containing Greek/, Latin/ subdirectories)
+    #[arg(short = 'm', long, env = "MORPHLIB")]
+    morphlib: PathBuf,
+
+    /// Language: greek (default) or latin
+    #[arg(short = 'L', long, default_value = "greek")]
+    language: String,
+
+    /// Overlay directory edits are saved to
+    #[arg(long, env = "MORPHEUS_OVERLAY", default_value = "stemlib-overrides")]
+    overlay: PathBuf,
+
+    /// Port to listen on (127.0.0.1 only)
+    #[arg(short = 'p', long, default_value_t = 8788)]
+    port: u16,
 }
 
 #[derive(Args, Debug)]
@@ -88,6 +118,16 @@ fn main() -> anyhow::Result<()> {
 
     match cli.command {
         Some(Command::Generate(args)) => run_generate(args),
+        Some(Command::Edit(args)) => {
+            let language = parse_language(&args.language);
+            morpheus_core::edit::run_edit_server(
+                args.morphlib,
+                args.overlay,
+                language,
+                args.port,
+            )?;
+            Ok(())
+        }
         None => run_analyze(cli),
     }
 }
@@ -97,7 +137,7 @@ fn run_analyze(cli: Cli) -> anyhow::Result<()> {
         anyhow::anyhow!("missing --morphlib (-m) or MORPHLIB environment variable")
     })?;
     let language = parse_language(&cli.language);
-    let stemlib = StemlibIndex::load(&morphlib, language)?;
+    let stemlib = StemlibIndex::load_with_overlays(&morphlib, language, &cli.overlay)?;
 
     let opts = AnalysisOptions {
         strict_case:   !cli.no_strict_case,

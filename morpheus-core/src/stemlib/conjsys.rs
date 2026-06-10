@@ -272,7 +272,7 @@ pub fn expand_derivation_entries(dict: &mut StemDict, deriv_tables: &DerivTables
 }
 
 /// Generate all derived stems for one :de: entry.
-fn expand_one_entry(entry: &StemEntry, deriv_tables: &DerivTables) -> Vec<StemEntry> {
+pub fn expand_one_entry(entry: &StemEntry, deriv_tables: &DerivTables) -> Vec<StemEntry> {
     let mut out = Vec::new();
     {
         {

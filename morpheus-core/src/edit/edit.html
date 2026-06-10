@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>morpheus lemma editor</title>
+<style>
+  :root { --bg:#fdfdfa; --fg:#222; --accent:#1d4ed8; --muted:#777; --border:#ddd; }
+  * { box-sizing: border-box; }
+  body { margin:0; font:15px/1.45 system-ui, sans-serif; background:var(--bg); color:var(--fg); }
+  header { padding:.6rem 1rem; border-bottom:1px solid var(--border); display:flex; gap:1rem; align-items:baseline; }
+  header h1 { font-size:1.1rem; margin:0; }
+  header span { color:var(--muted); font-size:.85rem; }
+  main { display:grid; grid-template-columns: 280px 1fr; gap:0; height:calc(100vh - 49px); }
+  #left { border-right:1px solid var(--border); overflow-y:auto; padding:.8rem; }
+  #right { overflow-y:auto; padding:1rem 1.4rem; }
+  input, select, textarea, button { font:inherit; }
+  input[type=text] { width:100%; padding:.4rem .5rem; border:1px solid var(--border); border-radius:6px; }
+  #results { list-style:none; margin:.6rem 0 0; padding:0; }
+  #results li { padding:.25rem .4rem; cursor:pointer; border-radius:4px; font-size:1.05rem; }
+  #results li:hover { background:#eef2ff; }
+  h2 { font-size:1rem; margin:1.2rem 0 .4rem; }
+  .block { border:1px solid var(--border); border-radius:8px; padding:.6rem .8rem; margin:.5rem 0; }
+  .block .meta { color:var(--muted); font-size:.8rem; margin-bottom:.3rem; }
+  .block pre { margin:.2rem 0; font-size:.9rem; white-space:pre-wrap; }
+  .block.overlay { border-color:var(--accent); }
+  .block button { margin-top:.3rem; }
+  textarea { width:100%; min-height:7rem; padding:.5rem; border:1px solid var(--border); border-radius:6px; font-family:ui-monospace, monospace; font-size:.95rem; }
+  .composer { display:flex; flex-wrap:wrap; gap:.4rem; margin:.4rem 0; align-items:center; }
+  .composer select, .composer input { padding:.3rem .4rem; border:1px solid var(--border); border-radius:6px; }
+  button { padding:.35rem .8rem; border:1px solid var(--border); border-radius:6px; background:#fff; cursor:pointer; }
+  button.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
+  button:disabled { opacity:.5; cursor:default; }
+  #status { margin-left:.8rem; font-size:.85rem; }
+  #status.ok { color:#15803d; } #status.err { color:#b91c1c; }
+  table { border-collapse:collapse; width:100%; margin-top:.6rem; font-size:.88rem; }
+  th, td { border:1px solid var(--border); padding:.25rem .5rem; text-align:left; }
+  th { background:#f3f4f6; font-weight:600; }
+  td.form { font-size:1.05rem; }
+  .hint { color:var(--muted); font-size:.82rem; }
+</style>
+</head>
+<body>
+<header>
+  <h1>morpheus lemma editor</h1>
+  <span>edits are saved to the overlay directory — the upstream stemlib is never touched</span>
+</header>
+<main>
+  <div id="left">
+    <input type="text" id="search" placeholder="search lemma (Unicode or beta-code)…" autocomplete="off">
+    <ul id="results"></ul>
+  </div>
+  <div id="right">
+    <h2 id="lemma-title">Select a lemma — or create a new entry below</h2>
+    <div id="blocks"></div>
+
+    <h2>Entry editor</h2>
+    <p class="hint">
+      One <code>:le:</code> line (the lemma) followed by stem lines.
+      Greek may be typed in Unicode (converted to beta-code on save) or beta-code.
+      Tags: <code>:no:</code> noun/adj stem &nbsp; <code>:vs:</code> verb stem &nbsp;
+      <code>:de:</code> derivation (regular verb, expands all principal parts) &nbsp;
+      <code>:wd:</code> indeclinable whole word.
+    </p>
+    <div class="composer">
+      <select id="c-tag">
+        <option value=":no:">:no: noun/adj</option>
+        <option value=":de:">:de: derivation (verb)</option>
+        <option value=":vs:">:vs: verb stem</option>
+        <option value=":wd:">:wd: indeclinable</option>
+      </select>
+      <input type="text" id="c-stem" placeholder="stem (e.g. σοφι)" size="14">
+      <select id="c-type"></select>
+      <input type="text" id="c-keys" placeholder="extra keys (e.g. fem)" size="18">
+      <button id="c-add">add line</button>
+      <span class="hint">the dropdown lists the valid stemtypes / derivtypes for the chosen tag</span>
+    </div>
+    <textarea id="editor" spellcheck="false" placeholder=":le:σοφία
+:no:σοφι a_hs fem"></textarea>
+    <div style="margin-top:.5rem">
+      <button id="preview-btn">preview forms</button>
+      <button id="save-btn" class="primary">save to overlay</button>
+      <span id="status"></span>
+    </div>
+    <div id="preview"></div>
+  </div>
+</main>
+<script>
+"use strict";
+const $ = (id) => document.getElementById(id);
+let types = { stemtypes: [], derivtypes: [] };
+
+async function api(path, opts) {
+  const r = await fetch(path, opts);
+  return r.json();
+}
+
+// ── types for the composer dropdown ────────────────────────────────────────
+async function loadTypes() {
+  types = await api("/api/types");
+  fillTypeSelect();
+}
+function fillTypeSelect() {
+  const tag = $("c-tag").value;
+  const list = tag === ":de:" ? types.derivtypes : types.stemtypes;
+  $("c-type").innerHTML = list
+    .map((t) => `<option value="${t.name}">${t.name} (${t.class})</option>`)
+    .join("");
+}
+$("c-tag").addEventListener("change", fillTypeSelect);
+
+$("c-add").addEventListener("click", () => {
+  const tag = $("c-tag").value;
+  const stem = $("c-stem").value.trim();
+  const type = $("c-type").value;
+  const keys = $("c-keys").value.trim();
+  if (!stem) { setStatus("enter a stem first", true); return; }
+  const line = tag === ":wd:"
+    ? `${tag}${stem} ${keys || "indecl"}`
+    : `${tag}${stem} ${type}${keys ? " " + keys : ""}`;
+  const ed = $("editor");
+  ed.value = (ed.value.trimEnd() ? ed.value.trimEnd() + "\n" : "") + line + "\n";
+  schedulePreview();
+});
+
+// ── search ──────────────────────────────────────────────────────────────────
+let searchTimer = null;
+$("search").addEventListener("input", () => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(doSearch, 200);
+});
+async function doSearch() {
+  const q = $("search").value.trim();
+  if (!q) { $("results").innerHTML = ""; return; }
+  const data = await api("/api/search?q=" + encodeURIComponent(q));
+  $("results").innerHTML = data.lemmas
+    .map((l) => `<li data-lemma="${l}">${l}</li>`)
+    .join("");
+}
+$("results").addEventListener("click", (e) => {
+  const lemma = e.target.dataset && e.target.dataset.lemma;
+  if (lemma) showLemma(lemma);
+});
+
+// ── lemma detail ─────────────────────────────────────────────────────────────
+async function showLemma(lemma) {
+  const data = await api("/api/lemma?l=" + encodeURIComponent(lemma));
+  $("lemma-title").textContent = data.lemma;
+  $("blocks").innerHTML = data.blocks
+    .map(
+      (b, i) => `
+    <div class="block${b.is_overlay ? " overlay" : ""}">
+      <div class="meta">${b.file}:${b.line}${b.is_overlay ? " · overlay (editable)" : " · upstream (read-only)"}</div>
+      <pre>${escapeHtml(b.unicode)}</pre>
+      <pre class="hint">${escapeHtml(b.raw)}</pre>
+      <button data-load="${i}">load into editor</button>
+      ${b.is_overlay ? `<button data-del="${data.lemma}">delete overlay entry</button>` : ""}
+    </div>`
+    )
+    .join("") || "<p class='hint'>no entries</p>";
+  $("blocks").querySelectorAll("[data-load]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      $("editor").value = data.blocks[+btn.dataset.load].unicode;
+      schedulePreview();
+    });
+  });
+  $("blocks").querySelectorAll("[data-del]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      if (!confirm(`Delete the overlay entry for ${btn.dataset.del}?`)) return;
+      const res = await api("/api/delete", {
+        method: "POST",
+        body: JSON.stringify({ lemma: btn.dataset.del }),
+      });
+      setStatus(res.error || `deleted ${res.deleted}`, !!res.error);
+      showLemma(lemma);
+    });
+  });
+}
+
+// ── preview ─────────────────────────────────────────────────────────────────
+let previewTimer = null;
+function schedulePreview() {
+  clearTimeout(previewTimer);
+  previewTimer = setTimeout(doPreview, 400);
+}
+$("editor").addEventListener("input", schedulePreview);
+$("preview-btn").addEventListener("click", doPreview);
+
+async function doPreview() {
+  const block = $("editor").value.trim();
+  if (!block) { $("preview").innerHTML = ""; return; }
+  const data = await api("/api/preview", {
+    method: "POST",
+    body: JSON.stringify({ block }),
+  });
+  if (data.error) {
+    $("preview").innerHTML = `<p class="hint">${escapeHtml(data.error)}</p>`;
+    return;
+  }
+  const rows = data.forms
+    .map(
+      (f) => `<tr>
+      <td class="form">${escapeHtml(f.form)}</td>
+      <td>${f.pos || ""}</td>
+      <td>${[f.tense, f.mood, f.voice].filter(Boolean).join(" ")}</td>
+      <td>${[(f.person || []).join("/"), (f.number || []).join("/"), (f.case || []).join("/"), (f.gender || []).join("/")].filter(Boolean).join(" · ")}</td>
+      <td>${(f.dialects || []).join(" ")}</td>
+      <td>${f.stemtype || ""}</td>
+    </tr>`
+    )
+    .join("");
+  $("preview").innerHTML = `
+    <p class="hint">${data.forms.length} forms (beta-code: <code>${escapeHtml(data.beta).replace(/\n/g, " ⏎ ")}</code>).
+    Accents are not generated — compare accent-insensitively.</p>
+    <table><thead><tr><th>form</th><th>pos</th><th>tense/mood/voice</th><th>pers · num · case · gend</th><th>dialects</th><th>table</th></tr></thead>
+    <tbody>${rows}</tbody></table>`;
+}
+
+// ── save ────────────────────────────────────────────────────────────────────
+$("save-btn").addEventListener("click", async () => {
+  const block = $("editor").value.trim();
+  if (!block) { setStatus("nothing to save", true); return; }
+  const res = await api("/api/save", {
+    method: "POST",
+    body: JSON.stringify({ block }),
+  });
+  if (res.error) { setStatus(res.error, true); return; }
+  setStatus(`saved ${res.saved} → ${res.file}`, false);
+  showLemma(res.saved);
+});
+
+function setStatus(msg, isErr) {
+  const el = $("status");
+  el.textContent = msg;
+  el.className = isErr ? "err" : "ok";
+}
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+}
+
+loadTypes();
+</script>
+</body>
+</html>

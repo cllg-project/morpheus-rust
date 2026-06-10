@@ -1,4 +1,5 @@
 pub mod analysis;
+pub mod edit;
 pub mod error;
 pub mod generate;
 pub mod output;

@@ -33,14 +33,17 @@ impl Parser {
     ///     strict_case: If True (default), uppercase words are treated as proper nouns.
     ///     check_preverb: If True, attempt preverb stripping (default False).
     ///     verbs_only: If True, skip nominal analysis (default False).
+    ///     overlay_path: Optional overlay directory with extra stem files
+    ///         (as written by `morpheus edit`), loaded on top of the stemlib.
     #[new]
-    #[pyo3(signature = (morphlib_path, language = "greek", strict_case = true, check_preverb = false, verbs_only = false))]
+    #[pyo3(signature = (morphlib_path, language = "greek", strict_case = true, check_preverb = false, verbs_only = false, overlay_path = None))]
     fn new(
         morphlib_path: &str,
         language: &str,
         strict_case: bool,
         check_preverb: bool,
         verbs_only: bool,
+        overlay_path: Option<&str>,
     ) -> PyResult<Self> {
         let lang = match language.to_lowercase().as_str() {
             "latin" | "lat" => Language::Latin,
@@ -53,7 +56,9 @@ impl Parser {
             }
         };
 
-        let stemlib = StemlibIndex::load(Path::new(morphlib_path), lang)
+        let overlays: Vec<std::path::PathBuf> =
+            overlay_path.iter().map(std::path::PathBuf::from).collect();
+        let stemlib = StemlibIndex::load_with_overlays(Path::new(morphlib_path), lang, &overlays)
             .map_err(|e| pyo3::exceptions::PyRuntimeError::new_err(e.to_string()))?;
 
         Ok(Parser {

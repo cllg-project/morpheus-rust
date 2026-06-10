@@ -115,8 +115,14 @@ pub fn load_stem_files(paths: &[&Path]) -> Result<StemDict> {
 
 /// Parse one stem source file (e.g. lsj.nom) into `dict`.
 fn parse_stem_file(path: &Path) -> Result<Vec<StemEntry>> {
-    let mut dict: Vec<StemEntry> = Vec::new();
     let content = fs::read_to_string(path).map_err(MorpheusError::Io)?;
+    Ok(parse_stem_content(&content))
+}
+
+/// Parse stem-source text (the `:le:`/`:no:`/`:vs:`/`:de:`/`:wd:` format) into
+/// stem entries. Exposed for the edit-server preview and overlay validation.
+pub fn parse_stem_content(content: &str) -> Vec<StemEntry> {
+    let mut dict: Vec<StemEntry> = Vec::new();
     let mut current_lemma = String::new();
     let mut current_lemma_unicode = String::new();
     // Pending :de: entry that may collect ;pr ;fu ;ao qualifiers
@@ -293,7 +299,7 @@ fn parse_stem_file(path: &Path) -> Result<Vec<StemEntry>> {
     if let Some(entry) = pending_deriv.take() {
         dict.push(entry);
     }
-    Ok(dict)
+    dict
 }
 
 /// Insert the variant entry described by an `@` continuation line.
@@ -397,7 +403,7 @@ fn split_stem_and_keys(s: &str) -> (&str, &str) {
 }
 
 /// Convert a beta-code word to Unicode, applying final-sigma rule.
-fn beta_to_unicode_word(beta: &str) -> String {
+pub fn beta_to_unicode_word(beta: &str) -> String {
     // The stemlib uses * prefix for uppercase, and standard beta-code diacritics.
     // We need to apply final-sigma substitution at word boundaries.
     let mut result = beta_to_unicode(beta);
