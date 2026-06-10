@@ -92,9 +92,57 @@ fn preverb_splits(word: &str) -> Vec<(String, String)> {
     remainders
 }
 
+/// Breathing mark for the composed lemma's initial vowel. Prefer the mark the
+/// surface preverb carries (ἐπ from ἐποιχομένην); crasis candidates and other
+/// reconstructed inputs arrive bare, so fall back to the canonical breathing:
+/// every vowel-initial preverb takes smooth breathing except the ὑπό/ὑπέρ
+/// family (matches raw_preverbs.table). Consonant-initial preverbs (καθ, συμ,
+/// προσ, …) need no mark.
+fn preverb_breathing(surface: &str, pv: &str) -> Option<char> {
+    use unicode_normalization::UnicodeNormalization;
+    let pv_first = pv
+        .chars()
+        .next()
+        .map(|c| c.to_lowercase().next().unwrap_or(c))
+        .unwrap_or(' ');
+    if !matches!(pv_first, 'α' | 'ε' | 'η' | 'ι' | 'ο' | 'υ' | 'ω') {
+        return None;
+    }
+    if let Some(mark) = surface.nfd().find(|c| matches!(c, '\u{0313}' | '\u{0314}')) {
+        return Some(mark);
+    }
+    Some(if pv_first == 'υ' { '\u{0314}' } else { '\u{0313}' })
+}
+
+/// Insert `mark` (smooth/rough breathing) after the initial vowel of `word`,
+/// or after the second vowel of an initial diphthong (εἰσφέρω, not έ̓ισφέρω).
+fn apply_initial_breathing(word: &str, mark: char) -> String {
+    use unicode_normalization::UnicodeNormalization;
+    let chars: Vec<char> = word.nfd().collect();
+    let lower = |c: char| c.to_lowercase().next().unwrap_or(c);
+    let is_vowel = |c: char| matches!(lower(c), 'α' | 'ε' | 'η' | 'ι' | 'ο' | 'υ' | 'ω');
+    let Some(first) = chars.first().copied().filter(|&c| is_vowel(c)) else {
+        return word.to_string();
+    };
+    let mut at = 1;
+    if let Some(&second) = chars.get(1) {
+        let diphthong = matches!(
+            (lower(first), lower(second)),
+            ('α' | 'ε' | 'ο' | 'υ', 'ι') | ('α' | 'ε' | 'η' | 'ο' | 'ω', 'υ')
+        );
+        if diphthong {
+            at = 2;
+        }
+    }
+    let mut out: Vec<char> = chars;
+    out.insert(at, mark);
+    out.into_iter().nfc().collect()
+}
+
 /// Compose the compound lemma from a stripped surface preverb and the base
 /// lemma: ἀπο + στρέφω → ἀποστρέφω, ἀνα + ἔχω → ἀνέχω (elision),
-/// κατα + ἁγιστεύω → καθαγιστεύω (elision + aspiration).
+/// κατα + ἁγιστεύω → καθαγιστεύω (elision + aspiration),
+/// ἐπ + οἴχομαι → ἐποίχομαι (breathing moves to the preverb's vowel).
 fn compose_lemma(preverb: &str, base_lemma: &str) -> String {
     use unicode_normalization::UnicodeNormalization;
     let base_nfd: Vec<char> = base_lemma.nfd().collect();
@@ -175,7 +223,12 @@ fn compose_lemma(preverb: &str, base_lemma: &str) -> String {
     } else {
         base_lemma.to_string()
     };
-    format!("{pv}{base_clean}")
+    let composed = format!("{pv}{base_clean}");
+    // Restore the word-initial breathing lost by strip_diacritics above.
+    match preverb_breathing(preverb, &pv) {
+        Some(mark) => apply_initial_breathing(&composed, mark),
+        None => composed,
+    }
 }
 
 /// Analyze `remainder` as a standalone verb form, including nu-movable retry.
@@ -203,6 +256,55 @@ fn analyze_remainder(remainder: &str, stemlib: &StemlibIndex) -> Vec<Analysis> {
 /// Handles single and double preverbs.
 /// Returns analyses with `HAS_PREVERB` flag set and the compound lemma
 /// composed from the preverb(s) and the base lemma.
+#[cfg(test)]
+mod tests {
+    use super::compose_lemma;
+
+    #[test]
+    fn elided_surface_keeps_its_breathing() {
+        // ἐποιχομένην: surface preverb ἐπ carries the smooth breathing.
+        assert_eq!(compose_lemma("ἐπ", "οἴχομαι"), "ἐποίχομαι");
+    }
+
+    #[test]
+    fn bare_surface_falls_back_to_smooth() {
+        // Crasis candidates arrive without breathing on the preverb.
+        assert_eq!(compose_lemma("απο", "στρέφω"), "ἀποστρέφω");
+        assert_eq!(compose_lemma("ανα", "ἔχω"), "ἀνέχω");
+    }
+
+    #[test]
+    fn hypo_family_falls_back_to_rough() {
+        assert_eq!(compose_lemma("υπ", "ἄρχω"), "ὑπάρχω");
+        assert_eq!(compose_lemma("υπο", "μένω"), "ὑπομένω");
+    }
+
+    #[test]
+    fn aspirated_preverb_stays_consonant_initial() {
+        assert_eq!(compose_lemma("κατ", "ἁγιστεύω"), "καθαγιστεύω");
+        assert_eq!(compose_lemma("συν", "φέρω"), "συμφέρω");
+    }
+
+    #[test]
+    fn initial_diphthong_takes_breathing_on_second_vowel() {
+        assert_eq!(compose_lemma("εισ", "φέρω"), "εἰσφέρω");
+        assert_eq!(compose_lemma("εισ", "ἄγω"), "εἰσάγω");
+    }
+
+    #[test]
+    fn double_preverbs_compose_cleanly() {
+        // Inner breathing is stripped again by the outer composition.
+        assert_eq!(
+            compose_lemma("συν", &compose_lemma("εκ", "δίδωμι")),
+            "συνεκδίδωμι"
+        );
+        assert_eq!(
+            compose_lemma("αντ", &compose_lemma("επ", "ἄγω")),
+            "ἀντεπάγω"
+        );
+    }
+}
+
 pub fn check_with_preverb(word: &str, stemlib: &StemlibIndex) -> Vec<Analysis> {
     let mut results = Vec::new();
 
