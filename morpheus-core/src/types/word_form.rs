@@ -111,3 +111,95 @@ impl WordForm {
 pub fn decode_pernum(pernum: u8) -> (u8, u8) {
     (pernum & 0o03, pernum >> 2)
 }
+
+// ── Human-readable field names ──────────────────────────────────────────────
+// Shared by the Python bindings, the `morpheus generate` JSONL output and the
+// edit-server paradigm preview, so all surfaces use identical spellings.
+
+pub fn tense_name(t: u8) -> Option<&'static str> {
+    Some(match t {
+        0               => return None,
+        tense::PRESENT  => "present",
+        tense::IMPERF   => "imperfect",
+        tense::FUTURE   => "future",
+        tense::AORIST   => "aorist",
+        tense::PERFECT  => "perfect",
+        tense::PLUPERF  => "pluperfect",
+        tense::FUTPERF  => "future perfect",
+        _               => "unknown",
+    })
+}
+
+pub fn mood_name(m: u8) -> Option<&'static str> {
+    Some(match m {
+        0                 => return None,
+        mood::INDICATIVE  => "indicative",
+        mood::SUBJUNCTIVE => "subjunctive",
+        mood::OPTATIVE    => "optative",
+        mood::IMPERATIVE  => "imperative",
+        mood::INFINITIVE  => "infinitive",
+        mood::PARTICIPLE  => "participle",
+        mood::GERUNDIVE   => "gerundive",
+        mood::SUPINE      => "supine",
+        mood::CONDITIONAL => "conditional",
+        _                 => "unknown",
+    })
+}
+
+pub fn voice_name(v: u8) -> Option<&'static str> {
+    Some(match v {
+        0                 => return None,
+        voice::ACTIVE     => "active",
+        voice::MIDDLE     => "middle",
+        voice::PASSIVE    => "passive",
+        voice::MEDIO_PASS => "medio-passive",
+        voice::DEPONENT   => "deponent",
+        _                 => "unknown",
+    })
+}
+
+pub fn degree_name(d: u8) -> Option<&'static str> {
+    Some(match d {
+        0                   => return None,
+        degree::COMPARATIVE => "comparative",
+        degree::SUPERLATIVE => "superlative",
+        _                   => "positive",
+    })
+}
+
+/// All persons set in a person bitmask, as 1/2/3.
+pub fn person_values(p: u8) -> Vec<u8> {
+    let mut out = Vec::new();
+    if p & person::PERS1 != 0 { out.push(1); }
+    if p & person::PERS2 != 0 { out.push(2); }
+    if p & person::PERS3 != 0 { out.push(3); }
+    out
+}
+
+pub fn number_names(n: u8) -> Vec<&'static str> {
+    let mut out = Vec::new();
+    if n & number::SINGULAR != 0 { out.push("singular"); }
+    if n & number::DUAL     != 0 { out.push("dual"); }
+    if n & number::PLURAL   != 0 { out.push("plural"); }
+    out
+}
+
+pub fn case_names(c: u8) -> Vec<&'static str> {
+    let mut out = Vec::new();
+    if c & case::NOMINATIVE != 0 { out.push("nominative"); }
+    if c & case::GENITIVE   != 0 { out.push("genitive"); }
+    if c & case::DATIVE     != 0 { out.push("dative"); }
+    if c & case::ACCUSATIVE != 0 { out.push("accusative"); }
+    if c & case::VOCATIVE   != 0 { out.push("vocative"); }
+    if c & case::ABLATIVE   != 0 { out.push("ablative"); }
+    out
+}
+
+pub fn gender_names(g: u8) -> Vec<&'static str> {
+    let mut out = Vec::new();
+    if g & gender::MASCULINE != 0 { out.push("masculine"); }
+    if g & gender::FEMININE  != 0 { out.push("feminine"); }
+    if g & gender::NEUTER    != 0 { out.push("neuter"); }
+    if g & gender::ADVERBIAL != 0 { out.push("adverbial"); }
+    out
+}

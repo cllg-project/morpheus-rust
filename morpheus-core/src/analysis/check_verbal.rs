@@ -165,7 +165,7 @@ fn analyzed_verb(stem_prefix: &str, ending: &str, stemlib: &StemlibIndex) -> Vec
     results
 }
 
-fn is_verbal_stemtype_name(name: &str, stemlib: &StemlibIndex) -> bool {
+pub(crate) fn is_verbal_stemtype_name(name: &str, stemlib: &StemlibIndex) -> bool {
     if let Some(ste) = stemlib.stem_types.get(name) {
         ste.stem_type.is_verbal() || ste.stem_type.is_participle()
     } else {

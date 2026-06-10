@@ -42,4 +42,17 @@ impl Dialect {
             *self &= other;
         }
     }
+
+    /// Human-readable dialect names (same spellings as the Python bindings).
+    pub fn names(&self) -> Vec<&'static str> {
+        let mut out = Vec::new();
+        if self.contains(Dialect::ATTIC)            { out.push("attic"); }
+        if self.contains(Dialect::IONIC)            { out.push("ionic"); }
+        if self.contains(Dialect::AEOLIC)           { out.push("aeolic"); }
+        if self.contains(Dialect::LESBIAN)          { out.push("lesbian"); }
+        if self.contains(Dialect::DORIC)            { out.push("doric"); }
+        if self.contains(Dialect::HOMERIC)          { out.push("homeric"); }
+        if self.contains(Dialect::NON_HOMERIC_EPIC) { out.push("epic"); }
+        out
+    }
 }

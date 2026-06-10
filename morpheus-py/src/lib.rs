@@ -1,6 +1,7 @@
-use morpheus_core::{AnalysisOptions, Language, StemlibIndex, check_string};
+use morpheus_core::generate::{form_to_json, generate_lemma, GenerateOptions};
 use morpheus_core::output::analyses_to_xml;
 use morpheus_core::types::Analysis;
+use morpheus_core::{AnalysisOptions, Language, StemlibIndex, check_string};
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyList};
 use std::path::Path;
@@ -92,6 +93,29 @@ impl Parser {
     fn analyze_xml(&self, word: &str) -> PyResult<String> {
         let analyses = check_string(word, &self.stemlib, &self.opts);
         Ok(analyses_to_xml(word, &analyses, self.language))
+    }
+
+    /// Generate all inflected forms of a lemma (Unicode, as on the :le: line).
+    ///
+    /// Returns a list of dicts (same fields as `morpheus generate` JSONL rows:
+    /// form, lemma, pos, stemtype, tense, mood, voice, person, number, case,
+    /// gender, degree, dialects, flags). Forms are accent-incomplete — compare
+    /// accent-insensitively. Returns an empty list for unknown lemmas.
+    #[pyo3(signature = (lemma, movable_nu = true, unaugmented = false))]
+    fn generate(
+        &self,
+        py: Python<'_>,
+        lemma: &str,
+        movable_nu: bool,
+        unaugmented: bool,
+    ) -> PyResult<PyObject> {
+        let opts = GenerateOptions { movable_nu, unaugmented };
+        let forms = generate_lemma(lemma, &self.stemlib, &opts);
+        let list = PyList::empty_bound(py);
+        for f in &forms {
+            list.append(json_to_py(py, &form_to_json(f))?)?;
+        }
+        Ok(list.into())
     }
 
     /// Return the language this parser was configured for.
@@ -235,6 +259,37 @@ fn analysis_to_py_dict(py: Python<'_>, a: &Analysis, word: &str) -> PyResult<PyO
     }
 
     Ok(d.into())
+}
+
+/// Convert a serde_json Value (from form_to_json) into the equivalent Python object.
+fn json_to_py(py: Python<'_>, v: &serde_json::Value) -> PyResult<PyObject> {
+    use serde_json::Value;
+    Ok(match v {
+        Value::Null => py.None(),
+        Value::Bool(b) => b.into_py(py),
+        Value::Number(n) => {
+            if let Some(i) = n.as_i64() {
+                i.into_py(py)
+            } else {
+                n.as_f64().unwrap_or(0.0).into_py(py)
+            }
+        }
+        Value::String(s) => s.into_py(py),
+        Value::Array(items) => {
+            let list = PyList::empty_bound(py);
+            for item in items {
+                list.append(json_to_py(py, item)?)?;
+            }
+            list.into()
+        }
+        Value::Object(map) => {
+            let dict = PyDict::new_bound(py);
+            for (k, val) in map {
+                dict.set_item(k, json_to_py(py, val)?)?;
+            }
+            dict.into()
+        }
+    })
 }
 
 #[pymodule]

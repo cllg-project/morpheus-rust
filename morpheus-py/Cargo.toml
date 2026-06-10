@@ -11,3 +11,4 @@ crate-type = ["cdylib"]
 morpheus-core = { path = "../morpheus-core" }
 pyo3.workspace = true
 anyhow.workspace = true
+serde_json.workspace = true

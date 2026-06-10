@@ -17,7 +17,7 @@ use std::fs;
 use std::path::Path;
 
 /// The record type of a stem entry (which stemlib tag produced it).
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum StemKind {
     Noun,       // :no:
     Verb,       // :vs:

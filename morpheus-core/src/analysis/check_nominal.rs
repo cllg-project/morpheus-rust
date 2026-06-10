@@ -135,7 +135,7 @@ pub fn check_indecl(word: &str, stemlib: &StemlibIndex) -> Vec<Analysis> {
         .collect()
 }
 
-fn is_verbal_stemtype(name: &str, stemlib: &StemlibIndex) -> bool {
+pub(crate) fn is_verbal_stemtype(name: &str, stemlib: &StemlibIndex) -> bool {
     if let Some(ste) = stemlib.stem_types.get(name) {
         ste.stem_type.is_verbal() || ste.stem_type.is_participle()
     } else if stemlib.deriv_types.contains_key(name) {

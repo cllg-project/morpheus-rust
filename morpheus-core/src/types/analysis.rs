@@ -36,23 +36,28 @@ pub struct Analysis {
 
 impl Analysis {
     pub fn pos(&self) -> &'static str {
-        use super::word_form::mood;
-        use super::stem_type::PPARTMASK;
-        // PP_* bits mark this stem as belonging to a verbal principal part (present,
-        // future, aorist, perfect, …). Participle is determined by the mood field only.
-        let is_principal_part = self.stem_type.bits() & PPARTMASK != 0;
-        if self.form.mood == mood::PARTICIPLE {
-            return "participle";
-        }
-        if self.stem_type.is_verbal() || is_principal_part {
-            return "verb";
-        }
-        if self.stem_type.is_adjectival() {
-            return "adjective";
-        }
-        if self.stem_type.is_nominal() {
-            return "noun";
-        }
-        "indeclinable"
+        pos_of(self.stem_type, &self.form)
     }
+}
+
+/// Part of speech for a (stem type, word form) pair.
+/// PP_* bits mark the stem as belonging to a verbal principal part (present,
+/// future, aorist, perfect, …). Participle is determined by the mood field only.
+pub fn pos_of(stem_type: StemType, form: &WordForm) -> &'static str {
+    use super::word_form::mood;
+    use super::stem_type::PPARTMASK;
+    let is_principal_part = stem_type.bits() & PPARTMASK != 0;
+    if form.mood == mood::PARTICIPLE {
+        return "participle";
+    }
+    if stem_type.is_verbal() || is_principal_part {
+        return "verb";
+    }
+    if stem_type.is_adjectival() {
+        return "adjective";
+    }
+    if stem_type.is_nominal() {
+        return "noun";
+    }
+    "indeclinable"
 }

@@ -169,6 +169,92 @@ fn temporal_unaugment(stem: &str) -> Vec<String> {
     results
 }
 
+/// Forward augment: the inverse of `unaugment`, used by form generation.
+/// Returns the plausible augmented variants of an unaugmented stem (usually
+/// one; ε-initial stems yield both η- and ει-augments since both occur:
+/// ἐθέλω → ἤθελον but ἔχω → εἶχον).
+pub fn apply_augment(stem: &str) -> Vec<String> {
+    let nfd: Vec<char> = stem.nfd().collect();
+    let Some(&first) = nfd.first() else {
+        return vec![stem.to_string()];
+    };
+
+    // ── Syllabic augment for consonant-initial stems ───────────────────
+    if !is_greek_vowel(first) {
+        // Initial ρ doubles and loses its breathing: ῥαπτ → ἐρραπτ.
+        if first == 'ρ' {
+            let rest: String = nfd[1..]
+                .iter()
+                .skip_while(|c| is_combining(**c))
+                .collect::<String>()
+                .nfc()
+                .collect();
+            return vec![format!("ἐρρ{rest}")];
+        }
+        return vec![format!("ἐ{stem}")];
+    }
+
+    // ── Temporal augment for vowel-initial stems ───────────────────────
+    // Split off the first vowel, its combining marks, and (for diphthongs)
+    // the second vowel with its marks.
+    let mut i = 1;
+    while i < nfd.len() && is_combining(nfd[i]) {
+        i += 1;
+    }
+    let marks1: String = nfd[1..i].iter().collect();
+    let second = nfd.get(i).copied();
+    let mut j = i;
+    let mut marks2 = String::new();
+    if let Some(s) = second {
+        if is_greek_vowel(s) {
+            j = i + 1;
+            while j < nfd.len() && is_combining(nfd[j]) {
+                marks2.push(nfd[j]);
+                j += 1;
+            }
+        }
+    }
+    let nfc = |s: String| -> String { s.nfc().collect() };
+
+    // Diphthongs: αι → ῃ, οι → ῳ, αυ/ευ → ηυ (breathing/accent marks of both
+    // vowels move onto the lengthened first vowel; ῃ/ῳ keep the iota as
+    // subscript U+0345, which sorts after the other marks).
+    if let Some(s) = second.filter(|&s| is_greek_vowel(s)) {
+        let rest: String = nfd[j..].iter().collect();
+        match (first, s) {
+            ('α', 'ι') => return vec![nfc(format!("η{marks1}{marks2}\u{0345}{rest}"))],
+            ('ο', 'ι') => return vec![nfc(format!("ω{marks1}{marks2}\u{0345}{rest}"))],
+            ('α', 'υ') | ('ε', 'υ') => {
+                return vec![nfc(format!("η{marks1}υ{marks2}{rest}"))]
+            }
+            ('ε', 'ι') => {
+                // Already long — no visible augment.
+                return vec![stem.to_string()];
+            }
+            _ => {}
+        }
+    }
+
+    // Single vowels: α/ε → η, ο → ω; η/ω/ι/υ unchanged (length is unwritten).
+    let rest: String = nfd[i..].iter().collect();
+    match first {
+        'α' => vec![nfc(format!("η{marks1}{rest}"))],
+        'ε' => vec![
+            nfc(format!("η{marks1}{rest}")),
+            // ε + ε contraction: ἔχω → εἶχον. The breathing moves onto the
+            // second vowel of the resulting diphthong (εἰ).
+            nfc(format!("ει{marks1}{rest}")),
+        ],
+        'ο' => vec![nfc(format!("ω{marks1}{rest}"))],
+        _ => vec![stem.to_string()],
+    }
+}
+
+#[inline]
+fn is_greek_vowel(c: char) -> bool {
+    matches!(c, 'α' | 'ε' | 'η' | 'ι' | 'ο' | 'υ' | 'ω')
+}
+
 fn get_breathing_char(nfd_chars: &[char]) -> Option<char> {
     for &c in nfd_chars.iter().take(4) {
         match c {
