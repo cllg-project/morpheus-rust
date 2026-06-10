@@ -23,7 +23,7 @@ except ImportError as exc:  # pragma: no cover
     ) from exc
 
 setup(
-    name="morpheus",
+    name="pymorpheuslib",
     version="0.1.0",
     description="Ancient Greek and Latin morphological parser (Rust port of Perseus Morpheus)",
     long_description=open("README.md", encoding="utf-8").read(),

@@ -36,9 +36,9 @@ impl Parser {
     ///     overlay_path: Optional overlay directory with extra stem files
     ///         (as written by `morpheus edit`), loaded on top of the stemlib.
     #[new]
-    #[pyo3(signature = (morphlib_path, language = "greek", strict_case = true, check_preverb = false, verbs_only = false, overlay_path = None))]
+    #[pyo3(signature = (morphlib_path = None, language = "greek", strict_case = true, check_preverb = false, verbs_only = false, overlay_path = None))]
     fn new(
-        morphlib_path: &str,
+        morphlib_path: Option<&str>,
         language: &str,
         strict_case: bool,
         check_preverb: bool,
@@ -56,10 +56,27 @@ impl Parser {
             }
         };
 
+        // Resolution: explicit argument → MORPHEUS_STEMLIB env → platform cache dir.
+        let resolved: std::path::PathBuf = match morphlib_path {
+            Some(p) => p.into(),
+            None => std::env::var_os("MORPHEUS_STEMLIB")
+                .map(Into::into)
+                .unwrap_or_else(default_stemlib_dir),
+        };
         let overlays: Vec<std::path::PathBuf> =
             overlay_path.iter().map(std::path::PathBuf::from).collect();
-        let stemlib = StemlibIndex::load_with_overlays(Path::new(morphlib_path), lang, &overlays)
-            .map_err(|e| pyo3::exceptions::PyRuntimeError::new_err(e.to_string()))?;
+        let stemlib = StemlibIndex::load_with_overlays(&resolved, lang, &overlays)
+            .map_err(|e| {
+                let mut msg = e.to_string();
+                if morphlib_path.is_none() {
+                    msg.push_str(&format!(
+                        " — stemlib not found at {}. Run `python -m morpheus.fetch` \
+                         or call morpheus.fetch_stemlib() to download it.",
+                        resolved.display()
+                    ));
+                }
+                pyo3::exceptions::PyRuntimeError::new_err(msg)
+            })?;
 
         Ok(Parser {
             stemlib: Arc::new(stemlib),
@@ -266,6 +283,35 @@ fn analysis_to_py_dict(py: Python<'_>, a: &Analysis, word: &str) -> PyResult<PyO
     Ok(d.into())
 }
 
+/// Default per-user cache location for the downloaded stemlib
+/// (<cache>/pymorpheuslib/stemlib). Shared by Parser() and morpheus.fetch.
+fn default_stemlib_dir() -> std::path::PathBuf {
+    use std::path::PathBuf;
+    #[cfg(target_os = "windows")]
+    let base = std::env::var_os("LOCALAPPDATA")
+        .map(PathBuf::from)
+        .unwrap_or_else(std::env::temp_dir);
+    #[cfg(target_os = "macos")]
+    let base = std::env::var_os("HOME")
+        .map(|h| PathBuf::from(h).join("Library").join("Caches"))
+        .unwrap_or_else(std::env::temp_dir);
+    #[cfg(all(unix, not(target_os = "macos")))]
+    let base = std::env::var_os("XDG_CACHE_HOME")
+        .map(PathBuf::from)
+        .or_else(|| std::env::var_os("HOME").map(|h| PathBuf::from(h).join(".cache")))
+        .unwrap_or_else(std::env::temp_dir);
+    base.join("pymorpheuslib").join("stemlib")
+}
+
+/// Default stemlib path: MORPHEUS_STEMLIB env var if set, else the per-user
+/// cache directory used by morpheus.fetch_stemlib().
+#[pyfunction]
+fn default_stemlib_path() -> String {
+    std::env::var_os("MORPHEUS_STEMLIB")
+        .map(|p| p.to_string_lossy().into_owned())
+        .unwrap_or_else(|| default_stemlib_dir().to_string_lossy().into_owned())
+}
+
 /// Convert a serde_json Value (from form_to_json) into the equivalent Python object.
 fn json_to_py(py: Python<'_>, v: &serde_json::Value) -> PyResult<PyObject> {
     use serde_json::Value;
@@ -300,6 +346,7 @@ fn json_to_py(py: Python<'_>, v: &serde_json::Value) -> PyResult<PyObject> {
 #[pymodule]
 fn _morpheus(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<Parser>()?;
+    m.add_function(wrap_pyfunction!(default_stemlib_path, m)?)?;
     m.add("__version__", env!("CARGO_PKG_VERSION"))?;
     Ok(())
 }

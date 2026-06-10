@@ -21,6 +21,27 @@ and pre-expands all derived stems, contractions, and consonant euphony into
 in-memory hash indices at load time. Analysis is then a sliding stem+ending
 split over normalized Unicode. No build step for the data is needed.
 
+## Quick start (Python, from PyPI)
+
+The Python package is published as **`pymorpheuslib`** (the import name stays
+`morpheus`):
+
+```bash
+pip install pymorpheuslib
+```
+
+```python
+import morpheus
+
+morpheus.fetch_stemlib()        # one-time data download (~10 MB) into the user cache
+parser = morpheus.Parser()      # finds the downloaded stemlib automatically
+parser.analyze("λόγος")
+```
+
+`Parser()` resolves the stemlib path as: explicit argument →
+`MORPHEUS_STEMLIB` env var → the per-user cache dir filled by
+`fetch_stemlib()` (also available as `python -m morpheus.fetch`).
+
 ## Getting the data (stemlib)
 
 The linguistic data (stem dictionaries, ending tables, derivation tables) is
@@ -47,9 +68,47 @@ echo "ἀνθρώπων" | ./target/release/morpheus
 ```
 
 Options: `-L greek|latin` (default greek), `-m/--morphlib PATH` (or `MORPHLIB`
-env var, same as the C original). Output is Alpheios-compatible XML, one
-`<word>` element per input line. Set `MORPHEUS_TIMING=1` to print stemlib
-load-phase timings to stderr.
+env var, same as the C original), `--overlay DIR` (or `MORPHEUS_OVERLAY`) for
+custom stem entries. Output is Alpheios-compatible XML, one `<word>` element
+per input line. Set `MORPHEUS_TIMING=1` to print stemlib load-phase timings
+to stderr.
+
+## Generating forms (`morpheus generate`)
+
+Enumerate every inflected form the engine knows, as JSON Lines:
+
+```bash
+morpheus generate -m data/morpheus/stemlib --lemma λόγος
+# {"form":"λογος","lemma":"λόγος","pos":"noun","case":["nominative"],...}
+morpheus generate -m data/morpheus/stemlib | zstd > all-forms.jsonl.zst   # full corpus (huge)
+```
+
+Options: `--lemma` (Unicode or beta-code), `--no-movable-nu`, `--unaugmented`
+(also emit epic augmentless past indicatives), `--limit N`. The same engine is
+exposed in Python as `parser.generate("λόγος")`.
+
+**Caveat:** stems carry breathings but only sporadic accents, and there is no
+accent-placement engine yet, so generated forms are correct *except for
+accents* — compare accent-insensitively. (Round-trip check: 99.9% of generated
+forms re-analyze to their source lemma.)
+
+## Editing and adding lemmas (`morpheus edit`)
+
+A local web UI for browsing the stemlib and adding or correcting lemma
+entries, with stemtype/derivtype dropdowns and a live paradigm preview:
+
+```bash
+morpheus edit -m data/morpheus/stemlib --overlay stemlib-overrides
+# open http://127.0.0.1:8788/
+```
+
+Edits are saved to the overlay directory (`stemlib-overrides/` in this repo,
+beta-code stem-source format) — the upstream stemlib is never modified. Greek
+can be typed in Unicode; it is converted to beta-code on save. The analyzer
+picks the overlay up via `--overlay` / `MORPHEUS_OVERLAY` /
+`Parser(..., overlay_path=...)`. Manual smoke checklist: add a noun, watch the
+preview paradigm, save, re-run the analyzer with `--overlay` on one of the
+generated forms, restart the server and confirm the entry persists.
 
 ## Python bindings
 
@@ -100,11 +159,12 @@ xml = parser.analyze_xml("λόγος")
 
 | Argument | Default | Meaning |
 |---|---|---|
-| `morphlib_path` | — | path to the stemlib directory (contains `Greek/`) |
+| `morphlib_path` | auto | stemlib dir; default: `MORPHEUS_STEMLIB` env → user cache |
 | `language` | `"greek"` | `"greek"` or `"latin"` |
 | `strict_case` | `True` | uppercase words are treated as proper nouns first |
 | `check_preverb` | `False` | extra preverb stripping inside the verbal path |
 | `verbs_only` | `False` | skip nominal analysis |
+| `overlay_path` | `None` | overlay directory with custom stem entries |
 
 Each reading dict contains `lemma`, `pos`, `word`, `stem`, `ending`, and the
 applicable subset of `tense`, `mood`, `voice`, `person`, `number`, `case`,
@@ -137,6 +197,24 @@ refresh the ground truth, not to run the Rust engine.
 | `tests/` | corpus sampler + pytest consistency suite |
 | `scripts/fetch_stemlib.sh` | pulls the stemlib data from the original repo |
 | `CLAUDE.md` | detailed architecture notes and invariants |
+
+## Publishing (PyPI)
+
+Releases are driven by git tags: pushing a `v*` tag runs
+`.github/workflows/release.yaml`, which builds abi3 wheels (linux
+x86_64/aarch64, macOS x86_64/arm64, Windows x64 — one wheel per platform,
+Python ≥ 3.9) plus an sdist with maturin, then uploads with **twine** using
+the `PYPI_API_TOKEN` repository secret (`TWINE_USERNAME=__token__`).
+
+Manual release from a dev machine:
+
+```bash
+pip install maturin twine
+maturin build --release          # wheel in target/wheels/
+maturin sdist
+twine check target/wheels/*
+twine upload target/wheels/*
+```
 
 ## License
 
