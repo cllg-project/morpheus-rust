@@ -238,7 +238,7 @@ fn analysis_to_py_dict(py: Python<'_>, a: &Analysis, word: &str) -> PyResult<PyO
 }
 
 #[pymodule]
-fn morpheus(m: &Bound<'_, PyModule>) -> PyResult<()> {
+fn _morpheus(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<Parser>()?;
     m.add("__version__", env!("CARGO_PKG_VERSION"))?;
     Ok(())

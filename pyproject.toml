@@ -5,14 +5,20 @@ build-backend = "maturin"
 [project]
 name = "morpheus"
 version = "0.1.0"
-description = "Ancient Greek and Latin morphological parser"
+description = "Ancient Greek and Latin morphological parser (Rust port of Perseus Morpheus)"
+readme = "README.md"
 requires-python = ">=3.9"
 classifiers = [
     "Programming Language :: Rust",
     "Programming Language :: Python :: 3",
+    "Topic :: Text Processing :: Linguistic",
 ]
+
+[project.urls]
+Source = "https://github.com/alpheios-project/morpheus"
 
 [tool.maturin]
 manifest-path = "morpheus-py/Cargo.toml"
 features = ["pyo3/extension-module"]
 python-source = "python"
+module-name = "morpheus._morpheus"
