@@ -71,6 +71,14 @@ Use `rtk proxy cargo build` to see full compiler output (RTK filters cargo by de
   readings — and (b) ῥ gemination in `compose_lemma` (ἀνα+ῥίπτω→ἀναρρίπτω).
   `check_indecl` now parses the entry key_str, so `:vb:` readings carry their
   form/dialect/stemtype (φημί = pres ind act 1 sg, not bare indecl).
+- **Proper names**: stem-dict keys are lowercased (capitalized stems like
+  `*ptele` → Πτελε were unmatchable since the engine lowercases input).
+  `MorphFlags::CAPITAL_STEM` (Rust-only, set at load) gates them: under
+  `strict_case` a lowercase input never matches a capitalized stem (mirrors
+  C's case-sensitive lookup); lowercase stems with capitalized lemmas
+  (λεσβ → Λέσβος) still match. `pers_name`/`geog_name` surface as
+  `<flags>` in XML, `name: person|place` in Python, flags in JSONL. C's
+  propname.c/np_scan.c are offline dictionary-build tools — no port needed.
 - **Preverbs**: remainder analyzed as verb only; compound lemma composed with elision/aspiration/assimilation (ἀπο+στρέφω→ἀποστρέφω, κατα+ἁγιστεύω→καθαγιστεύω, ἐν+καλέω→ἐγκαλέω, ἐξ+φέρω→ἐκφέρω). `compose_lemma` restores the word-initial breathing (from the surface preverb, fallback rough for ὑπ-, else smooth; diphthong-aware: εἰσφέρω) — it was lost before (εποίχομαι bug).
 - **Form generation** (`generate.rs`): analysis run forwards — per stem entry, iterate `end_index.by_stemtype` groups, `stemtype_compatible` once per group, `ending_compatible`+`merge_form` per ending; `apply_augment` (forward inverse of `unaugment`) for IMPERF/AORIST/PLUPERF indicatives; movable-nu emission mirrors the engine retry (appended *after* accentuation); dedup absorbs the iota-subscript dual-index clones.
 - **Augment tables** (`augment.rs::apply_augment`): faithful port of C `TempAugments`/`SyllAugments` (Smyth 435/431), beta-code prefix rows with per-row dialects — ἀ- → ἠ- (attic/ionic/epic) *and* ᾱ̓- (doric/aeolic), ῑ̔-/ῡ̔- macron augments, identity rows (ἠ-/ὠ- stems, invisible augment). Returns `(stem, Dialect)`; incompatible augment dialects are skipped per form. ε/η-initial pluperfects stay unaugmented (Smyth 444) unless attic-reduplicated. Note: **`setquant` needs no port** — it's a dictionary-build lex filter whose `<quant>` output is already baked into stemsrc (`lu^`, `poli_t`); C gener's extra long-vowel forms came from these augment rows, plus C gener ignoring stem-level dialect/person keys (Rust honors them).
@@ -108,7 +116,7 @@ Use `rtk proxy cargo build` to see full compiler output (RTK filters cargo by de
 
 ## Key Invariants
 
-- Stem dict keys: `strip_diacritics(stem).replace('ς', 'σ')` — always medial sigma.
+- Stem dict keys: `strip_diacritics(stem).replace('ς', 'σ').to_lowercase()` — always medial sigma, always lowercase (capitalized stems are gated by `CAPITAL_STEM` instead).
 - Ending dict keys: `strip_diacritics(ending)` — no sigma normalization needed.
 - Hyphens stripped from stems at load time: `beta_stem.replace('-', "")`.
 - Commas in `key_str` normalized to spaces at load time.

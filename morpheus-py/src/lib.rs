@@ -287,6 +287,16 @@ fn analysis_to_py_dict(py: Python<'_>, a: &Analysis, word: &str) -> PyResult<PyO
         })?;
     }
 
+    // Proper-name markers
+    {
+        use morpheus_core::types::MorphFlags;
+        if a.morph_flags.has(MorphFlags::PERS_NAME) {
+            d.set_item("name", "person")?;
+        } else if a.morph_flags.has(MorphFlags::GEOG_NAME) {
+            d.set_item("name", "place")?;
+        }
+    }
+
     // Dialect
     if !a.dialect.is_empty() {
         let mut dialects = Vec::new();

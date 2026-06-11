@@ -55,6 +55,14 @@ pub fn analyses_to_xml(word: &str, analyses: &[Analysis], language: Language) ->
             ));
             out.push_str(&format!("      <pofs>{}</pofs>\n", analysis.pos()));
             out.push_str(&format_form(&analysis.form));
+            // Proper-name markers, as printed by C cruncher (geog_name column).
+            use crate::types::MorphFlags;
+            if analysis.morph_flags.has(MorphFlags::PERS_NAME) {
+                out.push_str("      <flags>pers_name</flags>\n");
+            }
+            if analysis.morph_flags.has(MorphFlags::GEOG_NAME) {
+                out.push_str("      <flags>geog_name</flags>\n");
+            }
             out.push_str("    </inflection>\n");
         }
         out.push_str("  </entry>\n");

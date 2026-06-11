@@ -78,7 +78,8 @@ impl StemDict {
         {
             let without_iota =
                 crate::unicode::normalize::strip_diacritics_drop_subscript(&entry.stem)
-                    .replace('ς', "σ");
+                    .replace('ς', "σ")
+                    .to_lowercase();
             if without_iota != entry.stem_norm {
                 self.by_stem
                     .entry(without_iota)
@@ -271,8 +272,13 @@ pub fn parse_stem_content(content: &str) -> Vec<StemEntry> {
         // Stem dictionary entries may have final sigma (ς) because beta_to_unicode
         // applies the final-sigma rule, but the word's stem fragment always has
         // medial sigma (σ). Unify to medial for consistent lookup keys.
-        let stem_norm = strip_diacritics(&stem_unicode).replace('ς', "σ");
-        let features = parse_key_string(key_str);
+        // Lowercased: proper-name stems are capitalized (*ptele → Πτελε) but
+        // the engine lowercases every input word, so keys must be lowercase.
+        let stem_norm = strip_diacritics(&stem_unicode).replace('ς', "σ").to_lowercase();
+        let mut features = parse_key_string(key_str);
+        if stem_unicode.chars().next().is_some_and(|c| c.is_uppercase()) {
+            features.morph_flags.set(crate::types::MorphFlags::CAPITAL_STEM);
+        }
 
         let entry = StemEntry {
             lemma:       current_lemma_unicode.clone(),
@@ -330,7 +336,10 @@ fn insert_at_variant(dict: &mut Vec<StemEntry>, base: &StemEntry, at_line: &str)
         }
         key_str.push_str(&feature_toks.join(" "));
     }
-    let features = parse_key_string(&key_str);
+    let mut features = parse_key_string(&key_str);
+    if base.morph_flags.has(crate::types::MorphFlags::CAPITAL_STEM) {
+        features.morph_flags.set(crate::types::MorphFlags::CAPITAL_STEM);
+    }
 
     if let Some(ending_beta) = end_tok {
         // Whole-word form: stem + explicit ending (τεσσα + ρσι).
@@ -339,7 +348,7 @@ fn insert_at_variant(dict: &mut Vec<StemEntry>, base: &StemEntry, at_line: &str)
             base.stem,
             crate::unicode::betacode::beta_to_unicode(ending_beta)
         );
-        let stem_norm = strip_diacritics(&word).replace('ς', "σ");
+        let stem_norm = strip_diacritics(&word).replace('ς', "σ").to_lowercase();
         dict.push(StemEntry {
             lemma: base.lemma.clone(),
             stem: word,

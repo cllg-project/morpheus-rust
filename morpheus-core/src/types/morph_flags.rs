@@ -91,10 +91,13 @@ impl MorphFlags {
     pub const T_PREVB:            u8 = 83;
     /// Rust-only: the surface word was elided (ἀλλ’ → ἀλλά).
     pub const ELIDED:             u8 = 84;
+    /// Rust-only: the stem is capitalized in stemsrc (beta `*`, proper
+    /// names); must not match a lowercase input word under strict_case.
+    pub const CAPITAL_STEM:       u8 = 85;
 
     #[inline]
     pub fn has(&self, flag: u8) -> bool {
-        debug_assert!(flag >= 1 && flag <= 84, "flag {flag} out of range 1..=84");
+        debug_assert!(flag >= 1 && flag <= 85, "flag {flag} out of range 1..=85");
         let idx = (flag as usize - 1) / 8;
         let bit = (flag - 1) % 8;
         self.0[idx] & (1 << bit) != 0
@@ -102,7 +105,7 @@ impl MorphFlags {
 
     #[inline]
     pub fn set(&mut self, flag: u8) {
-        debug_assert!(flag >= 1 && flag <= 84, "flag {flag} out of range 1..=84");
+        debug_assert!(flag >= 1 && flag <= 85, "flag {flag} out of range 1..=85");
         let idx = (flag as usize - 1) / 8;
         let bit = (flag - 1) % 8;
         self.0[idx] |= 1 << bit;
@@ -110,7 +113,7 @@ impl MorphFlags {
 
     #[inline]
     pub fn clear(&mut self, flag: u8) {
-        debug_assert!(flag >= 1 && flag <= 84, "flag {flag} out of range 1..=84");
+        debug_assert!(flag >= 1 && flag <= 85, "flag {flag} out of range 1..=85");
         let idx = (flag as usize - 1) / 8;
         let bit = (flag - 1) % 8;
         self.0[idx] &= !(1 << bit);

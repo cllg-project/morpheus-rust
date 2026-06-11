@@ -340,6 +340,8 @@ pub fn form_to_json(f: &GeneratedForm) -> serde_json::Value {
     if f.morph_flags.has(MorphFlags::CONTRACTED)  { flag_names.push("contracted"); }
     if f.morph_flags.has(MorphFlags::ENCLITIC)    { flag_names.push("enclitic"); }
     if f.morph_flags.has(MorphFlags::INDECLFORM)  { flag_names.push("indeclform"); }
+    if f.morph_flags.has(MorphFlags::PERS_NAME)   { flag_names.push("pers_name"); }
+    if f.morph_flags.has(MorphFlags::GEOG_NAME)   { flag_names.push("geog_name"); }
     if !flag_names.is_empty() {
         obj.insert("flags".into(), flag_names.into());
     }

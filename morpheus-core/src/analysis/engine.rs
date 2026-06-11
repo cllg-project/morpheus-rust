@@ -54,6 +54,15 @@ pub fn check_string(word: &str, stemlib: &StemlibIndex, opts: &AnalysisOptions) 
         }
     }
 
+    // Case gate (C lookup is case-sensitive): capitalized stemsrc stems
+    // (beta `*`, proper names) must not match a lowercase input word. Stem
+    // keys are lowercased for lookup, so filter on CAPITAL_STEM here.
+    // Lowercase stems with capitalized lemmas (λεσβ → Λέσβος) still match.
+    let input_capitalized = trimmed.chars().next().is_some_and(|c| c.is_uppercase());
+    if opts.strict_case && !input_capitalized {
+        results.retain(|a| !a.morph_flags.has(MorphFlags::CAPITAL_STEM));
+    }
+
     // Dialect filter (C WantDialects/AndDialect): a requested mask drops
     // readings restricted to disjoint dialects; neutral readings survive.
     if !opts.dialects.is_empty() {
@@ -437,6 +446,29 @@ mod tests {
             )
             .expect("stemlib load"),
         )
+    }
+
+    /// Capitalized proper-name stems (beta `*`) match capitalized inputs
+    /// only; lowercase stems with capitalized lemmas (λεσβ → Λέσβος) keep
+    /// matching lowercase inputs. Needs MORPHLIB (skipped otherwise).
+    #[test]
+    fn proper_name_case_gate() {
+        let Some(stemlib) = load_stemlib() else {
+            eprintln!("MORPHLIB not set — skipping proper-name test");
+            return;
+        };
+        let opts = AnalysisOptions::default();
+        let lemmas = |w: &str| -> Vec<String> {
+            check_string(w, &stemlib, &opts).into_iter().map(|a| a.lemma).collect()
+        };
+        assert!(lemmas("Σωκράτης").iter().any(|l| l == "Σωκράτης"));
+        assert!(!lemmas("σωκράτης").iter().any(|l| l == "Σωκράτης"));
+        assert!(lemmas("Ἀχιλλεύς").iter().any(|l| l == "Ἀχιλλεύς"));
+        // lowercase stem in stemsrc, capitalized lemma: still matches
+        assert!(lemmas("λέσβος").iter().any(|l| l == "Λέσβος"));
+        // geog_name flag survives into the analysis
+        let ptele = check_string("Πτελεός", &stemlib, &opts);
+        assert!(ptele.iter().any(|a| a.morph_flags.has(MorphFlags::GEOG_NAME)));
     }
 
     /// Needs a real stemlib — set MORPHLIB to run (skipped otherwise).
