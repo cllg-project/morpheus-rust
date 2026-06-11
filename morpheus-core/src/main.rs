@@ -35,6 +35,11 @@ struct Cli {
     #[arg(short = 'V', long)]
     verbs_only: bool,
 
+    /// Restrict to these dialects (comma-separated: attic, ionic, aeolic,
+    /// lesbian, doric, homeric, epic, prose). Dialect-neutral readings always pass.
+    #[arg(short = 'd', long)]
+    dialect: Option<String>,
+
     /// Overlay directories with extra stem files (repeatable)
     #[arg(long, env = "MORPHEUS_OVERLAY")]
     overlay: Vec<PathBuf>,
@@ -139,10 +144,16 @@ fn run_analyze(cli: Cli) -> anyhow::Result<()> {
     let language = parse_language(&cli.language);
     let stemlib = StemlibIndex::load_with_overlays(&morphlib, language, &cli.overlay)?;
 
+    let dialects = match &cli.dialect {
+        Some(names) => morpheus_core::types::Dialect::from_names(names)
+            .map_err(|e| anyhow::anyhow!(e))?,
+        None => Default::default(),
+    };
     let opts = AnalysisOptions {
         strict_case:   !cli.no_strict_case,
         check_preverb: cli.check_preverb,
         verbs_only:    cli.verbs_only,
+        dialects,
     };
 
     println!("<words>");

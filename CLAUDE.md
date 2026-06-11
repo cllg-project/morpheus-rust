@@ -27,8 +27,12 @@ Use `rtk proxy cargo build` to see full compiler output (RTK filters cargo by de
 
 - `morpheus generate -m <stemlib> [--lemma λῆμμα|beta] [--no-movable-nu] [--unaugmented] [--limit N]`
   — all inflected forms as JSONL (rayon-parallel, single writer thread). Also
-  `Parser.generate(lemma)` in Python. **Generated forms lack accents** (no
-  addaccent.c port) — compare accent-insensitively. Round-trip: 99.9% re-analyze.
+  `Parser.generate(lemma)` in Python. **Forms are fully accented** (accent.rs
+  port of the C engine, ≈99.5% accent agreement with C gener; residue = C
+  gener ignoring stem-level dialect/person keys — Rust is stricter — plus a
+  few aeolic -οισα endings). Round-trip: 99.9% re-analyze.
+  Validate accents: `python3 tests/compare_accents.py [lemma_beta ...]` (feeds
+  stemsrc blocks to `~/dev/morpheus/bin/gener` as oracle).
 - `morpheus edit -m <stemlib> [--overlay stemlib-overrides] [-p 8788]` — local
   web UI (tiny-http, embedded `edit/edit.html`); saves validated beta-code blocks
   to `<overlay>/Greek/stemsrc/custom.{nom,vbs}` and hot-reloads. Unicode input
@@ -51,14 +55,19 @@ Use `rtk proxy cargo build` to see full compiler output (RTK filters cargo by de
 - **Analysis engine**: sliding stem+ending split at grapheme cluster boundaries.
 - **Three analysis paths**: `check_indecl` (whole-word `:wd:` entries), `check_nom` (nouns/adj), `check_verb` (verbs).
 - **Nu-movable**: `engine.rs` retries analysis without final ν and sets `MorphFlags::NU_MOVABLE`.
-- **Fallback chain in `check_string_inner`**: direct → nu-movable → crasis (κἀκεῖνος, τοὔνομα) → doric ᾱ→η retry; preverb stripping runs unconditionally (a word can be both simple and compound).
+- **Dialect filter** (C `WantDialects`): `AnalysisOptions.dialects` mask (CLI `-d attic,ionic`, Python `dialects=["attic"]`). Non-empty mask drops readings whose dialect is non-empty and disjoint; dialect-neutral readings always pass. Also gates the doric α→η retry off unless Doric/Aeolic is acceptable. Names parsed by `Dialect::parse_name`/`from_names` (`from_name` is taken by bitflags).
+- **Fallback chain in `check_string_inner`**: direct → nu-movable → crasis (κἀκεῖνος, τοὔνομα) → doric ᾱ→η retry → enclitic -περ stripping (οἷόσπερ; nominal readings only, retries without the enclitic-thrown acute); preverb stripping runs unconditionally (a word can be both simple and compound).
+- **Elision/prodelision** (`engine.rs`, port of C checkapostr/checkstring1): trailing apostrophe (any of `' ’ ʼ ᾽ ᾿`) restores α/ι/ο/ε (+poetic αι); monosyllables only ε (Smyth 70: δ᾽→δέ); unaccented cores get an acute on the restored vowel (ἀλλ᾽→ἀλλά); final θ/χ/φ de-aspirated first (καθ᾽→κατά, ἀφ᾽→ἀπό, χθ→κτ). Leading apostrophe tries ἐ-/ἀ- (᾽κεῖνος→ἐκεῖνος). Sets `MorphFlags::ELIDED`/`PRODELISION`. Tests: `tests/test_elision.py`.
 - **Derived stems**: `conjsys.rs` expands `:de:` Deriv entries at load time, driven by `derivs/source/*.deriv` tables (gated by `;pr`/`;fu`/… ppart bits) plus hand-rolled special cases.
 - **Iota subscript ≡ adscript**: `strip_diacritics` turns U+0345 into ι (ῳ → ωι). Subscript-bearing stems are dual-indexed with and without the iota (σῴζ → σωιζ and σωζ).
 - **`:vb:` lines are whole-word forms** (ἐστί), matched by `check_indecl`, not stem+ending splits.
 - **`@` continuation lines** after `:no:`/`:vs:` stems add alternative form-sets for the same stem; `@ end:xxx` makes a whole-word form (τέσσαρσι).
 - **`;` qualifier modifiers**: `-suffix` overrides the generated stem (δύναμαι `;ap,-hq` → δυνηθ), stemtype tokens override the target table (κιχάνω `;ao,aor2`). `;` blocks survive interleaved `:vs:`/`:vb:` lines.
 - **Preverbs**: remainder analyzed as verb only; compound lemma composed with elision/aspiration/assimilation (ἀπο+στρέφω→ἀποστρέφω, κατα+ἁγιστεύω→καθαγιστεύω, ἐν+καλέω→ἐγκαλέω, ἐξ+φέρω→ἐκφέρω). `compose_lemma` restores the word-initial breathing (from the surface preverb, fallback rough for ὑπ-, else smooth; diphthong-aware: εἰσφέρω) — it was lost before (εποίχομαι bug).
-- **Form generation** (`generate.rs`): analysis run forwards — per stem entry, iterate `end_index.by_stemtype` groups, `stemtype_compatible` once per group, `ending_compatible`+`merge_form` per ending; `apply_augment` (forward inverse of `unaugment`) for IMPERF/AORIST/PLUPERF indicatives; movable-nu emission mirrors the engine retry; dedup absorbs the iota-subscript dual-index clones.
+- **Form generation** (`generate.rs`): analysis run forwards — per stem entry, iterate `end_index.by_stemtype` groups, `stemtype_compatible` once per group, `ending_compatible`+`merge_form` per ending; `apply_augment` (forward inverse of `unaugment`) for IMPERF/AORIST/PLUPERF indicatives; movable-nu emission mirrors the engine retry (appended *after* accentuation); dedup absorbs the iota-subscript dual-index clones.
+- **Augment tables** (`augment.rs::apply_augment`): faithful port of C `TempAugments`/`SyllAugments` (Smyth 435/431), beta-code prefix rows with per-row dialects — ἀ- → ἠ- (attic/ionic/epic) *and* ᾱ̓- (doric/aeolic), ῑ̔-/ῡ̔- macron augments, identity rows (ἠ-/ὠ- stems, invisible augment). Returns `(stem, Dialect)`; incompatible augment dialects are skipped per form. ε/η-initial pluperfects stay unaugmented (Smyth 444) unless attic-reduplicated. Note: **`setquant` needs no port** — it's a dictionary-build lex filter whose `<quant>` output is already baked into stemsrc (`lu^`, `poli_t`); C gener's extra long-vowel forms came from these augment rows, plus C gener ignoring stem-level dialect/person keys (Rust honors them).
+- **Accent engine** (`accent.rs`): byte-level beta-code port of C fixacc.c/addaccent.c/acccompos.c. Three hooks: (1) `accent_table_ending` in `end_table.rs::emit_entry` mirrors mkend's join_end — endings ≥3 syllables get a standalone recessive accent ("eomen"→"e/omen"), shorter ones stay bare (ACCENT_OPTIONAL); (2) `emit_contracted_variants` mirrors contract.c — an accent absorbed by contraction is stripped and the result re-accented with the `contr` flag (FixRecAcc → "ou=men", "ei="); (3) `accent_generated` in generate.rs mirrors gener BuildANoun/BuildAVerb — persistent accent (FixPersAcc) for nominal forms, recessive (FixRecAcc) for finite verbs and unaccented whole-word `:vb:` entries; no-op when stem or ending is already accented; enclitics stay bare. **Ported C quirks are load-bearing** (AccComposForm's always-persistent dispatch, exact-equality `is_oblique`) — validate any change with `tests/compare_accents.py`.
+- **`e_`/`o_` lengthening happens only at the prefix↔ending join** (`compose_prefix_ending`, mirrors mkend CompStemEnd): "e"+"_s"→"eis", "o"+"_s"→"ous", breathing-swap, `_` dropped after η/ω. A `_` inside a plain ending (doric "e_n") is kept.
 - **Forward generation**: Rust pre-expands all stems at load time (unlike C's backward analysis). All consonant euphony runs at index build time in `end_table.rs::apply_dental_euphony`.
 - **Leading `-` stems**: `stem_dict.rs` strips leading `-` from `-:vs:` / `-:no:` / `-:de:` entries (363 in `vbs.simp.ml`) — these mark compound-verb stems but are needed for simple-form analysis too.
 
@@ -79,6 +88,8 @@ Use `rtk proxy cargo build` to see full compiler output (RTK filters cargo by de
 | `morpheus-core/src/types/stem_type.rs` | StemType bitflags (PPARTMASK, PP_PR, etc.) |
 | `morpheus-core/src/types/word_form.rs` | WordForm bitmasks + shared name helpers (tense_name, case_names…) used by PyO3/JSONL/preview |
 | `morpheus-core/src/generate.rs` | Form generation engine + `form_to_json` JSONL row shape |
+| `morpheus-core/src/accent.rs` | Accent engine (beta-code port of fixacc.c/addaccent.c/acccompos.c) |
+| `tests/compare_accents.py` | Accent oracle harness: C `bin/gener` vs Rust generate |
 | `morpheus-core/src/analysis/augment.rs` | `unaugment` (analysis) + `apply_augment` (generation) |
 | `morpheus-core/src/analysis/check_preverb.rs` | Preverb splits + `compose_lemma` (breathing restoration) |
 | `morpheus-core/src/edit/` | `morpheus edit` server (server.rs, raw_index.rs, embedded edit.html) |

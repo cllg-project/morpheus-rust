@@ -43,6 +43,32 @@ impl Dialect {
         }
     }
 
+    /// Parse one dialect name (as accepted by the CLI `-d` flag and the
+    /// Python `dialects=` kwarg). `epic` covers both Homeric and later epic.
+    pub fn parse_name(name: &str) -> Option<Dialect> {
+        Some(match name.trim().to_lowercase().as_str() {
+            "attic"   => Dialect::ATTIC,
+            "ionic"   => Dialect::IONIC,
+            "aeolic"  => Dialect::AEOLIC,
+            "lesbian" => Dialect::LESBIAN,
+            "doric"   => Dialect::DORIC,
+            "homeric" => Dialect::HOMERIC,
+            "epic"    => Dialect::EPIC,
+            "prose"   => Dialect::PROSE,
+            _ => return None,
+        })
+    }
+
+    /// Parse a comma/space-separated list of dialect names into one mask.
+    pub fn from_names(names: &str) -> Result<Dialect, String> {
+        let mut mask = Dialect::empty();
+        for name in names.split([',', ' ']).filter(|s| !s.is_empty()) {
+            mask |= Self::parse_name(name)
+                .ok_or_else(|| format!("unknown dialect '{name}'"))?;
+        }
+        Ok(mask)
+    }
+
     /// Human-readable dialect names (same spellings as the Python bindings).
     pub fn names(&self) -> Vec<&'static str> {
         let mut out = Vec::new();

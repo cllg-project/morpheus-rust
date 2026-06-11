@@ -1,7 +1,7 @@
 //! Top-level analysis dispatcher. Mirrors C `checkstring1` → `checkword`.
 
 use crate::stemlib::StemlibIndex;
-use crate::types::{Analysis, MorphFlags};
+use crate::types::{Analysis, Dialect, MorphFlags, StemType};
 use crate::unicode::normalize::{normalize_word, strip_trailing_digits};
 
 use super::{check_nominal::{check_indecl, check_nom}, check_preverb::check_with_preverb, check_verbal::check_verb};
@@ -14,6 +14,10 @@ pub struct AnalysisOptions {
     pub check_preverb: bool,
     /// If true, analyze verbs only (skip nominal analysis).
     pub verbs_only:    bool,
+    /// Requested dialect mask (C `WantDialects`). Empty = no restriction.
+    /// Readings carrying a non-empty dialect disjoint from this mask are
+    /// dropped; dialect-neutral readings always pass.
+    pub dialects:      Dialect,
 }
 
 impl Default for AnalysisOptions {
@@ -22,6 +26,7 @@ impl Default for AnalysisOptions {
             strict_case:   true,
             check_preverb: false,
             verbs_only:    false,
+            dialects:      Dialect::empty(),
         }
     }
 }
@@ -37,15 +42,201 @@ pub fn check_string(word: &str, stemlib: &StemlibIndex, opts: &AnalysisOptions) 
     // Normalize separate iota after ω/η (OCR artifact: δήμωι → δήμῳ).
     let normalized = normalize_adscript_iota(&normalized);
 
-    let mut results = check_string_inner(&normalized, stemlib, opts);
+    let mut results = check_with_case(&normalized, stemlib, opts);
 
-    // If no results and not strict_case, retry without requiring initial capital
-    if results.is_empty() && opts.strict_case {
-        let relaxed = AnalysisOptions { strict_case: false, ..opts.clone() };
-        results = check_string_inner(&normalized, stemlib, &relaxed);
+    // Elision/prodelision: words written with an apostrophe (ἀλλ’, δ’, ’κεῖνος).
+    // Mirrors C checkapostr/checkstring1.
+    if results.is_empty() {
+        if let Some(core) = strip_final_apostrophe(&normalized) {
+            results = check_elision(&core, stemlib, opts);
+        } else if let Some(rest) = strip_leading_apostrophe(&normalized) {
+            results = check_prodelision(&rest, stemlib, opts);
+        }
+    }
+
+    // Dialect filter (C WantDialects/AndDialect): a requested mask drops
+    // readings restricted to disjoint dialects; neutral readings survive.
+    if !opts.dialects.is_empty() {
+        results.retain(|a| a.dialect.compatible_with(opts.dialects));
     }
 
     deduplicate(&mut results);
+    results
+}
+
+/// check_string_inner with the strict-case relaxation retry.
+fn check_with_case(word: &str, stemlib: &StemlibIndex, opts: &AnalysisOptions) -> Vec<Analysis> {
+    let mut results = check_string_inner(word, stemlib, opts);
+    if results.is_empty() && opts.strict_case {
+        let relaxed = AnalysisOptions { strict_case: false, ..opts.clone() };
+        results = check_string_inner(word, stemlib, &relaxed);
+    }
+    results
+}
+
+/// Apostrophe code points accepted as an elision mark.
+fn is_apostrophe(c: char) -> bool {
+    matches!(c, '\'' | '\u{2019}' | '\u{02BC}' | '\u{1FBD}' | '\u{1FBF}')
+}
+
+fn strip_final_apostrophe(word: &str) -> Option<String> {
+    let mut chars: Vec<char> = word.chars().collect();
+    if chars.len() >= 2 && is_apostrophe(*chars.last().unwrap()) {
+        chars.pop();
+        Some(chars.into_iter().collect())
+    } else {
+        None
+    }
+}
+
+fn strip_leading_apostrophe(word: &str) -> Option<String> {
+    let mut chars = word.chars();
+    match chars.next() {
+        Some(c) if is_apostrophe(c) && chars.clone().next().is_some() => Some(chars.collect()),
+        _ => None,
+    }
+}
+
+fn nfd_has(s: &str, pred: impl Fn(char) -> bool) -> bool {
+    use unicode_normalization::UnicodeNormalization;
+    s.nfd().any(pred)
+}
+
+fn has_accent(s: &str) -> bool {
+    nfd_has(s, |c| matches!(c, '\u{0300}' | '\u{0301}' | '\u{0342}'))
+}
+
+fn strip_accents(s: &str) -> String {
+    use unicode_normalization::UnicodeNormalization;
+    s.nfd()
+        .filter(|c| !matches!(c, '\u{0300}' | '\u{0301}' | '\u{0342}'))
+        .nfc()
+        .collect()
+}
+
+fn is_greek_vowel(c: char) -> bool {
+    matches!(c, 'α' | 'ε' | 'η' | 'ι' | 'ο' | 'υ' | 'ω')
+}
+
+/// Number of syllables = number of maximal vowel runs (diacritics stripped).
+fn nsylls(s: &str) -> usize {
+    let bare = crate::unicode::normalize::strip_diacritics(s);
+    let mut count = 0;
+    let mut in_vowel = false;
+    for c in bare.chars() {
+        let v = is_greek_vowel(c);
+        if v && !in_vowel {
+            count += 1;
+        }
+        in_vowel = v;
+    }
+    count
+}
+
+/// Elided word: `core` is the surface form minus its trailing apostrophe.
+/// Try restoring the elided vowel (α/ι/ο/ε, poetic αι), mirroring C checkapostr.
+/// An unaccented core (ἀλλ’ ← ἀλλά) gets an acute on the restored vowel.
+fn check_elision(core: &str, stemlib: &StemlibIndex, opts: &AnalysisOptions) -> Vec<Analysis> {
+    let mut results = Vec::new();
+
+    // The next word began with a rough breathing, aspirating a final stop:
+    // καθ’ ← κατά, ἀφ’ ← ἀπό, νύχθ’ ← νύκτα. Try the de-aspirated core too.
+    let mut cores = vec![core.to_string()];
+    let chars: Vec<char> = core.chars().collect();
+    if let Some(&last) = chars.last() {
+        let deaspirated = match last {
+            'θ' => {
+                let mut v = chars.clone();
+                *v.last_mut().unwrap() = 'τ';
+                let n = v.len();
+                if n >= 2 && v[n - 2] == 'χ' {
+                    v[n - 2] = 'κ';
+                }
+                Some(v)
+            }
+            'χ' => {
+                let mut v = chars.clone();
+                *v.last_mut().unwrap() = 'κ';
+                Some(v)
+            }
+            'φ' => {
+                let mut v = chars.clone();
+                *v.last_mut().unwrap() = 'π';
+                Some(v)
+            }
+            _ => None,
+        };
+        if let Some(v) = deaspirated {
+            cores.push(v.into_iter().collect());
+        }
+    }
+
+    for c in &cores {
+        // Monosyllables only elide ε (Smyth 70): δ’ (0 apparent syllables) must
+        // be δέ; ἀλλ’ (1 apparent syllable) may restore any vowel.
+        let polysyllabic = nsylls(c) >= 1;
+        let unaccented = !has_accent(c);
+        let mut candidates: Vec<(&str, bool)> = Vec::new(); // (vowel, poetic)
+        if polysyllabic {
+            candidates.extend([("α", false), ("ι", false), ("ο", false)]);
+        }
+        candidates.push(("ε", false));
+        if polysyllabic {
+            candidates.push(("αι", true)); // γένεσθ’ ← γένεσθαι (Pindar)
+        }
+        for (vowel, poetic) in candidates {
+            let restored = if unaccented {
+                use unicode_normalization::UnicodeNormalization;
+                format!("{c}{vowel}\u{0301}").nfc().collect::<String>()
+            } else {
+                format!("{c}{vowel}")
+            };
+            let mut r = check_with_case(&restored, stemlib, opts);
+            for a in &mut r {
+                a.morph_flags.set(MorphFlags::ELIDED);
+                if poetic {
+                    a.morph_flags.set(MorphFlags::POETIC);
+                }
+            }
+            results.extend(r);
+        }
+    }
+
+    // C fallback: an oxytone core (accent already on the ultima, e.g. an
+    // enclitic-induced accent) — strip the accents and let the restored vowel
+    // carry the acute instead.
+    if results.is_empty() && has_accent(core) {
+        let bare = strip_accents(core);
+        if bare != core {
+            results = check_elision(&bare, stemlib, opts);
+        }
+    }
+
+    results
+}
+
+/// Prodelision: leading apostrophe stands for an elided initial vowel
+/// (’κεῖνος = ἐκεῖνος). Mirrors C checkstring1: try ἐ- then ἀ-, and the
+/// accented variants against the accent-stripped remainder (’θανον → ἔθανον).
+fn check_prodelision(rest: &str, stemlib: &StemlibIndex, opts: &AnalysisOptions) -> Vec<Analysis> {
+    let mut results = Vec::new();
+    for prefix in ["ἐ", "ἀ"] {
+        let mut r = check_with_case(&format!("{prefix}{rest}"), stemlib, opts);
+        for a in &mut r {
+            a.morph_flags.set(MorphFlags::PRODELISION);
+        }
+        results.extend(r);
+    }
+    if results.is_empty() {
+        let bare = strip_accents(rest);
+        for prefix in ["ἔ", "ἄ"] {
+            let mut r = check_with_case(&format!("{prefix}{bare}"), stemlib, opts);
+            for a in &mut r {
+                a.morph_flags.set(MorphFlags::PRODELISION);
+            }
+            results.extend(r);
+        }
+    }
     results
 }
 
@@ -93,8 +284,11 @@ fn check_string_inner(
     }
 
     // Doric/Aeolic ᾱ for η (ἀλλάλαις = ἀλλήλαις): retry with each single
-    // α→η substitution. Last resort, recall-oriented.
-    if results.is_empty() {
+    // α→η substitution. Last resort, recall-oriented. Mirrors C's gating:
+    // only worth trying when Doric/Aeolic readings are acceptable.
+    if results.is_empty()
+        && opts.dialects.compatible_with(Dialect::DORIC | Dialect::AEOLIC)
+    {
         let chars: Vec<char> = word.chars().collect();
         let alpha_positions: Vec<usize> = chars
             .iter()
@@ -115,7 +309,41 @@ fn check_string_inner(
         }
     }
 
+    // Enclitic -περ (οἷόσπερ, ὥσπερ when not in the dictionary): strip it and
+    // keep only noun/adjective readings, mirroring C checkstring3's GreekSuff.
+    // The enclitic adds an acute on the host's ultima; retry without it.
+    if results.is_empty() {
+        if let Some(host) = word.strip_suffix("περ").filter(|h| !h.is_empty()) {
+            // Restore the word-final sigma form (οἷόσπερ → οἷός).
+            let host = match host.strip_suffix('σ') {
+                Some(h) => format!("{h}ς"),
+                None => host.to_string(),
+            };
+            for candidate in [host.clone(), strip_ultima_acute(&host)] {
+                let mut r = check_string_inner_base(&candidate, stemlib, opts);
+                r.retain(|a| {
+                    a.stem_type.intersects(StemType::NOUNSTEM | StemType::ADJSTEM)
+                });
+                results.extend(r);
+                if !results.is_empty() {
+                    break;
+                }
+            }
+        }
+    }
+
     results
+}
+
+/// Remove an acute on the last vowel group (the accent an enclitic threw back
+/// onto its host's ultima: οἷόσπερ → οἷοσ).
+fn strip_ultima_acute(s: &str) -> String {
+    use unicode_normalization::UnicodeNormalization;
+    let mut out: Vec<char> = s.nfd().collect();
+    if let Some(i) = out.iter().rposition(|&c| c == '\u{0301}') {
+        out.remove(i);
+    }
+    out.into_iter().nfc().collect()
 }
 
 /// Detect crasis and return the possible underlying second words.
@@ -193,6 +421,47 @@ fn normalize_adscript_iota(word: &str) -> String {
         format!("{base}ῃ")
     } else {
         word.to_string()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn load_stemlib() -> Option<StemlibIndex> {
+        let morphlib = std::env::var_os("MORPHLIB")?;
+        Some(
+            StemlibIndex::load(
+                std::path::Path::new(&morphlib),
+                crate::stemlib::Language::Greek,
+            )
+            .expect("stemlib load"),
+        )
+    }
+
+    /// Needs a real stemlib — set MORPHLIB to run (skipped otherwise).
+    #[test]
+    fn dialect_filter() {
+        let Some(stemlib) = load_stemlib() else {
+            eprintln!("MORPHLIB not set — skipping dialect filter test");
+            return;
+        };
+        let with_dialects = |d: Dialect| AnalysisOptions { dialects: d, ..Default::default() };
+
+        // Dialect-neutral readings pass any requested mask.
+        let r = check_string("λόγος", &stemlib, &with_dialects(Dialect::ATTIC));
+        assert!(r.iter().any(|a| a.lemma == "λόγος"));
+
+        // φάμα reads as doric φῆμις (dialect-tagged) and as φήμη: a doric
+        // request keeps φῆμις, an attic-only request drops it.
+        let default = check_string("φάμα", &stemlib, &AnalysisOptions::default());
+        assert!(default.iter().any(|a| a.lemma == "φῆμις"
+            && a.dialect.intersects(Dialect::DORIC | Dialect::AEOLIC)));
+        let doric = check_string("φάμα", &stemlib, &with_dialects(Dialect::DORIC));
+        assert!(doric.iter().any(|a| a.lemma == "φῆμις"));
+        let attic = check_string("φάμα", &stemlib, &with_dialects(Dialect::ATTIC));
+        assert!(!attic.is_empty()); // dialect-neutral φήμη reading survives
+        assert!(attic.iter().all(|a| a.dialect.compatible_with(Dialect::ATTIC)));
     }
 }
 

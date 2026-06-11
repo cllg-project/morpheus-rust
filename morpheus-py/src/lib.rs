@@ -33,18 +33,37 @@ impl Parser {
     ///     strict_case: If True (default), uppercase words are treated as proper nouns.
     ///     check_preverb: If True, attempt preverb stripping (default False).
     ///     verbs_only: If True, skip nominal analysis (default False).
+    ///     dialects: Optional list of dialect names ("attic", "ionic", "aeolic",
+    ///         "lesbian", "doric", "homeric", "epic", "prose") to restrict
+    ///         analyses to. Dialect-neutral readings always pass. Default: all.
     ///     overlay_path: Optional overlay directory with extra stem files
     ///         (as written by `morpheus edit`), loaded on top of the stemlib.
     #[new]
-    #[pyo3(signature = (morphlib_path = None, language = "greek", strict_case = true, check_preverb = false, verbs_only = false, overlay_path = None))]
+    #[pyo3(signature = (morphlib_path = None, language = "greek", strict_case = true, check_preverb = false, verbs_only = false, dialects = None, overlay_path = None))]
     fn new(
         morphlib_path: Option<&str>,
         language: &str,
         strict_case: bool,
         check_preverb: bool,
         verbs_only: bool,
+        dialects: Option<Vec<String>>,
         overlay_path: Option<&str>,
     ) -> PyResult<Self> {
+        let dialect_mask = match &dialects {
+            Some(names) => {
+                use morpheus_core::types::dialect::Dialect;
+                let mut mask = Dialect::empty();
+                for name in names {
+                    mask |= Dialect::parse_name(name).ok_or_else(|| {
+                        pyo3::exceptions::PyValueError::new_err(format!(
+                            "Unknown dialect '{name}'."
+                        ))
+                    })?;
+                }
+                mask
+            }
+            None => Default::default(),
+        };
         let lang = match language.to_lowercase().as_str() {
             "latin" | "lat" => Language::Latin,
             "greek" | "grc" => Language::Greek,
@@ -84,6 +103,7 @@ impl Parser {
                 strict_case,
                 check_preverb,
                 verbs_only,
+                dialects: dialect_mask,
             },
             language: lang,
         })
