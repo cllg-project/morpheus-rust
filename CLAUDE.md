@@ -63,6 +63,14 @@ Use `rtk proxy cargo build` to see full compiler output (RTK filters cargo by de
 - **`:vb:` lines are whole-word forms** (ἐστί), matched by `check_indecl`, not stem+ending splits.
 - **`@` continuation lines** after `:no:`/`:vs:` stems add alternative form-sets for the same stem; `@ end:xxx` makes a whole-word form (τέσσαρσι).
 - **`;` qualifier modifiers**: `-suffix` overrides the generated stem (δύναμαι `;ap,-hq` → δυνηθ), stemtype tokens override the target table (κιχάνω `;ao,aor2`). `;` blocks survive interleaved `:vs:`/`:vb:` lines.
+- **C checkhalf1/2 needs no breathing port**: it retries the preverb remainder
+  under rough/smooth breathings, ῥ̔- and diaeresis variants because C's stem
+  lookup is breathing-sensitive; Rust's `strip_diacritics` keys make all of
+  that moot. The real gaps were (a) `:vb:` whole-word remainders (ἀντί+φημί)
+  — `analyze_remainder` now also runs `check_indecl` filtered to conjugated
+  readings — and (b) ῥ gemination in `compose_lemma` (ἀνα+ῥίπτω→ἀναρρίπτω).
+  `check_indecl` now parses the entry key_str, so `:vb:` readings carry their
+  form/dialect/stemtype (φημί = pres ind act 1 sg, not bare indecl).
 - **Preverbs**: remainder analyzed as verb only; compound lemma composed with elision/aspiration/assimilation (ἀπο+στρέφω→ἀποστρέφω, κατα+ἁγιστεύω→καθαγιστεύω, ἐν+καλέω→ἐγκαλέω, ἐξ+φέρω→ἐκφέρω). `compose_lemma` restores the word-initial breathing (from the surface preverb, fallback rough for ὑπ-, else smooth; diphthong-aware: εἰσφέρω) — it was lost before (εποίχομαι bug).
 - **Form generation** (`generate.rs`): analysis run forwards — per stem entry, iterate `end_index.by_stemtype` groups, `stemtype_compatible` once per group, `ending_compatible`+`merge_form` per ending; `apply_augment` (forward inverse of `unaugment`) for IMPERF/AORIST/PLUPERF indicatives; movable-nu emission mirrors the engine retry (appended *after* accentuation); dedup absorbs the iota-subscript dual-index clones.
 - **Augment tables** (`augment.rs::apply_augment`): faithful port of C `TempAugments`/`SyllAugments` (Smyth 435/431), beta-code prefix rows with per-row dialects — ἀ- → ἠ- (attic/ionic/epic) *and* ᾱ̓- (doric/aeolic), ῑ̔-/ῡ̔- macron augments, identity rows (ἠ-/ὠ- stems, invisible augment). Returns `(stem, Dialect)`; incompatible augment dialects are skipped per form. ε/η-initial pluperfects stay unaugmented (Smyth 444) unless attic-reduplicated. Note: **`setquant` needs no port** — it's a dictionary-build lex filter whose `<quant>` output is already baked into stemsrc (`lu^`, `poli_t`); C gener's extra long-vowel forms came from these augment rows, plus C gener ignoring stem-level dialect/person keys (Rust honors them).
@@ -164,7 +172,7 @@ Key stem-formation rules:
 ## Corpus Metrics (4000-word freed-corpus sample, seed 42)
 
 - C analyzes 3374/4000; **Rust recall 100%** (0 missed), pytest 3390 passed.
-- **Lemma agreement 98.8%** (words both analyze whose lemma sets intersect).
+- **Lemma agreement 99.2%** (words both analyze whose lemma sets intersect).
 - Rust-only 7.4% (270 words Rust analyzes that C doesn't — about half are
   unaccented words C refuses by design; rest are lowercase proper names and
   fallback noise).

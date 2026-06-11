@@ -7,6 +7,7 @@ use crate::stemlib::StemlibIndex;
 use crate::types::{Analysis, MorphFlags};
 use crate::unicode::normalize::strip_diacritics;
 
+use super::check_nominal::check_indecl;
 use super::check_verbal::check_verb;
 
 /// Greek preverbs as diacritics-stripped lowercase Unicode, ordered longest-first.
@@ -197,6 +198,11 @@ fn compose_lemma(preverb: &str, base_lemma: &str) -> String {
             "εξ" => "εκ".into(),
             _ => pv,
         };
+        // ῥ doubles after a vowel-final preverb and loses its breathing
+        // word-internally: ἀνα + ῥίπτω → ἀναρρίπτω.
+        if base_first == 'ρ' && pv.ends_with(|c| matches!(c, 'α' | 'ε' | 'η' | 'ι' | 'ο' | 'υ' | 'ω')) {
+            pv.push('ρ');
+        }
         // Nasal assimilation of final ν (ἐν/σύν + κ → ἐγκ/συγκ, + π → ἐμπ/συμπ)
         if pv.ends_with('ν') {
             let repl = match base_first {
@@ -213,8 +219,8 @@ fn compose_lemma(preverb: &str, base_lemma: &str) -> String {
         }
     }
 
-    // Drop the breathing of the (now word-internal) base-initial vowel.
-    let base_clean: String = if base_is_vowel {
+    // Drop the breathing of the (now word-internal) base-initial vowel or ῥ.
+    let base_clean: String = if base_is_vowel || base_first == 'ρ' {
         base_lemma
             .nfd()
             .filter(|c| !matches!(c, '\u{0313}' | '\u{0314}'))
@@ -236,6 +242,19 @@ fn compose_lemma(preverb: &str, base_lemma: &str) -> String {
 /// their own stem entries), and nominal matches here are false positives.
 fn analyze_remainder(remainder: &str, stemlib: &StemlibIndex) -> Vec<Analysis> {
     let mut results = check_verb(remainder, stemlib, false);
+
+    // Whole-word `:vb:` forms (φημί, ἐστί) live in the indecl index, not the
+    // stem+ending split — without this ἀντίφημι never finds ἀντί+φημί.
+    // `:vb:` readings carry irreg stem types (pos "indeclinable"), so filter
+    // on the form being conjugated rather than on pos.
+    let mut vb = check_indecl(remainder, stemlib);
+    vb.retain(|a| {
+        matches!(a.pos(), "verb" | "participle")
+            || a.form.tense != 0
+            || a.form.mood != 0
+            || a.form.person != 0
+    });
+    results.extend(vb);
 
     // Nu-movable retry
     if results.is_empty() && remainder.ends_with('ν') {
@@ -289,6 +308,51 @@ mod tests {
     fn initial_diphthong_takes_breathing_on_second_vowel() {
         assert_eq!(compose_lemma("εισ", "φέρω"), "εἰσφέρω");
         assert_eq!(compose_lemma("εισ", "ἄγω"), "εἰσάγω");
+    }
+
+    #[test]
+    fn rho_geminates_after_vowel_final_preverb() {
+        assert_eq!(compose_lemma("ανα", "ῥίπτω"), "ἀναρρίπτω");
+        assert_eq!(compose_lemma("συρ", "ῥίπτω"), "συρρίπτω");
+        assert_eq!(compose_lemma("εκ", "ῥίπτω"), "ἐκρίπτω");
+    }
+
+    /// Words C analyzes through checkhalf1 (breathing variants on the
+    /// preverb remainder) and :vb: whole-word remainders (ἀντί+φημί).
+    /// Needs a real stemlib — set MORPHLIB to run (skipped otherwise).
+    #[test]
+    fn checkhalf_style_compounds() {
+        let Some(morphlib) = std::env::var_os("MORPHLIB") else {
+            eprintln!("MORPHLIB not set — skipping checkhalf compound test");
+            return;
+        };
+        let stemlib = crate::stemlib::StemlibIndex::load(
+            std::path::Path::new(&morphlib),
+            crate::stemlib::Language::Greek,
+        )
+        .expect("stemlib load");
+        let opts = crate::analysis::engine::AnalysisOptions::default();
+        let lemmas = |w: &str| -> Vec<String> {
+            let mut v: Vec<String> = crate::analysis::engine::check_string(w, &stemlib, &opts)
+                .into_iter()
+                .map(|a| a.lemma)
+                .collect();
+            v.sort();
+            v.dedup();
+            v
+        };
+        // :vb: whole-word remainders
+        assert!(lemmas("ἀντίφημι").iter().any(|l| l == "ἀντιφημί"));
+        assert!(lemmas("σύμφημι").iter().any(|l| l == "συμφημί"));
+        assert!(lemmas("πάρεστι").iter().any(|l| l == "παρειμί"));
+        // diaeresis remainder (C: ἀμφ-αίσσομαι → ἀ+ίσσ)
+        assert!(lemmas("ἀπαΐξας").iter().any(|l| l == "ἀπαΐσσω"));
+        // both rough- and smooth-breathing remainders must be found
+        let dielo = lemmas("διελῶ");
+        assert!(dielo.iter().any(|l| l == "διαιρέω"));
+        assert!(dielo.iter().any(|l| l == "διελαύνω"));
+        // geminate-ρ composition
+        assert!(lemmas("ἀναρρίπτω").iter().any(|l| l == "ἀναρρίπτω"));
     }
 
     #[test]

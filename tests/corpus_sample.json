@@ -29,8 +29,8 @@
       "N kata/,kata/ \t\tindeclform\tprep"
     ],
     "rust": [
-      "κατά:indeclinable",
-      "κατάημι:indeclinable",
+      "κατά:adjective",
+      "κατάημι:adjective",
       "καταάω:verb",
       "καταίρω:verb"
     ]
@@ -141,8 +141,10 @@
       "ἐξωθέω:verb",
       "ἑξίημι:verb",
       "ἑξεάω:participle",
+      "ἑξειμί:verb",
+      "ἑξεῖμι:participle",
       "ἑξιαίνω:verb",
-      "ἔχω:participle",
+      "ἔχω:verb",
       "ἕξις:verb"
     ]
   },
@@ -157,6 +159,7 @@
     ],
     "rust": [
       "συνίημι:verb",
+      "συνεῖμι:verb",
       "συνιάομαι:verb",
       "συνιαίνω:verb"
     ]
@@ -237,8 +240,8 @@
       "V e)sti,ei)mi/  pres ind act 3rd sg\t\tenclitic\tirreg_mi"
     ],
     "rust": [
-      "εἰμί:indeclinable",
-      "σαίνω:indeclinable",
+      "εἰμί:verb",
+      "σαίνω:verb",
       "σαίρω:verb",
       "σεύω:verb",
       "ἐστίνυμαι:verb"
@@ -490,8 +493,8 @@
       "N a)nh/r  masc dat pl\t\tindeclform\tirreg_decl3"
     ],
     "rust": [
-      "ἀνήρ:indeclinable",
-      "ἀναδιδράσκω:indeclinable",
+      "ἀνήρ:adjective",
+      "ἀναδιδράσκω:adjective",
       "ἀναδράω:verb",
       "ἀναδραίνω:verb",
       "ἀνδρύνω:verb"
@@ -716,13 +719,13 @@
       "N i)_e/,i)o/s2  masc voc sg\t\t\tos_ou"
     ],
     "rust": [
-      "εἶμι:indeclinable",
-      "εἷς:indeclinable",
-      "ἰά:adjective",
+      "εἶμι:verb",
+      "εἷς:verb",
+      "ἰά:verb",
       "ἰάλλω:adjective",
-      "ἰάομαι:noun",
+      "ἰάομαι:adjective",
       "ἰίζω:noun",
-      "ἰαίνω:verb",
+      "ἰαίνω:noun",
       "ἰόομαι:verb",
       "ἰός:verb",
       "ἰύζω:verb",
@@ -886,8 +889,8 @@
       "N paisi/,pai=s  masc/fem dat pl\t\tindeclform\tirreg_decl3"
     ],
     "rust": [
-      "παῖς:indeclinable",
-      "πείρω:indeclinable",
+      "παῖς:adjective",
+      "πείρω:adjective",
       "πᾶς:verb"
     ]
   },
@@ -928,6 +931,7 @@
     ],
     "rust": [
       "ἀφεάω:verb",
+      "ἀφεσεῖμι:verb",
       "ἀφεσιαίνω:verb",
       "ἄφεσις:verb"
     ]
@@ -1240,8 +1244,8 @@
     "rust": [
       "πίνω:verb",
       "πεῖ:verb",
-      "πιαίνω:indeclinable",
-      "πιπίσκω:indeclinable"
+      "πιαίνω:adjective",
+      "πιπίσκω:adjective"
     ]
   },
   {
@@ -1330,7 +1334,7 @@
       "N o)gdoh/konta \tepic doric ionic\tindeclform\tnumeral"
     ],
     "rust": [
-      "ὀγδοήκοντα:indeclinable"
+      "ὀγδοήκοντα:adjective"
     ]
   },
   {
@@ -1490,8 +1494,8 @@
     "rust": [
       "Γαῖα:noun",
       "γε:noun",
-      "γείνομαι:indeclinable",
-      "γῆ:indeclinable"
+      "γείνομαι:adjective",
+      "γῆ:adjective"
     ]
   },
   {
@@ -1583,7 +1587,7 @@
       "N o(/de  neut acc sg\t\tindeclform\tdemonstr"
     ],
     "rust": [
-      "ὅδε:indeclinable"
+      "ὅδε:adjective"
     ]
   },
   {
@@ -1902,8 +1906,8 @@
       "διαράομαι:verb",
       "διαράω2:verb",
       "διαρέσκω:verb",
+      "διαρραίνω:verb",
       "διαρόω:verb",
-      "διαῥαίνω:verb",
       "διεράομαι:verb",
       "διεράω:verb",
       "διεράω2:verb",
@@ -2047,7 +2051,7 @@
       "ἀλήθω:verb",
       "ἀληθής:verb",
       "ἀληθίζω:verb",
-      "ἀληθεύω:indeclinable"
+      "ἀληθεύω:adjective"
     ]
   },
   {
@@ -2104,7 +2108,7 @@
       "N o(/sper  neut nom/voc/acc sg\t\tindeclform\trelative"
     ],
     "rust": [
-      "ὅσπερ:indeclinable"
+      "ὅσπερ:adjective"
     ]
   },
   {
@@ -2161,7 +2165,10 @@
       "μεθίημι:verb",
       "μεθαάω:verb",
       "μεθαίρω:verb",
-      "μεθεάω:verb"
+      "μεθεάω:verb",
+      "μεθειμί:verb",
+      "μεθημί:verb",
+      "μετακάθημαι:verb"
     ]
   },
   {
@@ -2185,7 +2192,7 @@
       "N au)to/qi \t\tindeclform\tadverb"
     ],
     "rust": [
-      "αὐτόθι:indeclinable"
+      "αὐτόθι:adjective"
     ]
   },
   {
@@ -2280,9 +2287,11 @@
     "rust": [
       "πίπτω:verb",
       "ἐπεσέννυμι:verb",
+      "ἐπεσίημι:verb",
       "ἐπεσεάω:verb",
+      "ἐπεσειμί:verb",
       "ἐπεσεναίρω:verb",
-      "ἐπεσνάω:verb",
+      "ἐπεσνάω:participle",
       "ἐπεσνέω:verb",
       "ἐπεσνέω2:verb",
       "ἐπεσνέω3:verb",
@@ -2501,8 +2510,8 @@
     ],
     "rust": [
       "μέτρον:noun",
-      "μεταῥέω:noun",
-      "μεταῥαίνω:verb",
+      "μεταρρέω:noun",
+      "μεταρραίνω:verb",
       "μετρέω:verb",
       "μετριάω:verb"
     ]
@@ -2674,6 +2683,7 @@
       "παρασαίνω:verb",
       "παρασαίρω:verb",
       "παρασεύω:verb",
+      "παρειμί:verb",
       "παρεστίνυμαι:verb"
     ]
   },
@@ -2800,8 +2810,8 @@
     "rust": [
       "θέω:participle",
       "σής:participle",
-      "σαίνω:indeclinable",
-      "σαίρω:indeclinable",
+      "σαίνω:noun",
+      "σαίρω:noun",
       "σεύω:noun"
     ]
   },
@@ -2906,10 +2916,10 @@
       "N a)/lla_,a)/llos  fem nom/voc sg\tdoric aeolic\t\tart_adj"
     ],
     "rust": [
-      "ἀλλά:indeclinable",
-      "ἀλλᾶ:indeclinable",
-      "ἄλλος:indeclinable",
-      "ἄλλῃ:indeclinable"
+      "ἀλλά:adjective",
+      "ἀλλᾶ:adjective",
+      "ἄλλος:adjective",
+      "ἄλλῃ:adjective"
     ]
   },
   {
@@ -2947,8 +2957,8 @@
       "ποτίζω:verb",
       "ποτός:verb",
       "πότε:verb",
-      "πότης:indeclinable",
-      "πότος:indeclinable"
+      "πότης:adjective",
+      "πότος:adjective"
     ]
   },
   {
@@ -3180,7 +3190,7 @@
       "N o(/stis  fem nom sg\t\tindeclform\trelative"
     ],
     "rust": [
-      "ὅστις:indeclinable"
+      "ὅστις:adjective"
     ]
   },
   {
@@ -3243,8 +3253,8 @@
     "rust": [
       "θέω:verb",
       "σάν:verb",
-      "σίζω:indeclinable",
-      "σαίνω:indeclinable",
+      "σίζω:adjective",
+      "σαίνω:adjective",
       "σαίρω:verb",
       "σεύω:verb",
       "σός:verb",
@@ -3426,8 +3436,8 @@
       "N meta/,meta/ \t\tindeclform\tprep"
     ],
     "rust": [
-      "μετά:indeclinable",
-      "μετάημι:indeclinable",
+      "μετά:adjective",
+      "μετάημι:adjective",
       "μεταάω:verb",
       "μεταίρω:verb"
     ]
@@ -3438,6 +3448,7 @@
       "V a)/peimi2  pres imperat act 2nd sg\t\tunasp_preverb\tirreg_mi"
     ],
     "rust": [
+      "ἀπεῖμι:verb",
       "ἀπιαίνω:verb",
       "ἀφίημι:verb"
     ]
@@ -3800,7 +3811,7 @@
       "N podo/s,pou/s  masc gen sg\t\tindeclform\tirreg_decl3"
     ],
     "rust": [
-      "πούς:indeclinable"
+      "πούς:adjective"
     ]
   },
   {
@@ -3880,8 +3891,8 @@
       "N ei)=pos  masc voc sg\t\t\tos_ou"
     ],
     "rust": [
-      "εἶπον:indeclinable",
-      "εἶπος:indeclinable",
+      "εἶπον:verb",
+      "εἶπος:verb",
       "ἕπομαι:verb",
       "ἕπω:verb",
       "ἰπόω:verb"
@@ -3978,8 +3989,8 @@
     "word": "δια",
     "c": [],
     "rust": [
-      "διά:indeclinable",
-      "διάημι:indeclinable",
+      "διά:adjective",
+      "διάημι:adjective",
       "διαάω:verb",
       "διαίνω:verb",
       "διαίρω:verb",
@@ -4028,6 +4039,7 @@
       "V prosi/hmi  pres ind mp 3rd sg\t\t\tirreg_mi"
     ],
     "rust": [
+      "προσίημι:verb",
       "προσίπτομαι:verb",
       "προσιάλλω:verb",
       "προσιάομαι:verb",
@@ -4075,12 +4087,12 @@
       "N ei)s \tdoric aeolic\tproclitic indeclform\tprep"
     ],
     "rust": [
-      "εἰμί:indeclinable",
-      "εἰς:indeclinable",
-      "εἷς:indeclinable",
-      "νάω:indeclinable",
-      "νέω:indeclinable",
-      "νέω2:indeclinable",
+      "εἰμί:verb",
+      "εἰς:verb",
+      "εἷς:adjective",
+      "νάω:adjective",
+      "νέω:adjective",
+      "νέω2:adjective",
       "νέω3:verb",
       "ἐάω:verb",
       "ἐν:verb",
@@ -4672,7 +4684,7 @@
       "ἵημι:verb",
       "ὁ:verb",
       "ὅς:verb",
-      "ᾗ:indeclinable"
+      "ᾗ:verb"
     ]
   },
   {
@@ -4744,8 +4756,8 @@
     "rust": [
       "θέω:verb",
       "σάν:verb",
-      "σίζω:indeclinable",
-      "σαίνω:indeclinable",
+      "σίζω:adjective",
+      "σαίνω:adjective",
       "σαίρω:verb",
       "σεύω:verb",
       "σός:verb",
@@ -4798,8 +4810,8 @@
       "V ui(o/w  pres inf act\tdoric\t\tow_pr,ow_denom"
     ],
     "rust": [
-      "υἱός:indeclinable",
-      "υἱόω:indeclinable",
+      "υἱός:adjective",
+      "υἱόω:adjective",
       "ὑίζω:adjective"
     ]
   },
@@ -5091,8 +5103,8 @@
       "P ei)mi/  pres part act fem acc sg\tattic epic doric ionic\t\tirreg_mi"
     ],
     "rust": [
-      "εἰμί:indeclinable",
-      "ἐάω:indeclinable",
+      "εἰμί:participle",
+      "ἐάω:participle",
       "ὀίζω:participle"
     ]
   },
@@ -5246,7 +5258,7 @@
       "N pou/s  masc acc pl\t\tindeclform\tirreg_decl3"
     ],
     "rust": [
-      "πούς:indeclinable"
+      "πούς:adjective"
     ]
   },
   {
@@ -5390,8 +5402,8 @@
       "V metre/w  pres ind act 3rd sg\tattic epic doric ionic\tcontr\tew_pr,ew_denom"
     ],
     "rust": [
-      "μεταῥέω:verb",
-      "μεταῥαίνω:verb",
+      "μεταρρέω:verb",
+      "μεταρραίνω:verb",
       "μετερῶ:verb",
       "μετρέω:verb",
       "μετριάω:verb"
@@ -5599,8 +5611,8 @@
       "V e)sti,ei)mi/  pres ind act 3rd sg\t\tenclitic\tirreg_mi"
     ],
     "rust": [
-      "εἰμί:indeclinable",
-      "σαίνω:indeclinable",
+      "εἰμί:verb",
+      "σαίνω:verb",
       "σαίρω:verb",
       "σεύω:verb",
       "ἐστίνυμαι:verb"
@@ -6130,7 +6142,7 @@
       "τίς:verb",
       "τείνω:verb",
       "τείρω:verb",
-      "ὁ:indeclinable"
+      "ὁ:adjective"
     ]
   },
   {
@@ -6139,8 +6151,8 @@
       "N li/a_n,li/an \t\tindeclform\tadverb"
     ],
     "rust": [
-      "λίαν:indeclinable",
-      "λιάζω:indeclinable"
+      "λίαν:adjective",
+      "λιάζω:adjective"
     ]
   },
   {
@@ -6255,8 +6267,8 @@
       "N teo/s,teo/s  masc nom sg\t\tpoetic\tos_h_on"
     ],
     "rust": [
-      "σύ:indeclinable",
-      "τεός:indeclinable"
+      "σύ:adjective",
+      "τεός:adjective"
     ]
   },
   {
@@ -6722,10 +6734,10 @@
       "N o(  fem nom/voc pl\t\tproclitic indeclform\tarticle"
     ],
     "rust": [
-      "αἴ:indeclinable",
-      "εἰ:indeclinable",
-      "ὁ:indeclinable",
-      "ὅς:indeclinable"
+      "αἴ:adjective",
+      "εἰ:adjective",
+      "ὁ:adjective",
+      "ὅς:adjective"
     ]
   },
   {
@@ -6929,8 +6941,8 @@
       "N pe/nte \t\tindeclform\tnumeral"
     ],
     "rust": [
-      "πέντε:indeclinable",
-      "πείρω:indeclinable"
+      "πέντε:adjective",
+      "πείρω:adjective"
     ]
   },
   {
@@ -7010,8 +7022,8 @@
       "N a)nh/r  masc nom/voc pl\t\tindeclform\tirreg_decl3"
     ],
     "rust": [
-      "ἀνήρ:indeclinable",
-      "ἀναδιδράσκω:indeclinable",
+      "ἀνήρ:adjective",
+      "ἀναδιδράσκω:adjective",
       "ἀναδράω:verb",
       "ἀναδραίνω:verb",
       "ἀνδρίζω:verb",
@@ -7108,8 +7120,8 @@
       "V ei)=pon  aor opt act 1st sg\t\t\taor2"
     ],
     "rust": [
-      "εἶπον:indeclinable",
-      "ἕπομαι:indeclinable",
+      "εἶπον:verb",
+      "ἕπομαι:verb",
       "ἕπω:verb",
       "ἰπόω:verb"
     ]
@@ -7120,8 +7132,8 @@
       "N lepa/s,lepa/s  fem nom sg\t\t\ts_dos"
     ],
     "rust": [
-      "λέπας:indeclinable",
-      "λεπάς:indeclinable"
+      "λέπας:adjective",
+      "λεπάς:adjective"
     ]
   },
   {
@@ -7232,8 +7244,8 @@
     ],
     "rust": [
       "μέτρον:noun",
-      "μεταῥέω:noun",
-      "μεταῥαίνω:verb",
+      "μεταρρέω:noun",
+      "μεταρραίνω:verb",
       "μετριάω:verb"
     ]
   },
@@ -7243,7 +7255,7 @@
       "N pa=s  masc/neut dat pl\tepic aeolic\tnu_movable indeclform\tirreg_adj3"
     ],
     "rust": [
-      "πᾶς:indeclinable"
+      "πᾶς:adjective"
     ]
   },
   {
@@ -7271,8 +7283,8 @@
       "P diafe/rw  pres part act masc acc pl\t\t\tw_stem"
     ],
     "rust": [
-      "διαπορέω:participle",
-      "διαποραίνω:participle",
+      "διαπορρέω:participle",
+      "διαπορραίνω:participle",
       "διαφέρω:participle",
       "διαφεράω:participle",
       "διαφεράω2:participle",
@@ -7297,7 +7309,7 @@
       "N qugatro/s,quga/thr  fem gen sg\t\tsyncope\thr_eros"
     ],
     "rust": [
-      "θυγάτηρ:indeclinable"
+      "θυγάτηρ:adjective"
     ]
   },
   {
@@ -7405,7 +7417,7 @@
       "N paraxrh=ma \t\tindeclform\tadverb"
     ],
     "rust": [
-      "παραχρῆμα:indeclinable"
+      "παραχρῆμα:adjective"
     ]
   },
   {
@@ -7660,7 +7672,7 @@
       "N pi/stis  fem nom sg\t\t\tis_ews"
     ],
     "rust": [
-      "πίστις:indeclinable"
+      "πίστις:noun"
     ]
   },
   {
@@ -7679,12 +7691,12 @@
       "N tau/th| \t\tindeclform\tadverb"
     ],
     "rust": [
-      "αὐτός:indeclinable",
-      "οὗτος:indeclinable",
-      "ταύτῃ:indeclinable",
-      "ταὐτάζω:indeclinable",
-      "ταὐτίζω:indeclinable",
-      "ταὐτός:indeclinable",
+      "αὐτός:adjective",
+      "οὗτος:adjective",
+      "ταύτῃ:adjective",
+      "ταὐτάζω:adjective",
+      "ταὐτίζω:adjective",
+      "ταὐτός:adjective",
       "ταὐτόω:verb"
     ]
   },
@@ -7846,8 +7858,8 @@
       "N pa=s  neut nom/voc/acc pl\t\tindeclform\tirreg_adj3"
     ],
     "rust": [
-      "πάντῃ:indeclinable",
-      "πάομαι:indeclinable",
+      "πάντῃ:adjective",
+      "πάομαι:adjective",
       "πείρω:participle",
       "πᾶς:participle"
     ]
@@ -8199,11 +8211,15 @@
       "ἐμμυζάω:verb",
       "ἐμμύζω:verb",
       "ἐμμύρω:verb",
+      "ἐνίημι:verb",
       "ἐναίρω:verb",
       "ἐνεάω:verb",
+      "ἐνειμί:verb",
       "ἐνεμέννυμι:verb",
       "ἐνεμέω:verb",
+      "ἐνεμίημι:verb",
       "ἐνεμεάω:verb",
+      "ἐνεμειμί:verb",
       "ἐνεμεναίρω:verb",
       "ἐνεμνάω:verb",
       "ἐνεμνέω:verb",
@@ -8299,8 +8315,8 @@
     ],
     "rust": [
       "πράσσω:verb",
-      "ἐπιῥάσσω:verb",
-      "ἐπιῥήγνυμι:verb"
+      "ἐπιρράσσω:verb",
+      "ἐπιρρήγνυμι:verb"
     ]
   },
   {
@@ -8374,7 +8390,7 @@
       "N gunaiko/s,gunh/  fem gen sg\t\tindeclform\tirreg_decl3"
     ],
     "rust": [
-      "γυνή:indeclinable"
+      "γυνή:adjective"
     ]
   },
   {
@@ -8423,7 +8439,7 @@
       "N gunh/  fem dat sg\t\tindeclform\tirreg_decl3"
     ],
     "rust": [
-      "γυνή:indeclinable"
+      "γυνή:adjective"
     ]
   },
   {
@@ -8447,7 +8463,7 @@
       "N ka/ppa  neut\t\tindeclform\talphabetic"
     ],
     "rust": [
-      "κάππα:indeclinable"
+      "κάππα:adjective"
     ]
   },
   {
@@ -8600,6 +8616,8 @@
       "ἐξωθέω:verb",
       "ἑξίημι:verb",
       "ἑξεάω:verb",
+      "ἑξειμί:verb",
+      "ἑξεῖμι:verb",
       "ἑξιαίνω:verb",
       "ἔχω:verb",
       "ἕξις:verb"
@@ -9011,9 +9029,9 @@
       "N ou(=tos  neut nom/voc/acc pl\t\tindeclform\tpron_adj1"
     ],
     "rust": [
-      "αὐτός:indeclinable",
-      "οὗτος:indeclinable",
-      "ταὐτός:indeclinable"
+      "αὐτός:adjective",
+      "οὗτος:adjective",
+      "ταὐτός:adjective"
     ]
   },
   {
@@ -9338,7 +9356,7 @@
       "N a)/llote \t\tindeclform\tadverb"
     ],
     "rust": [
-      "ἄλλοτε:indeclinable"
+      "ἄλλοτε:adjective"
     ]
   },
   {
@@ -9356,13 +9374,13 @@
       "V ei)mi/  pres ind act 3rd pl\t\tenclitic\tirreg_mi"
     ],
     "rust": [
-      "εἰμί:indeclinable",
-      "εἰσίημι:indeclinable",
+      "εἰμί:verb",
+      "εἰσίημι:verb",
       "εἰσιαίνω:verb",
       "εἶμι:verb",
       "ἐάω:verb",
       "ἰαίνω:verb",
-      "ἵημι:indeclinable"
+      "ἵημι:verb"
     ]
   },
   {
@@ -9517,6 +9535,7 @@
       "εἰσαάω:verb",
       "εἰσαίρω:verb",
       "εἰσεάω:verb",
+      "εἰσειμί:verb",
       "εἰσοίζω:verb",
       "εἴδομαι:verb",
       "εἴσω:verb",
@@ -9661,9 +9680,9 @@
       "N o(te/,o(te/ \t\tindeclform\tadverb"
     ],
     "rust": [
-      "ὁτέ:indeclinable",
-      "ὅστε:indeclinable",
-      "ὅτε:indeclinable"
+      "ὁτέ:adjective",
+      "ὅστε:adjective",
+      "ὅτε:adjective"
     ]
   },
   {
@@ -9803,7 +9822,7 @@
       "N tou/tw|,ou(=tos  masc/neut dat sg\t\tindeclform\tpron_adj1"
     ],
     "rust": [
-      "οὗτος:indeclinable"
+      "οὗτος:adjective"
     ]
   },
   {
@@ -9983,7 +10002,7 @@
       "N ou(=tos  masc/neut dat sg\t\tindeclform\tpron_adj1"
     ],
     "rust": [
-      "οὗτος:indeclinable"
+      "οὗτος:adjective"
     ]
   },
   {
@@ -10303,7 +10322,7 @@
     ],
     "rust": [
       "πρέπω:verb",
-      "ἐπιῥέπω:verb"
+      "ἐπιρρέπω:verb"
     ]
   },
   {
@@ -10368,8 +10387,9 @@
       "ἐγαίρω:participle",
       "ἐγεάω:participle",
       "ἐγείρω:participle",
-      "ἐγοίζω:verb",
-      "ἐγώ:participle"
+      "ἐγειμί:verb",
+      "ἐγοίζω:participle",
+      "ἐγώ:verb"
     ]
   },
   {
@@ -11067,8 +11087,8 @@
       "P metarri_ptou=ntes,metarri/ptw  pres part act masc nom/voc pl\tattic epic doric\tcontr\tew_pr,ew_denom"
     ],
     "rust": [
-      "μεταῥίπτω:participle",
-      "μεταῥιπτέω:participle"
+      "μεταρρίπτω:participle",
+      "μεταρριπτέω:participle"
     ]
   },
   {
@@ -11087,7 +11107,7 @@
       "N sabe/k  neut sg\t\tindeclform\tindecl_noun"
     ],
     "rust": [
-      "σαβέκ:indeclinable"
+      "σαβέκ:adjective"
     ]
   },
   {
@@ -11096,7 +11116,7 @@
       "N me/gas  neut nom/voc/acc sg\t\tindeclform\tirreg_adj3"
     ],
     "rust": [
-      "μέγας:indeclinable"
+      "μέγας:adjective"
     ]
   },
   {
@@ -11242,7 +11262,7 @@
       "N o(phni/ka \t\tindeclform\tadverb"
     ],
     "rust": [
-      "ὁπηνίκα:indeclinable"
+      "ὁπηνίκα:adjective"
     ]
   },
   {
@@ -11310,8 +11330,8 @@
       "N pa_/ra_,ph=ros  neut nom/voc/acc pl\tdoric aeolic\tcontr\ths_eos"
     ],
     "rust": [
-      "παρά:indeclinable",
-      "παράημι:indeclinable",
+      "παρά:adjective",
+      "παράημι:adjective",
       "παραάω:verb",
       "παραίρω:verb",
       "πηρός:verb"
@@ -11464,10 +11484,10 @@
       "P ei)mi/  pres part act masc acc pl\tdoric\t\tirreg_mi"
     ],
     "rust": [
-      "εἰμί:indeclinable",
-      "εἶμι:indeclinable",
-      "ἰάλλω:indeclinable",
-      "ἰίζω:indeclinable",
+      "εἰμί:participle",
+      "εἶμι:participle",
+      "ἰάλλω:participle",
+      "ἰίζω:participle",
       "ἰαίνω:participle",
       "ἰόομαι:participle",
       "ἰύζω:participle"
@@ -11598,7 +11618,7 @@
       "N au)ti/ka \t\tindeclform\tadverb"
     ],
     "rust": [
-      "αὐτίκα:indeclinable"
+      "αὐτίκα:adjective"
     ]
   },
   {
@@ -11691,7 +11711,7 @@
       "N pu=r  neut nom/voc/acc sg\t\tindeclform\tirreg_decl3"
     ],
     "rust": [
-      "πῦρ:indeclinable"
+      "πῦρ:adjective"
     ]
   },
   {
@@ -11743,7 +11763,7 @@
     ],
     "rust": [
       "ἀπέραντος:adjective",
-      "ἀποῥαντίζω:adjective"
+      "ἀπορραντίζω:adjective"
     ]
   },
   {
@@ -11796,7 +11816,7 @@
       "Γαῖα:noun",
       "γε:noun",
       "γείνομαι:noun",
-      "γῆ:indeclinable"
+      "γῆ:adjective"
     ]
   },
   {
@@ -11981,8 +12001,8 @@
       "N tis  gen pl\tepic ionic\tenclitic indeclform\tindef"
     ],
     "rust": [
-      "τίς:indeclinable",
-      "τείνω:indeclinable",
+      "τίς:adjective",
+      "τείνω:adjective",
       "τείρω:participle",
       "τεός:participle",
       "τις:participle",
@@ -12006,7 +12026,7 @@
       "N e)nqa/de \t\tindeclform\tadverb"
     ],
     "rust": [
-      "ἐνθάδε:indeclinable"
+      "ἐνθάδε:adjective"
     ]
   },
   {
@@ -12062,10 +12082,10 @@
       "N ei) \tdoric aeolic\tproclitic indeclform\tconj"
     ],
     "rust": [
-      "αἴ:indeclinable",
-      "εἰ:indeclinable",
-      "ὁ:indeclinable",
-      "ὅς:indeclinable"
+      "αἴ:adjective",
+      "εἰ:adjective",
+      "ὁ:adjective",
+      "ὅς:adjective"
     ]
   },
   {
@@ -12148,7 +12168,7 @@
       "N u(/dwr  neut nom/voc/acc sg\t\tindeclform\tirreg_decl3"
     ],
     "rust": [
-      "ὕδωρ:indeclinable"
+      "ὕδωρ:adjective"
     ]
   },
   {
@@ -12230,12 +12250,12 @@
       "V ei)=mi  pres ind act 2nd sg\t\t\tirreg_mi"
     ],
     "rust": [
-      "εἰ:indeclinable",
-      "εἰμί:indeclinable",
-      "εἶμι:indeclinable",
-      "ἐάω:indeclinable",
-      "ἰαίνω:indeclinable",
-      "ἵημι:indeclinable"
+      "εἰ:adjective",
+      "εἰμί:adjective",
+      "εἶμι:verb",
+      "ἐάω:verb",
+      "ἰαίνω:verb",
+      "ἵημι:verb"
     ]
   },
   {
@@ -12425,7 +12445,7 @@
       "N xa/ris  fem acc sg\t\t\tis_itos"
     ],
     "rust": [
-      "χάρις:indeclinable"
+      "χάρις:noun"
     ]
   },
   {
@@ -12477,7 +12497,7 @@
       "N de/lta  neut\t\tindeclform\talphabetic"
     ],
     "rust": [
-      "δέλτα:indeclinable"
+      "δέλτα:adjective"
     ]
   },
   {
@@ -12486,8 +12506,8 @@
       "N tis  dat pl\t\tenclitic nu_movable indeclform\tindef"
     ],
     "rust": [
-      "τίς:indeclinable",
-      "τίσις:indeclinable",
+      "τίς:adjective",
+      "τίσις:adjective",
       "τις:noun"
     ]
   },
@@ -12612,8 +12632,8 @@
       "N ta/,ti/s  neut nom/voc/acc pl\t\tindeclform\tindecl"
     ],
     "rust": [
-      "τίς:indeclinable",
-      "τείνω:indeclinable",
+      "τίς:adjective",
+      "τείνω:adjective",
       "τείρω:verb",
       "ὁ:verb"
     ]
@@ -12684,7 +12704,7 @@
       "N pa/ntoqen \t\tindeclform\tadverb"
     ],
     "rust": [
-      "πάντοθεν:indeclinable"
+      "πάντοθεν:adjective"
     ]
   },
   {
@@ -12698,8 +12718,8 @@
       "N dia/,dia/ \t\tindeclform\tprep"
     ],
     "rust": [
-      "διά:indeclinable",
-      "διάημι:indeclinable",
+      "διά:adjective",
+      "διάημι:adjective",
       "διαάω:verb",
       "διαίνω:verb",
       "διαίρω:verb",
@@ -12846,6 +12866,7 @@
     "rust": [
       "διεξίημι:verb",
       "διεξίπτομαι:verb",
+      "διεξεῖμι:verb",
       "διεξιάλλω:verb",
       "διεξιάομαι:verb",
       "διεξιάπτω:verb",
@@ -13303,7 +13324,7 @@
       "N a)mfote/rwqen \t\tindeclform\tadverb"
     ],
     "rust": [
-      "ἀμφοτέρωθεν:indeclinable"
+      "ἀμφοτέρωθεν:adjective"
     ]
   },
   {
@@ -13406,10 +13427,12 @@
       "καθέχω:noun",
       "καθεξίημι:noun",
       "καθεξεάω:noun",
+      "καθεξειμί:verb",
+      "καθεξεῖμι:verb",
       "καθεξιαίνω:verb",
       "καθεξωθέω:verb",
-      "καταξέω:verb",
-      "καταξαίνω:verb"
+      "καταξέω:participle",
+      "καταξαίνω:participle"
     ]
   },
   {
@@ -13956,8 +13979,11 @@
       "ἐφαίρω:verb",
       "ἐφαινέω:verb",
       "ἐφεάω:verb",
+      "ἐφειμί:verb",
       "ἐφεναίρω:verb",
-      "ἐφεύω:verb"
+      "ἐφεύω:verb",
+      "ἐφεῖμι:verb",
+      "ἐφημί:verb"
     ]
   },
   {
@@ -14006,7 +14032,7 @@
       "N u(po/,u(po/ \t\tindeclform\tprep"
     ],
     "rust": [
-      "ὑπό:indeclinable"
+      "ὑπό:adjective"
     ]
   },
   {
@@ -14071,8 +14097,8 @@
       "ἀνθρωπέω:verb",
       "ἀνθρωπίζω:verb",
       "ἀνθρωπεύομαι:verb",
-      "ἀντιῥωπίζω:participle",
-      "ἀντιῥωπεύω:verb",
+      "ἀντιρρωπίζω:participle",
+      "ἀντιρρωπεύω:verb",
       "ἄνθρωπος:verb"
     ]
   },
@@ -14265,8 +14291,8 @@
       "N o)ktwkai/deka \t\tindeclform\tnumeral"
     ],
     "rust": [
-      "ὀκτωκαίδεκα:indeclinable",
-      "ὀκτωκαιδεκάς:indeclinable"
+      "ὀκτωκαίδεκα:adjective",
+      "ὀκτωκαιδεκάς:adjective"
     ]
   },
   {
@@ -14695,6 +14721,7 @@
       "P e)ni/hmi  aor part act neut nom/voc/acc pl\t\tpoetic raw_preverb en_to_eni\tirreg_mi"
     ],
     "rust": [
+      "ἐνίημι:participle",
       "ἐνιαίνω:participle"
     ]
   },
@@ -14779,9 +14806,9 @@
     "rust": [
       "μετέραμαι:verb",
       "μετέρομαι:verb",
-      "μεταῥέω:verb",
-      "μεταῥαίνω:verb",
-      "μεταῥώννυμι:verb",
+      "μεταρρέω:verb",
+      "μεταρραίνω:verb",
+      "μεταρρώννυμι:verb",
       "μετεράομαι:verb",
       "μετεράω:verb",
       "μετεράω2:verb",
@@ -14803,8 +14830,8 @@
     ],
     "rust": [
       "ἀπερῶ:verb",
-      "ἀποῥέω:verb",
-      "ἀποῥαίνω:verb",
+      "ἀπορρέω:verb",
+      "ἀπορραίνω:verb",
       "ἀπόρρητος:verb"
     ]
   },
@@ -14892,7 +14919,7 @@
       "N o(po/qen \t\tindeclform\tadverb"
     ],
     "rust": [
-      "ὁπόθεν:indeclinable"
+      "ὁπόθεν:adjective"
     ]
   },
   {
@@ -14901,8 +14928,8 @@
       "N penth/konta \t\tindeclform\tnumeral"
     ],
     "rust": [
-      "πεντήκοντα:indeclinable",
-      "πεντηκοντάς:indeclinable"
+      "πεντήκοντα:adjective",
+      "πεντηκοντάς:adjective"
     ]
   },
   {
@@ -15370,7 +15397,7 @@
       "N i)xqu/s  masc voc pl\t\tcontr\tuLs_uos"
     ],
     "rust": [
-      "ἰχθύς:indeclinable"
+      "ἰχθύς:noun"
     ]
   },
   {
@@ -15428,8 +15455,8 @@
       "V ei)mi/  pres ind act 3rd sg\t\tenclitic\tirreg_mi"
     ],
     "rust": [
-      "εἰμί:indeclinable",
-      "σαίνω:indeclinable",
+      "εἰμί:verb",
+      "σαίνω:verb",
       "σαίρω:verb",
       "σεύω:verb",
       "ἐστίνυμαι:verb"
@@ -16404,7 +16431,7 @@
       "N ou) \t\tproclitic indeclform\tadverb"
     ],
     "rust": [
-      "οὐ:indeclinable"
+      "οὐ:adjective"
     ]
   },
   {
@@ -16418,8 +16445,8 @@
       "N dia/ \t\tindeclform\tprep"
     ],
     "rust": [
-      "διά:indeclinable",
-      "διάημι:indeclinable",
+      "διά:adjective",
+      "διάημι:adjective",
       "διαάω:verb",
       "διαίνω:verb",
       "διαίρω:verb",
@@ -16440,8 +16467,8 @@
       "V xeiro/w  imperf ind act 2nd sg\thomeric ionic\tcontr unaugmented\tow_pr,ow_denom"
     ],
     "rust": [
-      "χείρων:indeclinable",
-      "χειρόω:indeclinable"
+      "χείρων:adjective",
+      "χειρόω:adjective"
     ]
   },
   {
@@ -16719,7 +16746,7 @@
       "N e)ntau=qa \t\tindeclform\tadverb"
     ],
     "rust": [
-      "ἐνταῦθα:indeclinable"
+      "ἐνταῦθα:adjective"
     ]
   },
   {
@@ -16853,8 +16880,8 @@
       "N a)na/,a)na/ \t\tindeclform\tprep"
     ],
     "rust": [
-      "ἀνά:indeclinable",
-      "ἀνάημι:indeclinable",
+      "ἀνά:adjective",
+      "ἀνάημι:adjective",
       "ἀναάω:verb",
       "ἀναίνομαι:verb",
       "ἀναίρω:verb",
@@ -16898,7 +16925,7 @@
       "N mhko/qen \t\tindeclform\tadverb"
     ],
     "rust": [
-      "μηκόθεν:indeclinable"
+      "μηκόθεν:adjective"
     ]
   },
   {
@@ -17009,8 +17036,8 @@
       "N boo/s,bou=s  masc/fem gen sg\t\tindeclform\tirreg_decl3"
     ],
     "rust": [
-      "βοῦς:indeclinable",
-      "βόσκω:indeclinable"
+      "βοῦς:adjective",
+      "βόσκω:adjective"
     ]
   },
   {
@@ -17193,10 +17220,10 @@
       "V ei)mi/  pres ind act 1st sg\t\tenclitic\tirreg_mi"
     ],
     "rust": [
-      "εἰμί:indeclinable",
-      "εἶμι:indeclinable",
-      "ἐάω:indeclinable",
-      "ἰαίνω:indeclinable"
+      "εἰμί:verb",
+      "εἶμι:verb",
+      "ἐάω:verb",
+      "ἰαίνω:verb"
     ]
   },
   {
@@ -17282,7 +17309,8 @@
       "V parora/w  aor subj act 2nd sg\t\t\taor2"
     ],
     "rust": [
-      "παροράω:verb"
+      "παροράω:verb",
+      "παροῖδα:verb"
     ]
   },
   {
@@ -17382,7 +17410,10 @@
       "ἐναινέω:verb",
       "ἐνεάζω:verb",
       "ἐνεάω:verb",
+      "ἐνειμί:verb",
       "ἐνεναίρω:verb",
+      "ἐνεῖμι:verb",
+      "ἐνημί:verb",
       "ἑνίζω:verb",
       "ἑνόω:verb",
       "ἔνος:verb",
@@ -17569,8 +17600,8 @@
     "rust": [
       "τίνυμαι:verb",
       "τίς:verb",
-      "τίσις:indeclinable",
-      "τις:indeclinable"
+      "τίσις:adjective",
+      "τις:adjective"
     ]
   },
   {
@@ -17671,7 +17702,7 @@
       "N prw|ai/teron,prwi/ \t\tirreg_comp indeclform\tadverb"
     ],
     "rust": [
-      "πρωί:indeclinable"
+      "πρωί:adjective"
     ]
   },
   {
@@ -17749,7 +17780,7 @@
       "N prou)/rgou \t\tindeclform\tadverb"
     ],
     "rust": [
-      "προὔργου:indeclinable"
+      "προὔργου:adjective"
     ]
   },
   {
@@ -18113,8 +18144,8 @@
       "V katanta/w  imperf ind act 1st sg\thomeric ionic\tunaugmented\tath_primary,aw_denom"
     ],
     "rust": [
-      "κατάντην:indeclinable",
-      "κατανάω:indeclinable",
+      "κατάντην:adjective",
+      "κατανάω:adjective",
       "κατανέω:verb",
       "κατανέω2:verb",
       "κατανέω3:verb",
@@ -18136,7 +18167,10 @@
       "κατανταίρω:verb",
       "κατανταινέω:verb",
       "καταντεάω:verb",
-      "καταντεναίρω:verb"
+      "καταντειμί:verb",
+      "καταντεναίρω:verb",
+      "καταντεῖμι:verb",
+      "καταντημί:verb"
     ]
   },
   {
@@ -18282,7 +18316,7 @@
       "N mh/pw \t\tindeclform\tadverb"
     ],
     "rust": [
-      "μήπω:indeclinable"
+      "μήπω:adjective"
     ]
   },
   {
@@ -18292,8 +18326,8 @@
       "V pe/la_s,pela/w  imperf ind act 2nd sg\thomeric ionic\tcontr unaugmented\taw_pr,aw_denom"
     ],
     "rust": [
-      "πέλας:indeclinable",
-      "πελάζω:indeclinable",
+      "πέλας:adjective",
+      "πελάζω:adjective",
       "πελάω:verb",
       "πελός:verb"
     ]
@@ -18378,7 +18412,8 @@
     "rust": [
       "ξέω:verb",
       "ξαίνω:verb",
-      "ἔχω:verb"
+      "ἐξειμί:verb",
+      "ἔχω:participle"
     ]
   },
   {
@@ -18451,8 +18486,8 @@
     "word": "δαι",
     "c": [],
     "rust": [
-      "δάϊς:indeclinable",
-      "δέρω:indeclinable",
+      "δάϊς:noun",
+      "δέρω:noun",
       "δέω:verb",
       "δέω2:verb",
       "δίδημι:verb",
@@ -18510,7 +18545,7 @@
       "N u(=s  masc/fem nom sg\t\tindeclform\tirreg_decl3"
     ],
     "rust": [
-      "ὗς:indeclinable"
+      "ὗς:adjective"
     ]
   },
   {
@@ -19139,7 +19174,7 @@
       "N me/xri \t\tindeclform\tprep"
     ],
     "rust": [
-      "μέχρι:indeclinable"
+      "μέχρι:adjective"
     ]
   },
   {
@@ -19256,7 +19291,7 @@
     ],
     "rust": [
       "γράφω:verb",
-      "ἐγῥάπτω:verb"
+      "ἐγράπτω:verb"
     ]
   },
   {
@@ -19360,10 +19395,10 @@
       "P ei)mi/  pres part act masc nom/voc pl\tdoric\t\tirreg_mi"
     ],
     "rust": [
-      "εἰμί:indeclinable",
-      "εἶμι:indeclinable",
-      "ἰάλλω:indeclinable",
-      "ἰίζω:indeclinable",
+      "εἰμί:participle",
+      "εἶμι:participle",
+      "ἰάλλω:participle",
+      "ἰίζω:participle",
       "ἰαίνω:participle",
       "ἰόομαι:participle",
       "ἰύζω:participle"
@@ -19487,8 +19522,8 @@
     "word": "οὺς",
     "c": [],
     "rust": [
-      "οὖς:indeclinable",
-      "ἐάω:indeclinable",
+      "οὖς:adjective",
+      "ἐάω:adjective",
       "ὅς:verb"
     ]
   },
@@ -19769,8 +19804,8 @@
       "ἀνθρωπίζω:noun",
       "ἀνθρωπεύομαι:verb",
       "ἀνθρωπόομαι:verb",
-      "ἀντιῥωπίζω:verb",
-      "ἀντιῥωπεύω:verb",
+      "ἀντιρρωπίζω:verb",
+      "ἀντιρρωπεύω:verb",
       "ἄνθρωπος:verb"
     ]
   },
@@ -19867,8 +19902,8 @@
       "αὐτός:adjective",
       "οὗτος:adjective",
       "ἀυτέω:adjective",
-      "ἀυτή:indeclinable",
-      "ἑαυτοῦ:indeclinable"
+      "ἀυτή:adjective",
+      "ἑαυτοῦ:adjective"
     ]
   },
   {
@@ -20069,8 +20104,8 @@
       "N di_/a_|,di=os  fem dat sg\tattic doric aeolic\t\tos_h_on"
     ],
     "rust": [
-      "διά:indeclinable",
-      "διίημι:indeclinable",
+      "διά:adjective",
+      "διίημι:adjective",
       "διαίνω:verb",
       "διιαίνω:verb",
       "δῖος:verb"
@@ -20133,10 +20168,10 @@
       "N ou) \t\tproclitic indeclform\tadverb"
     ],
     "rust": [
-      "οὐ:indeclinable",
-      "οὗ:indeclinable",
-      "ἐάω:indeclinable",
-      "ἕ:indeclinable",
+      "οὐ:adjective",
+      "οὗ:adjective",
+      "ἐάω:adjective",
+      "ἕ:adjective",
       "ἵημι:verb",
       "ὀίζω:verb",
       "ὅς:verb"
@@ -20148,7 +20183,7 @@
       "N xqe/s,xqe/s \t\tindeclform\tadverb"
     ],
     "rust": [
-      "χθές:indeclinable"
+      "χθές:adjective"
     ]
   },
   {
@@ -20297,8 +20332,8 @@
     "word": "μη",
     "c": [],
     "rust": [
-      "μή:indeclinable",
-      "μαίνομαι:indeclinable",
+      "μή:adjective",
+      "μαίνομαι:adjective",
       "μαίομαι:verb"
     ]
   },
@@ -20463,7 +20498,7 @@
       "N gunh/  fem acc sg\t\tindeclform\tirreg_decl3"
     ],
     "rust": [
-      "γυνή:indeclinable"
+      "γυνή:adjective"
     ]
   },
   {
@@ -20528,8 +20563,8 @@
       "N ei)=pos  masc acc sg\t\t\tos_ou"
     ],
     "rust": [
-      "εἶπον:indeclinable",
-      "εἶπος:indeclinable",
+      "εἶπον:verb",
+      "εἶπος:verb",
       "ἕπομαι:verb",
       "ἕπω:verb",
       "ἰπόω:participle"
@@ -21082,7 +21117,9 @@
       "ἐφαμόω:verb",
       "ἐφαμύνω:verb",
       "ἐφεάω:verb",
-      "ἐφεμέω:verb"
+      "ἐφειμί:verb",
+      "ἐφεμέω:verb",
+      "ἐφεῖμι:verb"
     ]
   },
   {
@@ -21433,8 +21470,8 @@
       "V e)sti,ei)mi/  pres ind act 3rd sg\t\tenclitic\tirreg_mi"
     ],
     "rust": [
-      "εἰμί:indeclinable",
-      "σαίνω:indeclinable",
+      "εἰμί:verb",
+      "σαίνω:verb",
       "σαίρω:verb",
       "σεύω:verb",
       "ἐστίνυμαι:verb"
@@ -21493,7 +21530,7 @@
       "N ou(=tos  masc/neut gen pl\tionic\tindeclform late\tpron_adj1"
     ],
     "rust": [
-      "οὗτος:indeclinable"
+      "οὗτος:adjective"
     ]
   },
   {
@@ -21748,8 +21785,8 @@
       "N peri/,peri/ \t\tindeclform\tprep"
     ],
     "rust": [
-      "περί:indeclinable",
-      "περίημι:indeclinable",
+      "περί:adjective",
+      "περίημι:adjective",
       "περιαίνω:verb"
     ]
   },
@@ -22198,7 +22235,7 @@
       "N tadi/,o(/de  masc nom pl\t\tindeclform iota_intens\tdemonstr"
     ],
     "rust": [
-      "ὅδε:indeclinable"
+      "ὅδε:adjective"
     ]
   },
   {
@@ -22332,7 +22369,7 @@
       "N toio/sde  neut nom sg\t\tindeclform\tdemonstr"
     ],
     "rust": [
-      "τοιόσδε:indeclinable"
+      "τοιόσδε:adjective"
     ]
   },
   {
@@ -22461,10 +22498,10 @@
       "V ei)mi/  imperf ind act 3rd dual\t\t\tirreg_mi"
     ],
     "rust": [
-      "εἰμί:indeclinable",
-      "οἶδα:indeclinable",
-      "ἀιστόω:indeclinable",
-      "ἑστιάω:indeclinable",
+      "εἰμί:verb",
+      "οἶδα:verb",
+      "ἀιστόω:verb",
+      "ἑστιάω:verb",
       "ἡστός:verb"
     ]
   },
@@ -22517,7 +22554,7 @@
       "P u(perafri/zw  pres part act fem acc sg\tattic epic doric ionic\t\tw_stem,izw"
     ],
     "rust": [
-      "ὑπεραποριζόω:participle",
+      "ὑπεραπορριζόω:participle",
       "ὑπεραφρίζω:participle"
     ]
   },
@@ -22628,8 +22665,8 @@
       "N ma/,ma/ \t\tindeclform\tparticle"
     ],
     "rust": [
-      "μά:indeclinable",
-      "μαίνομαι:indeclinable",
+      "μά:adjective",
+      "μαίνομαι:adjective",
       "μαίομαι:verb",
       "μᾶ:verb"
     ]
@@ -22681,8 +22718,8 @@
       "V o(ra/w  aor ind act 3rd sg\thomeric ionic\tsyll_augment unaugmented\taor2"
     ],
     "rust": [
-      "ἰδέ:indeclinable",
-      "ἴδη:indeclinable",
+      "ἰδέ:adjective",
+      "ἴδη:adjective",
       "ὁράω:noun"
     ]
   },
@@ -22776,8 +22813,8 @@
       "N ou)=n \t\tindeclform\tparticle"
     ],
     "rust": [
-      "οὖν:indeclinable",
-      "ἐάω:indeclinable"
+      "οὖν:adjective",
+      "ἐάω:adjective"
     ]
   },
   {
@@ -23020,8 +23057,8 @@
       "N mia=|,ei(=s  fem dat sg\tattic doric aeolic\t\tos_h_on"
     ],
     "rust": [
-      "εἷς:indeclinable",
-      "μιαίνω:indeclinable"
+      "εἷς:adjective",
+      "μιαίνω:adjective"
     ]
   },
   {
@@ -23210,7 +23247,7 @@
       "N gunh/,gunh/  fem nom sg\t\tindeclform\tirreg_decl3"
     ],
     "rust": [
-      "γυνή:indeclinable"
+      "γυνή:adjective"
     ]
   },
   {
@@ -23369,8 +23406,8 @@
       "N e)ggu/teros  neut nom/voc/acc pl\t\tirreg_superl\tos_on"
     ],
     "rust": [
-      "ἐγγύς:indeclinable",
-      "ἐγγύτατος:indeclinable",
+      "ἐγγύς:adjective",
+      "ἐγγύτατος:adjective",
       "ἐγγύτερος:adjective"
     ]
   },
@@ -23574,7 +23611,7 @@
       "N o(/stis  fem nom pl\t\tindeclform\trelative"
     ],
     "rust": [
-      "ὅστις:indeclinable"
+      "ὅστις:adjective"
     ]
   },
   {
@@ -23583,7 +23620,7 @@
       "N paido/s,pai=s  masc/fem gen sg\t\tindeclform\tirreg_decl3"
     ],
     "rust": [
-      "παῖς:indeclinable"
+      "παῖς:adjective"
     ]
   },
   {
@@ -23592,7 +23629,7 @@
       "N toia_/sde,toio/sde  fem acc pl\t\tindeclform\tdemonstr"
     ],
     "rust": [
-      "τοιόσδε:indeclinable"
+      "τοιόσδε:adjective"
     ]
   },
   {
@@ -23960,7 +23997,7 @@
     "word": "όντων",
     "c": [],
     "rust": [
-      "εἰμί:indeclinable"
+      "εἰμί:verb"
     ]
   },
   {
@@ -24041,7 +24078,7 @@
       "N h(du/s  adverbial\t\t\tus_u"
     ],
     "rust": [
-      "ἡδέως:indeclinable"
+      "ἡδέως:adjective"
     ]
   },
   {
@@ -24106,7 +24143,7 @@
       "N xersi/,xei/r  fem dat pl\t\tindeclform\tirreg_decl3"
     ],
     "rust": [
-      "χείρ:indeclinable"
+      "χείρ:adjective"
     ]
   },
   {
@@ -24115,8 +24152,8 @@
       "V ei)mi/  pres inf act\t\t\tirreg_mi"
     ],
     "rust": [
-      "εἰμί:indeclinable",
-      "ἐάω:indeclinable",
+      "εἰμί:verb",
+      "ἐάω:verb",
       "ἐναίρω:verb",
       "ἕννυμι:verb",
       "ἰαίνω:verb",
@@ -24449,8 +24486,8 @@
       "ἀνθρωπεύομαι:noun",
       "ἀνθρωπόομαι:participle",
       "ἀνθρωπώ:participle",
-      "ἀντιῥωπίζω:participle",
-      "ἀντιῥωπεύω:participle",
+      "ἀντιρρωπίζω:participle",
+      "ἀντιρρωπεύω:participle",
       "ἄνθρωπος:participle"
     ]
   },
@@ -24881,7 +24918,8 @@
       "V lanqa/nw  fut ind mid 2nd sg\tepic ionic\t\treg_fut,reg_conj"
     ],
     "rust": [
-      "λανθάνω:verb"
+      "λανθάνω:verb",
+      "ληΐζομαι:verb"
     ]
   },
   {
@@ -24895,7 +24933,7 @@
       "N i(_ma/tion,i(ma/tion  neut nom/voc/acc sg\t\tdiminutive\tos_ou"
     ],
     "rust": [
-      "ἱμάτιον:indeclinable"
+      "ἱμάτιον:noun"
     ]
   },
   {
@@ -25078,8 +25116,8 @@
       "N sfo/s  fem gen sg\tdoric aeolic\tpoetic\tos_h_on"
     ],
     "rust": [
-      "σφεῖς:indeclinable",
-      "σφός:indeclinable"
+      "σφεῖς:adjective",
+      "σφός:adjective"
     ]
   },
   {
@@ -25103,8 +25141,8 @@
       "N ei)ko/tws \t\tindeclform\tadverb"
     ],
     "rust": [
-      "εἰκότως:indeclinable",
-      "ἐοικότως:indeclinable"
+      "εἰκότως:adjective",
+      "ἐοικότως:adjective"
     ]
   },
   {
@@ -25339,7 +25377,7 @@
       "ἐπιδιαράομαι:verb",
       "ἐπιδιαράω2:verb",
       "ἐπιδιαρέσκω:verb",
-      "ἐπιδιαῥαίνω:verb",
+      "ἐπιδιαρραίνω:verb",
       "ἐπιδιεράομαι:verb",
       "ἐπιδιεράω:verb",
       "ἐπιδιεράω2:verb",
@@ -25418,6 +25456,8 @@
       "διέχω:participle",
       "διαξέω:participle",
       "διαξαίνω:participle",
+      "διεξειμί:participle",
+      "διεξεῖμι:participle",
       "διεξιάλλω:participle",
       "διεξιίζω:participle",
       "διεξιαίνω:participle",
@@ -25508,6 +25548,7 @@
       "ἀμφαάω:verb",
       "ἀμφαίρω:verb",
       "ἀμφεάω:verb",
+      "ἀμφειμί:verb",
       "ἀμφιάζω:verb",
       "ἀμφοίζω:verb",
       "ἄμφω:verb"
@@ -25904,8 +25945,8 @@
       "V katafe/rw  pres ind act 3rd pl\tattic epic doric ionic\tnu_movable\tw_stem"
     ],
     "rust": [
-      "καταπορέω:verb",
-      "καταποραίνω:verb",
+      "καταπορρέω:verb",
+      "καταπορραίνω:verb",
       "καταφέρω:participle",
       "καταφεράομαι:verb",
       "καταφεράω:participle",
@@ -26341,8 +26382,8 @@
     "word": "οις",
     "c": [],
     "rust": [
-      "ὄις:indeclinable",
-      "ὅς:indeclinable"
+      "ὄις:noun",
+      "ὅς:noun"
     ]
   },
   {
@@ -26467,8 +26508,8 @@
       "αὐτός:adjective",
       "οὗτος:adjective",
       "ἀυτέω:adjective",
-      "ἀυτή:indeclinable",
-      "ἑαυτοῦ:indeclinable"
+      "ἀυτή:adjective",
+      "ἑαυτοῦ:adjective"
     ]
   },
   {
@@ -26546,7 +26587,7 @@
       "N go/nu  neut nom pl\t\tindeclform\tirreg_decl3"
     ],
     "rust": [
-      "γόνυ:indeclinable"
+      "γόνυ:adjective"
     ]
   },
   {
@@ -26858,7 +26899,7 @@
       "N e(ka/stote \t\tindeclform\tadverb"
     ],
     "rust": [
-      "ἑκάστοτε:indeclinable"
+      "ἑκάστοτε:adjective"
     ]
   },
   {
@@ -27077,7 +27118,7 @@
       "N xei/r  fem dat pl\tepic aeolic\tpoetic indeclform\tirreg_decl3"
     ],
     "rust": [
-      "χείρ:indeclinable"
+      "χείρ:adjective"
     ]
   },
   {
@@ -27148,8 +27189,8 @@
     "word": "ιηʹ",
     "c": [],
     "rust": [
-      "εἶμι:indeclinable",
-      "εἷς:indeclinable",
+      "εἶμι:verb",
+      "εἷς:verb",
       "ἰά:adjective",
       "ἰάομαι:adjective",
       "ἰή:adjective",
@@ -27228,11 +27269,12 @@
       "ἐπαάω:verb",
       "ἐπαίρω:verb",
       "ἐπεάω:participle",
+      "ἐπειμί:participle",
       "ἐποίζω:participle",
-      "ἐφάπτω:participle",
+      "ἐφάπτω:verb",
       "ἔπος:verb",
       "ἕπομαι:verb",
-      "ἕπω:verb"
+      "ἕπω:participle"
     ]
   },
   {
@@ -27962,7 +28004,7 @@
       "N polla/kis \t\tindeclform\tadverb"
     ],
     "rust": [
-      "πολλάκις:indeclinable"
+      "πολλάκις:adjective"
     ]
   },
   {
@@ -28259,7 +28301,7 @@
       "N toute/sti \t\tindeclform\tadverb"
     ],
     "rust": [
-      "τουτέστι:indeclinable"
+      "τουτέστι:adjective"
     ]
   },
   {
@@ -28278,6 +28320,8 @@
       "ἀφανίζω:verb",
       "ἀφανίημι:verb",
       "ἀφανεάω:verb",
+      "ἀφανειμί:verb",
+      "ἀφανεῖμι:verb",
       "ἀφανιάω:verb",
       "ἀφανιαίνω:verb"
     ]
@@ -28436,11 +28480,11 @@
       "N o(/s  masc nom pl\t\tindeclform\trelative"
     ],
     "rust": [
-      "οἰ:indeclinable",
-      "ἕ:indeclinable",
-      "ὁ:indeclinable",
-      "ὄις:indeclinable",
-      "ὅς:indeclinable"
+      "οἰ:adjective",
+      "ἕ:adjective",
+      "ὁ:adjective",
+      "ὄις:adjective",
+      "ὅς:adjective"
     ]
   },
   {
@@ -28618,7 +28662,7 @@
       "N e)u+rrei=os,e)urreh/s  masc/fem/neut gen sg\tepic\tcontr indeclform\ths_es"
     ],
     "rust": [
-      "ἐυρρεής:indeclinable"
+      "ἐυρρεής:adjective"
     ]
   },
   {
@@ -28659,8 +28703,8 @@
     "rust": [
       "ἀνέραμαι:verb",
       "ἀνήρ:verb",
-      "ἀναῥέω:verb",
-      "ἀναῥαίνω:verb",
+      "ἀναρρέω:verb",
+      "ἀναρραίνω:verb",
       "ἀνεράομαι:verb",
       "ἀνεράω:verb",
       "ἀνεράω2:verb",
@@ -28720,6 +28764,8 @@
     ],
     "rust": [
       "παρεάω:verb",
+      "παρειμί:verb",
+      "παρεῖμι:verb",
       "παριαίνω:verb"
     ]
   },
@@ -28953,7 +28999,7 @@
       "N pa/sxa  neut nom/voc/acc sg\t\tindeclform\tindecl"
     ],
     "rust": [
-      "πάσχα:indeclinable"
+      "πάσχα:adjective"
     ]
   },
   {
@@ -29735,7 +29781,7 @@
       "N la/qra_,la/qrh| \t\tindeclform\tadverb"
     ],
     "rust": [
-      "λάθρῃ:indeclinable"
+      "λάθρῃ:adjective"
     ]
   },
   {
@@ -29826,7 +29872,7 @@
       "N e)pipolu/,e)pipolu/ \t\tindeclform\tadverb"
     ],
     "rust": [
-      "ἐπιπολύ:indeclinable"
+      "ἐπιπολύ:adjective"
     ]
   },
   {
@@ -29848,7 +29894,7 @@
     "word": "λι",
     "c": [],
     "rust": [
-      "λῖ:indeclinable"
+      "λῖ:adjective"
     ]
   },
   {
@@ -29882,7 +29928,7 @@
       "N ou)damo/qen \t\tindeclform\tadverb"
     ],
     "rust": [
-      "οὐδαμόθεν:indeclinable"
+      "οὐδαμόθεν:adjective"
     ]
   },
   {
@@ -29921,8 +29967,8 @@
     "word": "εη",
     "c": [],
     "rust": [
-      "εἰμί:indeclinable",
-      "ἐάω:indeclinable",
+      "εἰμί:verb",
+      "ἐάω:verb",
       "ἐή:verb",
       "ἑός:verb",
       "ἵημι:verb"
@@ -29962,7 +30008,7 @@
       "N a)po/ \t\tindeclform\tprep"
     ],
     "rust": [
-      "ἀπό:indeclinable"
+      "ἀπό:adjective"
     ]
   },
   {
@@ -30203,7 +30249,7 @@
     ],
     "rust": [
       "κράζω:verb",
-      "ἐκῥάσσω:verb"
+      "ἐκράσσω:verb"
     ]
   },
   {
@@ -30328,8 +30374,9 @@
       "ἀντιφαίνω:verb",
       "ἀντιφαύζω:verb",
       "ἀντιφεύζω:verb",
-      "ἀντιφύζω:verb",
-      "ἀντιφύρω:participle",
+      "ἀντιφημί:verb",
+      "ἀντιφύζω:participle",
+      "ἀντιφύρω:verb",
       "ἀντιφώσκω:verb"
     ]
   },
@@ -30416,7 +30463,7 @@
       "V e)lqe/,e)/rxomai  aor imperat act 2nd sg\t\t\taor2"
     ],
     "rust": [
-      "ἔρχομαι:indeclinable"
+      "ἔρχομαι:verb"
     ]
   },
   {
@@ -30507,7 +30554,7 @@
       "N o(/s  masc nom sg\t\tindeclform\trelative"
     ],
     "rust": [
-      "ὅς:indeclinable"
+      "ὅς:adjective"
     ]
   },
   {
@@ -30522,8 +30569,8 @@
       "ἀνθρωπεύομαι:noun",
       "ἀνθρωπόομαι:participle",
       "ἀνθρωπώ:participle",
-      "ἀντιῥωπίζω:participle",
-      "ἀντιῥωπεύω:participle",
+      "ἀντιρρωπίζω:participle",
+      "ἀντιρρωπεύω:participle",
       "ἄνθρωπος:participle"
     ]
   },
@@ -30579,7 +30626,7 @@
       "V pi/ptw  aor inf act\tattic epic doric\tcontr\taor2"
     ],
     "rust": [
-      "πίπτω:indeclinable"
+      "πίπτω:verb"
     ]
   },
   {
@@ -30819,6 +30866,7 @@
       "ἐνίημι:verb",
       "ἐνίπτω:verb",
       "ἐνίσσω:verb",
+      "ἐνεῖμι:verb",
       "ἐνιάλλω:verb",
       "ἐνιάομαι:verb",
       "ἐνιίζω:verb",
@@ -30980,7 +31028,7 @@
       "N xeiro/s,xei/r  fem gen sg\t\tindeclform\tirreg_decl3"
     ],
     "rust": [
-      "χείρ:indeclinable"
+      "χείρ:adjective"
     ]
   },
   {
@@ -31157,7 +31205,7 @@
     "word": "έωσιν",
     "c": [],
     "rust": [
-      "εἰμί:indeclinable"
+      "εἰμί:verb"
     ]
   },
   {
@@ -31309,7 +31357,7 @@
       "N xersi/n,xei/r  fem dat pl\t\tnu_movable indeclform\tirreg_decl3"
     ],
     "rust": [
-      "χείρ:indeclinable"
+      "χείρ:adjective"
     ]
   },
   {
@@ -31443,7 +31491,10 @@
       "ἁφαίρω:verb",
       "ἁφαινέω:verb",
       "ἁφεάω:verb",
+      "ἁφειμί:verb",
       "ἁφεναίρω:verb",
+      "ἁφεῖμι:verb",
+      "ἁφημί:verb",
       "ἅπτω:verb"
     ]
   },
@@ -31617,8 +31668,8 @@
       "V pe/ra_,pera/w2  imperf ind act 3rd sg\thomeric ionic\tcontr unaugmented\taw_pr,a_stem"
     ],
     "rust": [
-      "πέρα:indeclinable",
-      "πέρνημι:indeclinable",
+      "πέρα:adjective",
+      "πέρνημι:adjective",
       "περάημι:noun",
       "περάω:noun",
       "περάω2:noun",
@@ -31671,8 +31722,8 @@
       "V ei)mi/  pres opt act 3rd sg\t\t\tirreg_mi"
     ],
     "rust": [
-      "εἰμί:indeclinable",
-      "ἐάω:indeclinable",
+      "εἰμί:verb",
+      "ἐάω:verb",
       "ἰάομαι:verb",
       "ἰαίνω:verb",
       "ἵημι:verb"
@@ -31754,7 +31805,7 @@
     ],
     "rust": [
       "γράφω:verb",
-      "ἐγῥάπτω:verb"
+      "ἐγράπτω:verb"
     ]
   },
   {
@@ -32309,6 +32360,7 @@
     "word": "συλιν",
     "c": [],
     "rust": [
+      "συλεῖμι:verb",
       "συλιαίνω:verb"
     ]
   },
@@ -32504,8 +32556,7 @@
       "V surre/w  aor imperat pass 3rd pl\t\t\taor2_pass,e_stem"
     ],
     "rust": [
-      "συρῥέω:verb",
-      "συῥέω:verb"
+      "συρρέω:verb"
     ]
   },
   {
@@ -32594,7 +32645,7 @@
       "N fa/tis  fem acc sg\t\t\tis_ews"
     ],
     "rust": [
-      "φάτις:indeclinable"
+      "φάτις:noun"
     ]
   },
   {
@@ -32625,7 +32676,7 @@
       "N ui(o/s,ui(o/s  masc nom sg\t\t\tos_ou"
     ],
     "rust": [
-      "υἱός:indeclinable"
+      "υἱός:adjective"
     ]
   },
   {
@@ -32684,7 +32735,7 @@
       "N mhke/ti \t\tindeclform\tadverb"
     ],
     "rust": [
-      "μηκέτι:indeclinable"
+      "μηκέτι:adjective"
     ]
   },
   {
@@ -32719,8 +32770,8 @@
       "P e)w/n,ei)mi/  pres part act masc nom sg\tepic doric ionic\t\tirreg_mi"
     ],
     "rust": [
-      "εἰμί:indeclinable",
-      "ἄγνυμι:indeclinable",
+      "εἰμί:participle",
+      "ἄγνυμι:participle",
       "ἐάω:participle",
       "ἑός:participle",
       "ἠώς:participle",
@@ -32913,7 +32964,7 @@
       "ἀνθρακόομαι:participle",
       "ἀνθρακόω:participle",
       "ἀνθρακών:participle",
-      "ἀντιῥακόω:verb",
+      "ἀντιρρακόω:verb",
       "ἄνθρα:verb",
       "ἄνθραξ:verb"
     ]
@@ -33308,7 +33359,7 @@
       "N skuqisti/,*skuqisti/ \t\tindeclform\tadverb"
     ],
     "rust": [
-      "Σκυθιστί:indeclinable"
+      "Σκυθιστί:adjective"
     ]
   },
   {
@@ -33467,7 +33518,7 @@
       "N ou) \t\tproclitic indeclform\tadverb"
     ],
     "rust": [
-      "οὐ:indeclinable"
+      "οὐ:adjective"
     ]
   },
   {
@@ -34138,8 +34189,8 @@
       "N pa_ra_/,phro/s  fem nom/voc sg\tattic doric aeolic\t\tos_h_on"
     ],
     "rust": [
-      "παρά:indeclinable",
-      "παράημι:indeclinable",
+      "παρά:adjective",
+      "παράημι:adjective",
       "παραάω:verb",
       "παραίρω:verb",
       "πηρός:verb"
@@ -34153,6 +34204,7 @@
       "ἀποφαίνω:verb",
       "ἀποφαύζω:verb",
       "ἀποφεύζω:verb",
+      "ἀποφημί:verb",
       "ἀποφύζω:verb",
       "ἀποφύρω:verb",
       "ἀποφώσκω:verb"
@@ -34222,8 +34274,8 @@
       "N ei) \t\tindeclform\tconj"
     ],
     "rust": [
-      "εἰ:indeclinable",
-      "ἐγείρω:indeclinable"
+      "εἰ:adjective",
+      "ἐγείρω:adjective"
     ]
   },
   {
@@ -34288,7 +34340,7 @@
     "word": "γυναιξι",
     "c": [],
     "rust": [
-      "γυνή:indeclinable"
+      "γυνή:adjective"
     ]
   },
   {
@@ -34692,7 +34744,7 @@
     "word": "πασχα",
     "c": [],
     "rust": [
-      "πάσχα:indeclinable"
+      "πάσχα:adjective"
     ]
   },
   {
@@ -34784,7 +34836,7 @@
       "N ga/r \t\tindeclform\tparticle"
     ],
     "rust": [
-      "γάρ:indeclinable"
+      "γάρ:adjective"
     ]
   },
   {
@@ -35128,7 +35180,7 @@
       "N a)rkeo/ntws \tattic\tindeclform\tadverb"
     ],
     "rust": [
-      "ἀρκεόντως:indeclinable"
+      "ἀρκεόντως:adjective"
     ]
   },
   {
@@ -35371,8 +35423,8 @@
       "V ei)pe/,ei)=pon  aor imperat act 2nd sg\t\t\taor2"
     ],
     "rust": [
-      "εἶπον:indeclinable",
-      "εἶπος:indeclinable",
+      "εἶπον:verb",
+      "εἶπος:verb",
       "ἕπομαι:verb",
       "ἕπω:verb",
       "ἰπόω:verb"
@@ -35711,7 +35763,7 @@
       "N a_)io/nessi,h)iw/n  fem dat pl\tepic doric aeolic\t\twn_onos"
     ],
     "rust": [
-      "ἠιών:indeclinable"
+      "ἠιών:noun"
     ]
   },
   {
@@ -35867,13 +35919,13 @@
       "N ei)s \t\tproclitic indeclform\tprep"
     ],
     "rust": [
-      "εἰμί:indeclinable",
-      "εἰς:indeclinable",
-      "εἶμι:indeclinable",
-      "εἷς:indeclinable",
-      "ἐάω:indeclinable",
-      "ἰαίνω:indeclinable",
-      "ἵημι:indeclinable"
+      "εἰμί:verb",
+      "εἰς:verb",
+      "εἶμι:adjective",
+      "εἷς:adjective",
+      "ἐάω:verb",
+      "ἰαίνω:verb",
+      "ἵημι:adjective"
     ]
   },
   {
@@ -36161,6 +36213,7 @@
       "V ei)mi/  pres ind act 3rd pl\t\tenclitic nu_movable\tirreg_mi"
     ],
     "rust": [
+      "εἰσεῖμι:verb",
       "εἰσιαίνω:verb",
       "εἶμι:verb",
       "ἵημι:verb"
@@ -36182,7 +36235,7 @@
       "N toiga/r \t\tindeclform\tparticle"
     ],
     "rust": [
-      "τοιγάρ:indeclinable"
+      "τοιγάρ:adjective"
     ]
   },
   {
@@ -36488,7 +36541,7 @@
       "N pw/pote \t\tindeclform\tadverb"
     ],
     "rust": [
-      "πώποτε:indeclinable"
+      "πώποτε:adjective"
     ]
   },
   {
@@ -36534,8 +36587,8 @@
       "N te,te \t\tenclitic indeclform\tparticle"
     ],
     "rust": [
-      "σύ:indeclinable",
-      "τέλλω:indeclinable",
+      "σύ:adjective",
+      "τέλλω:adjective",
       "τίζω:verb",
       "τίλλω:verb",
       "τε:verb",
@@ -36756,7 +36809,10 @@
       "ἐξαίρω:verb",
       "ἐξαινέω:verb",
       "ἐξεάω:verb",
+      "ἐξειμί:verb",
       "ἐξεναίρω:verb",
+      "ἐξεῖμι:verb",
+      "ἐξημί:verb",
       "ἐξωθέω:verb",
       "ἔχω:verb"
     ]
@@ -36765,8 +36821,8 @@
     "word": "εῶν",
     "c": [],
     "rust": [
-      "εἰμί:indeclinable",
-      "ἄγνυμι:indeclinable",
+      "εἰμί:participle",
+      "ἄγνυμι:participle",
       "ἐάω:participle",
       "ἑός:participle",
       "ἠώς:participle",
@@ -36794,7 +36850,7 @@
       "N xwri/s,xwri/s \t\tindeclform\tadverb"
     ],
     "rust": [
-      "χωρίς:indeclinable"
+      "χωρίς:adjective"
     ]
   },
   {
@@ -36812,8 +36868,8 @@
       "ποτίζω:verb",
       "ποτός:verb",
       "πότε:verb",
-      "πότης:indeclinable",
-      "πότος:indeclinable"
+      "πότης:adjective",
+      "πότος:adjective"
     ]
   },
   {
@@ -36833,8 +36889,8 @@
       "N xei/r  fem nom pl\t\tindeclform\tirreg_decl3"
     ],
     "rust": [
-      "χείρ:indeclinable",
-      "χειρέω:indeclinable",
+      "χείρ:adjective",
+      "χειρέω:adjective",
       "χειρίζω:verb",
       "χειρόω:verb"
     ]
@@ -36878,10 +36934,10 @@
       "N e)ni/,e)n \t\tproclitic poetic indeclform\tprep"
     ],
     "rust": [
-      "εἷς:indeclinable",
-      "ἐν:indeclinable",
-      "ἐνίημι:indeclinable",
-      "ἐνιαίνω:indeclinable"
+      "εἷς:adjective",
+      "ἐν:adjective",
+      "ἐνίημι:adjective",
+      "ἐνιαίνω:adjective"
     ]
   },
   {
@@ -36890,7 +36946,7 @@
       "N u(/dwr  neut gen sg\t\tindeclform\tirreg_decl3"
     ],
     "rust": [
-      "ὕδωρ:indeclinable"
+      "ὕδωρ:adjective"
     ]
   },
   {
@@ -36908,6 +36964,7 @@
       "ἐφεξαάω:verb",
       "ἐφεξαίρω:verb",
       "ἐφεξεάω:verb",
+      "ἐφεξειμί:verb",
       "ἐφεξῆς:verb",
       "ἔφεξις:verb"
     ]
@@ -37060,8 +37117,8 @@
     "word": "περι",
     "c": [],
     "rust": [
-      "περί:indeclinable",
-      "περίημι:indeclinable",
+      "περί:adjective",
+      "περίημι:adjective",
       "περιαίνω:verb"
     ]
   },
@@ -37085,7 +37142,7 @@
     "rust": [
       "τίνυμαι:verb",
       "τίς:verb",
-      "τις:indeclinable"
+      "τις:adjective"
     ]
   },
   {
@@ -37194,8 +37251,8 @@
       "N dai/+s  fem voc sg\tepic\t\tis_idos"
     ],
     "rust": [
-      "δάϊς:indeclinable",
-      "δέρω:indeclinable",
+      "δάϊς:noun",
+      "δέρω:noun",
       "δέω:verb",
       "δέω2:verb",
       "δίδημι:verb",
@@ -37462,7 +37519,7 @@
       "N eu)kleh/s  neut nom/voc/acc pl\tepic ionic\t\ths_es"
     ],
     "rust": [
-      "εὐκλεής:indeclinable"
+      "εὐκλεής:adjective"
     ]
   },
   {
@@ -37539,7 +37596,7 @@
       "N mhde/pote \t\tindeclform\tadverb"
     ],
     "rust": [
-      "μηδέποτε:indeclinable"
+      "μηδέποτε:adjective"
     ]
   },
   {
@@ -37622,7 +37679,7 @@
       "N a)/xri \tepic\tindeclform\tadverb"
     ],
     "rust": [
-      "ἄχρι:indeclinable"
+      "ἄχρι:adjective"
     ]
   },
   {
@@ -37716,7 +37773,7 @@
       "N to/qen \t\tpoetic indeclform\tadverb"
     ],
     "rust": [
-      "τόθεν:indeclinable"
+      "τόθεν:adjective"
     ]
   },
   {
@@ -37792,12 +37849,14 @@
       "ἐναντάω:verb",
       "ἐναντίον:participle",
       "ἐναντίος:verb",
-      "ἐναντιάζω:verb",
+      "ἐναντειμί:verb",
+      "ἐναντεῖμι:verb",
+      "ἐναντιάζω:participle",
       "ἐναντιάλλω:verb",
-      "ἐναντιάω:participle",
-      "ἐναντιίζω:verb",
+      "ἐναντιάω:verb",
+      "ἐναντιίζω:participle",
       "ἐναντιαίνω:verb",
-      "ἐναντιόομαι:participle",
+      "ἐναντιόομαι:verb",
       "ἐναντιύζω:verb"
     ]
   },
@@ -38302,8 +38361,8 @@
       "N ou)de/,ou)do/s2  fem voc sg\tionic\t\tos_ou"
     ],
     "rust": [
-      "οὐδέ:indeclinable",
-      "οὐδίζω:indeclinable",
+      "οὐδέ:adjective",
+      "οὐδίζω:adjective",
       "οὐδός:verb"
     ]
   },
@@ -38324,7 +38383,7 @@
       "N o(/stis  neut nom/acc pl\t\tindeclform\trelative"
     ],
     "rust": [
-      "ὅστις:indeclinable"
+      "ὅστις:adjective"
     ]
   },
   {
@@ -38446,7 +38505,7 @@
       "N ma/lista \t\tindeclform\tadverb"
     ],
     "rust": [
-      "μάλιστα:indeclinable"
+      "μάλιστα:adjective"
     ]
   },
   {
@@ -38513,12 +38572,12 @@
       "γράω:verb",
       "γρύζω:verb",
       "ἐγερῶ:verb",
-      "ἐγῥάπτω:verb",
-      "ἐγῥέω:verb",
-      "ἐγῥαίζω:verb",
-      "ἐγῥαίνω:verb",
-      "ἐγῥοίζω:verb",
-      "ἐγῥώννυμι:verb",
+      "ἐγράπτω:verb",
+      "ἐγρέω:verb",
+      "ἐγραίζω:verb",
+      "ἐγραίνω:verb",
+      "ἐγροίζω:verb",
+      "ἐγρώννυμι:verb",
       "ἔγρω:verb"
     ]
   },
@@ -38609,8 +38668,8 @@
       "N o(/n,o(/s  neut acc sg\t\tindeclform\trelative"
     ],
     "rust": [
-      "εἰμί:indeclinable",
-      "ὅς:indeclinable"
+      "εἰμί:participle",
+      "ὅς:participle"
     ]
   },
   {
@@ -38774,8 +38833,8 @@
       "N de/ \t\tindeclform\tparticle"
     ],
     "rust": [
-      "δέ:indeclinable",
-      "δέρω:indeclinable",
+      "δέ:adjective",
+      "δέρω:adjective",
       "δέω:verb",
       "δέω2:verb",
       "δίδημι:verb",
@@ -38965,8 +39024,8 @@
       "ἀνατρέω:verb",
       "ἀνατρίζω:verb",
       "ἀνατρύζω:participle",
-      "ἀντιῥέω:verb",
-      "ἀντιῥαίνω:verb",
+      "ἀντιρρέω:verb",
+      "ἀντιρραίνω:verb",
       "ἄντρον:participle"
     ]
   },
@@ -39001,7 +39060,7 @@
       "N paidi/,pai=s  masc/fem dat sg\t\tindeclform\tirreg_decl3"
     ],
     "rust": [
-      "παῖς:indeclinable"
+      "παῖς:adjective"
     ]
   },
   {
@@ -39200,7 +39259,7 @@
       "N la/c,la/c \t\tindeclform\tadverb"
     ],
     "rust": [
-      "λάξ:indeclinable"
+      "λάξ:adjective"
     ]
   },
   {
@@ -39210,8 +39269,8 @@
       "N path/r  masc gen pl\t\t\thr_eros"
     ],
     "rust": [
-      "πατήρ:indeclinable",
-      "πατερίζω:indeclinable",
+      "πατήρ:adjective",
+      "πατερίζω:adjective",
       "πατερεύω:adjective"
     ]
   },
@@ -39450,8 +39509,10 @@
       "ἐνίημι:participle",
       "ἐναίρω:participle",
       "ἐνεάω:verb",
+      "ἐνειμί:participle",
       "ἐνεισίημι:participle",
       "ἐνεισιαίνω:participle",
+      "ἐνεῖμι:verb",
       "ἐνιαίνω:participle",
       "ἕννυμι:verb"
     ]
@@ -39706,6 +39767,8 @@
       "V a)fi/hmi  pres subj act 1st sg\tionic\tunasp_preverb\tirreg_mi"
     ],
     "rust": [
+      "ἀπειμί:verb",
+      "ἀπεῖμι:verb",
       "ἀπιάλλω:verb",
       "ἀπιάομαι:verb",
       "ἀπιάπτω:verb",
@@ -39826,8 +39889,8 @@
     "word": "περρ",
     "c": [],
     "rust": [
-      "περιῥέω:verb",
-      "περιῥαίνω:verb"
+      "περιρρέω:verb",
+      "περιρραίνω:verb"
     ]
   },
   {
@@ -39845,8 +39908,9 @@
       "V e)stin,ei)mi/  pres ind act 3rd sg\t\tenclitic nu_movable\tirreg_mi"
     ],
     "rust": [
-      "εἰμί:indeclinable",
-      "ἐστίνυμαι:indeclinable"
+      "εἰμί:verb",
+      "ἐσσύ:verb",
+      "ἐστίνυμαι:adjective"
     ]
   },
   {
@@ -39877,7 +39941,7 @@
       "N ou)damou= \t\tindeclform\tadverb"
     ],
     "rust": [
-      "οὐδαμοῦ:indeclinable"
+      "οὐδαμοῦ:adjective"
     ]
   },
   {
@@ -40003,8 +40067,8 @@
       "N tis  gen sg\tepic ionic\tenclitic indeclform\tindef"
     ],
     "rust": [
-      "σύ:indeclinable",
-      "τέλλω:indeclinable",
+      "σύ:adjective",
+      "τέλλω:adjective",
       "τίζω:verb",
       "τίλλω:verb",
       "τίς:verb",
@@ -40059,6 +40123,7 @@
       "συνέω:verb",
       "συνέω2:verb",
       "συνέω3:verb",
+      "συνίημι:verb",
       "συνεάω:verb",
       "συνετάζω:verb",
       "συνετίζω:verb",
@@ -40268,7 +40333,7 @@
       "N w(/sper \t\tindeclform\tadverb"
     ],
     "rust": [
-      "ὥσπερ:indeclinable"
+      "ὥσπερ:adjective"
     ]
   },
   {
@@ -40370,7 +40435,7 @@
       "N e)ggu/s,e)ggu/s \t\tindeclform\tadverb"
     ],
     "rust": [
-      "ἐγγύς:indeclinable"
+      "ἐγγύς:adjective"
     ]
   },
   {
@@ -40664,6 +40729,8 @@
       "πείρω:verb",
       "ἐπεάω:verb",
       "ἐπεί:verb",
+      "ἐπειμί:verb",
+      "ἐπεῖμι:verb",
       "ἐπιαίνω:verb",
       "ἐφίημι:verb",
       "ἔπος:verb",
@@ -40734,7 +40801,7 @@
       "N e)ntau=qa,e)ntau=qa \t\tindeclform\tadverb"
     ],
     "rust": [
-      "ἐνταῦθα:indeclinable"
+      "ἐνταῦθα:adjective"
     ]
   },
   {
@@ -41003,13 +41070,13 @@
       "N ei(=s  masc nom sg\t\tindeclform\tirreg_decl3"
     ],
     "rust": [
-      "εἰμί:indeclinable",
-      "εἰς:indeclinable",
-      "εἶμι:indeclinable",
-      "εἷς:indeclinable",
-      "ἐάω:indeclinable",
-      "ἰαίνω:indeclinable",
-      "ἵημι:indeclinable"
+      "εἰμί:verb",
+      "εἰς:verb",
+      "εἶμι:adjective",
+      "εἷς:adjective",
+      "ἐάω:verb",
+      "ἰαίνω:verb",
+      "ἵημι:adjective"
     ]
   },
   {
@@ -41050,11 +41117,12 @@
       "νέω2:verb",
       "νέω3:participle",
       "ἐναίρω:verb",
-      "ἑνίζω:verb",
-      "ἑνόω:participle",
+      "ἐνειμί:verb",
+      "ἑνίζω:participle",
+      "ἑνόω:verb",
       "ἔνος:verb",
       "ἕννυμι:verb",
-      "ἕνος:verb"
+      "ἕνος:participle"
     ]
   },
   {
@@ -41092,6 +41160,7 @@
       "P prosi/hmi  pres part mid fem gen sg\tattic epic ionic\t\tirreg_mi"
     ],
     "rust": [
+      "προσίημι:participle",
       "προσιαίνω:participle"
     ]
   },
@@ -41101,13 +41170,13 @@
       "V ei)si,ei)mi/  pres ind act 3rd pl\t\tenclitic\tirreg_mi"
     ],
     "rust": [
-      "εἰμί:indeclinable",
-      "εἰσίημι:indeclinable",
+      "εἰμί:verb",
+      "εἰσίημι:verb",
       "εἰσιαίνω:verb",
       "εἶμι:verb",
       "ἐάω:verb",
       "ἰαίνω:verb",
-      "ἵημι:indeclinable"
+      "ἵημι:verb"
     ]
   },
   {
@@ -41323,9 +41392,9 @@
       "N h)re/ma \t\tindeclform\tadverb"
     ],
     "rust": [
-      "ἠρέμα:indeclinable",
-      "ἡρέμα:indeclinable",
-      "ἤρεμος:indeclinable"
+      "ἠρέμα:adjective",
+      "ἡρέμα:adjective",
+      "ἤρεμος:adjective"
     ]
   },
   {
@@ -41349,8 +41418,9 @@
       "προσίζω:verb",
       "προσαίνω:participle",
       "προσαίρω:verb",
-      "προσεύω:verb",
-      "προσύρω:participle"
+      "προσειμί:verb",
+      "προσεύω:participle",
+      "προσύρω:verb"
     ]
   },
   {
@@ -41516,10 +41586,10 @@
     "word": "ἰω",
     "c": [],
     "rust": [
-      "εἰμί:indeclinable",
-      "εἶμι:indeclinable",
-      "ἰάλλω:indeclinable",
-      "ἰάομαι:indeclinable",
+      "εἰμί:verb",
+      "εἶμι:verb",
+      "ἰάλλω:verb",
+      "ἰάομαι:verb",
       "ἰάπτω:verb",
       "ἰίζω:verb",
       "ἰαίνω:verb",
@@ -41541,10 +41611,10 @@
       "N a)lla/,a)lla/ \t\tindeclform\tadverb"
     ],
     "rust": [
-      "ἀλλά:indeclinable",
-      "ἀλλᾶ:indeclinable",
-      "ἄλλος:indeclinable",
-      "ἄλλῃ:indeclinable"
+      "ἀλλά:adjective",
+      "ἀλλᾶ:adjective",
+      "ἄλλος:adjective",
+      "ἄλλῃ:adjective"
     ]
   },
   {
@@ -41692,10 +41762,10 @@
       "V oi)=da  plup ind act 3rd pl\tepic\t\tperf_act"
     ],
     "rust": [
-      "εἶμι:indeclinable",
-      "οἶδα:indeclinable",
-      "ἰαίνω:indeclinable",
-      "ἰσάζω:indeclinable",
+      "εἶμι:verb",
+      "οἶδα:verb",
+      "ἰαίνω:verb",
+      "ἰσάζω:verb",
       "ἰσόω:participle",
       "ἴσος:verb",
       "ἵζω:verb"
@@ -41781,8 +41851,8 @@
       "πάλα:noun",
       "πάλαι:noun",
       "πάλη:noun",
-      "πάλη2:indeclinable",
-      "πάλλω:indeclinable",
+      "πάλη2:adjective",
+      "πάλλω:adjective",
       "παλέω:noun",
       "παλύνω:noun"
     ]
@@ -41853,6 +41923,7 @@
       "συρία:noun",
       "συρίζω:noun",
       "συρίημι:verb",
+      "συρεῖμι:verb",
       "συριάομαι:verb",
       "συριαίνω:verb"
     ]
@@ -41914,7 +41985,7 @@
     "word": "γῦναι",
     "c": [],
     "rust": [
-      "γυνή:indeclinable"
+      "γυνή:adjective"
     ]
   },
   {
@@ -41990,11 +42061,14 @@
       "N cu_nh/,cuno/s  fem nom/voc sg\tattic epic ionic\t\tos_h_on"
     ],
     "rust": [
+      "ξυγκάθημαι:verb",
       "ξυνάημι:verb",
       "ξυνίημι:verb",
       "ξυναάω:verb",
       "ξυναίρω:verb",
       "ξυνεάω:verb",
+      "ξυνειμί:verb",
+      "ξυνημί:verb",
       "ξυνός:verb"
     ]
   },
@@ -42004,8 +42078,8 @@
       "N fa/os  neut nom/voc/acc sg\tattic\tcontr indeclform\tirreg_decl3"
     ],
     "rust": [
-      "φάος:indeclinable",
-      "φάσκω:indeclinable",
+      "φάος:adjective",
+      "φάσκω:adjective",
       "φαίνω:verb",
       "φωίς:verb",
       "φώς:verb",
@@ -42213,7 +42287,7 @@
       "N h(/misus  masc/neut gen sg\tepic doric ionic aeolic\t\tus_eia_u"
     ],
     "rust": [
-      "ἥμισυς:indeclinable"
+      "ἥμισυς:adjective"
     ]
   },
   {
@@ -42297,8 +42371,8 @@
     "word": "ἐνμέτρους",
     "c": [],
     "rust": [
-      "ἐμμεταῥέω:verb",
-      "ἐμμεταῥαίνω:verb"
+      "ἐμμεταρρέω:verb",
+      "ἐμμεταρραίνω:verb"
     ]
   },
   {
@@ -42328,8 +42402,8 @@
     "rust": [
       "μάσσω:verb",
       "μήν:verb",
-      "μαίνομαι:indeclinable",
-      "μαίομαι:indeclinable",
+      "μαίνομαι:adjective",
+      "μαίομαι:adjective",
       "μείς:verb",
       "μηκάομαι:verb",
       "μυζάω:verb",

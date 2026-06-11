@@ -125,11 +125,23 @@ pub fn check_indecl(word: &str, stemlib: &StemlibIndex) -> Vec<Analysis> {
                 || e.morph_flags.has(crate::types::MorphFlags::INDECLFORM)
         })
         .map(|e| {
+            // `:vb:` whole-word forms carry full morphology in their keys
+            // ("irreg_mi pres ind act sg 3rd doric enclitic") — parse them so
+            // the reading has a form, dialect, and (verbal) stem type.
+            let features = parse_key_string(&e.key_str);
             let mut analysis = Analysis::default();
+            analysis.form        = features.form;
+            analysis.dialect     = features.dialect;
             analysis.lemma       = e.lemma.clone();
             analysis.morph_flags = e.morph_flags;
+            analysis.morph_flags.merge(&features.morph_flags);
             analysis.stem.string = word.to_string();
             analysis.raw_word    = word.to_string();
+            if let Some(ste) = stemlib.stem_types.get(
+                find_stemtype_name(&e.key_str, stemlib).unwrap_or("")
+            ) {
+                analysis.stem_type = ste.stem_type;
+            }
             analysis
         })
         .collect()
