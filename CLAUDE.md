@@ -15,11 +15,34 @@ cargo test
 echo "λόγος" | ./target/release/morpheus -m ~/dev/morpheus/stemlib
 python3 tests/sample_corpus.py --refresh-rust  # re-run Rust only on cached corpus (fast)
 python3 tests/sample_corpus.py     # full regen incl. C run (4000-word corpus)
-pytest tests/ -q                   # corpus consistency tests (recall = 100%)
+env/bin/python -m pytest tests/ -q # corpus tests — USE THE VENV (`env/`); bare `pytest` is another interpreter without the morpheus module
+env/bin/maturin develop --release  # rebuild the Python extension after Rust changes
 MORPHEUS_TIMING=1 ./target/release/morpheus ...  # print load-phase timings
+MORPHLIB=~/dev/morpheus/stemlib cargo test --release generate::tests::roundtrip -- --nocapture  # generation round-trip
 ```
 
 Use `rtk proxy cargo build` to see full compiler output (RTK filters cargo by default).
+
+## Subcommands & Python packaging
+
+- `morpheus generate -m <stemlib> [--lemma λῆμμα|beta] [--no-movable-nu] [--unaugmented] [--limit N]`
+  — all inflected forms as JSONL (rayon-parallel, single writer thread). Also
+  `Parser.generate(lemma)` in Python. **Generated forms lack accents** (no
+  addaccent.c port) — compare accent-insensitively. Round-trip: 99.9% re-analyze.
+- `morpheus edit -m <stemlib> [--overlay stemlib-overrides] [-p 8788]` — local
+  web UI (tiny-http, embedded `edit/edit.html`); saves validated beta-code blocks
+  to `<overlay>/Greek/stemsrc/custom.{nom,vbs}` and hot-reloads. Unicode input
+  converted via `unicode_to_beta` on save.
+- **Overlays**: `StemlibIndex::load_with_overlays` loads `<overlay>/<Lang>/stemsrc/*`
+  after the upstream files, before deriv expansion. Additive only (cannot suppress
+  upstream entries). CLI `--overlay`/`MORPHEUS_OVERLAY`, Python `overlay_path=`.
+- **PyPI**: package name `pymorpheuslib` (morpheus/pymorpheus are taken), import
+  name stays `morpheus`. abi3-py39 wheels. `Parser()` path resolution: explicit →
+  `MORPHEUS_STEMLIB` env → user cache dir filled by `morpheus.fetch_stemlib()`
+  (`python -m morpheus.fetch`, stdlib-only tarball download from upstream).
+  Releases: push a `v*` tag → `.github/workflows/release.yaml` builds wheels +
+  sdist (maturin-action) and uploads via twine (needs `PYPI_API_TOKEN` secret
+  and a `pypi` environment on GitHub).
 
 ## Architecture
 
@@ -34,7 +57,8 @@ Use `rtk proxy cargo build` to see full compiler output (RTK filters cargo by de
 - **`:vb:` lines are whole-word forms** (ἐστί), matched by `check_indecl`, not stem+ending splits.
 - **`@` continuation lines** after `:no:`/`:vs:` stems add alternative form-sets for the same stem; `@ end:xxx` makes a whole-word form (τέσσαρσι).
 - **`;` qualifier modifiers**: `-suffix` overrides the generated stem (δύναμαι `;ap,-hq` → δυνηθ), stemtype tokens override the target table (κιχάνω `;ao,aor2`). `;` blocks survive interleaved `:vs:`/`:vb:` lines.
-- **Preverbs**: remainder analyzed as verb only; compound lemma composed with elision/aspiration/assimilation (ἀπο+στρέφω→ἀποστρέφω, κατα+ἁγιστεύω→καθαγιστεύω, ἐν+καλέω→ἐγκαλέω, ἐξ+φέρω→ἐκφέρω).
+- **Preverbs**: remainder analyzed as verb only; compound lemma composed with elision/aspiration/assimilation (ἀπο+στρέφω→ἀποστρέφω, κατα+ἁγιστεύω→καθαγιστεύω, ἐν+καλέω→ἐγκαλέω, ἐξ+φέρω→ἐκφέρω). `compose_lemma` restores the word-initial breathing (from the surface preverb, fallback rough for ὑπ-, else smooth; diphthong-aware: εἰσφέρω) — it was lost before (εποίχομαι bug).
+- **Form generation** (`generate.rs`): analysis run forwards — per stem entry, iterate `end_index.by_stemtype` groups, `stemtype_compatible` once per group, `ending_compatible`+`merge_form` per ending; `apply_augment` (forward inverse of `unaugment`) for IMPERF/AORIST/PLUPERF indicatives; movable-nu emission mirrors the engine retry; dedup absorbs the iota-subscript dual-index clones.
 - **Forward generation**: Rust pre-expands all stems at load time (unlike C's backward analysis). All consonant euphony runs at index build time in `end_table.rs::apply_dental_euphony`.
 - **Leading `-` stems**: `stem_dict.rs` strips leading `-` from `-:vs:` / `-:no:` / `-:de:` entries (363 in `vbs.simp.ml`) — these mark compound-verb stems but are needed for simple-form analysis too.
 
@@ -51,8 +75,17 @@ Use `rtk proxy cargo build` to see full compiler output (RTK filters cargo by de
 | `morpheus-core/src/stemlib/conjsys.rs` | Derived-stem expansion (mirrors `conjsys.c`) |
 | `morpheus-core/src/stemlib/rule_files.rs` | stemtypes.table, derivtypes.table |
 | `morpheus-core/src/stemlib/morph_keys.rs` | Keyword → feature dispatch (200+ tokens) |
-| `morpheus-core/src/types/analysis.rs` | `pos()` method (returns "verb", "noun", etc.) |
+| `morpheus-core/src/types/analysis.rs` | `pos()` / `pos_of()` (returns "verb", "noun", etc.) |
 | `morpheus-core/src/types/stem_type.rs` | StemType bitflags (PPARTMASK, PP_PR, etc.) |
+| `morpheus-core/src/types/word_form.rs` | WordForm bitmasks + shared name helpers (tense_name, case_names…) used by PyO3/JSONL/preview |
+| `morpheus-core/src/generate.rs` | Form generation engine + `form_to_json` JSONL row shape |
+| `morpheus-core/src/analysis/augment.rs` | `unaugment` (analysis) + `apply_augment` (generation) |
+| `morpheus-core/src/analysis/check_preverb.rs` | Preverb splits + `compose_lemma` (breathing restoration) |
+| `morpheus-core/src/edit/` | `morpheus edit` server (server.rs, raw_index.rs, embedded edit.html) |
+| `morpheus-core/src/stemlib/loader.rs` | `load_with_overlays`, keeps `deriv_tables`/`overlay_dirs` on the index |
+| `morpheus-py/src/lib.rs` | PyO3 Parser (analyze/generate, default stemlib path) |
+| `python/morpheus/fetch.py` | stdlib stemlib downloader (`fetch_stemlib`) |
+| `stemlib-overrides/` | committed overlay dir written by `morpheus edit` |
 
 ## Key Invariants
 
@@ -119,7 +152,7 @@ Key stem-formation rules:
 
 ## Corpus Metrics (4000-word freed-corpus sample, seed 42)
 
-- C analyzes 3374/4000; **Rust recall 100%** (0 missed), pytest 3377 passed.
+- C analyzes 3374/4000; **Rust recall 100%** (0 missed), pytest 3390 passed.
 - **Lemma agreement 98.8%** (words both analyze whose lemma sets intersect).
 - Rust-only 7.4% (270 words Rust analyzes that C doesn't — about half are
   unaccented words C refuses by design; rest are lowercase proper names and
