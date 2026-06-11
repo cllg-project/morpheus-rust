@@ -1,3 +1,4 @@
+pub mod accent;
 pub mod analysis;
 pub mod edit;
 pub mod error;

@@ -169,85 +169,158 @@ fn temporal_unaugment(stem: &str) -> Vec<String> {
     results
 }
 
+// ── Forward augment (C morphlib/augment.c add_augment/augmentit) ────────────
+//
+// The C tables work on beta-code prefixes (vowel + breathing), so the port
+// does too. Each row: (unaugmented prefix, augmented prefix, dialect
+// restriction bits, unique). All matching rows fire, in order, unless a
+// `unique` row matches first. `0` dialect bits = unrestricted (ALL_DIAL).
+
+type AugRow = (&'static str, &'static str, u16, bool);
+
+const ATTIC: u16 = 0o0002;
+const IONIC: u16 = 0o0010;
+const AEOLIC: u16 = 0o0020;
+const DORIC: u16 = 0o0200;
+const EPIC: u16 = 0o0100 | 0o2000; // HOMERIC | NON_HOMERIC_EPIC
+
+/// Smyth 435 — temporal augments (C `TempAugments`).
+const TEMP_AUGMENTS: &[AugRow] = &[
+    ("ai)", "h)|", 0, false),
+    ("ai(", "h(|", 0, false),
+    ("ei)", "h)|", 0, false),
+    ("ei(", "h(|", 0, false),
+    ("oi)", "w)|", 0, false),
+    ("oi(", "w(|", 0, false),
+    ("au)", "hu)", 0, false),
+    ("au(", "hu(", 0, false),
+    ("au)", "au)", DORIC, false),
+    ("au(", "au(", DORIC, false),
+    ("eu)", "hu)", 0, false),
+    ("eu(", "hu(", 0, false),
+    ("e)e", "e)e", EPIC, true),
+    ("e(e", "e(e", EPIC, true),
+    ("a)", "h)", ATTIC | IONIC | EPIC, false),
+    ("a(", "h(", ATTIC | IONIC | EPIC, false),
+    ("a)", "a_)", DORIC | AEOLIC, false),
+    ("a(", "a_(", DORIC | AEOLIC, false),
+    ("e)", "h)", 0, false),
+    ("e(", "h(", 0, false),
+    ("h(", "h(", 0, false),
+    ("h)", "h)", 0, false),
+    ("i(", "i_(", 0, false),
+    ("i)", "i_)", 0, false),
+    ("o)", "w)", 0, false),
+    ("o(", "w(", 0, false),
+    ("w)", "w)", 0, false),
+    ("w(", "w(", 0, false),
+    ("u)", "u_)", 0, false),
+    ("u(", "u_(", 0, false),
+    ("ou)", "ou)", 0, false),
+    ("ou(", "ou(", 0, false),
+];
+
+/// Smyth 431 — syllabic augments of vowel-initial stems (C `SyllAugments`),
+/// used when the stem carries the `syll_augment` flag (ἰδών → εἶδον).
+const SYLL_AUGMENTS: &[AugRow] = &[
+    ("i)", "ei)", 0, false),
+    ("i(", "ei(", 0, false),
+    ("i)", "e)i", 0, false),
+    ("i(", "e(i", 0, false),
+    ("oi)w", "oi)w", 0, false),
+    ("e)oi", "e)w|", 0, true),
+    ("e(oi", "e(w|", 0, true),
+    ("oi)", "e)w|", 0, false),
+    ("oi(", "e(w|", 0, false),
+    ("ei(", "ei(", 0, false),
+    ("ei)", "ei)", 0, false),
+    ("e)", "ei)", 0, false),
+    ("e(", "ei(", 0, false),
+    ("a)", "e)a", 0, false),
+    ("a(", "e(a", 0, false),
+    ("h)", "e)h", 0, false),
+    ("h(", "e(h", 0, false),
+    ("w)", "e)w", 0, false),
+    ("w(", "e(w", 0, false),
+    ("o)", "e)w", 0, false),
+    ("o(", "e(w", 0, false),
+    ("eu)", "eu)", 0, false),
+    ("eu(", "eu(", 0, false),
+    ("ou)", "e)ou", 0, false),
+    ("ou(", "e(ou", 0, false),
+];
+
 /// Forward augment: the inverse of `unaugment`, used by form generation.
-/// Returns the plausible augmented variants of an unaugmented stem (usually
-/// one; ε-initial stems yield both η- and ει-augments since both occur:
-/// ἐθέλω → ἤθελον but ἔχω → εἶχον).
-pub fn apply_augment(stem: &str) -> Vec<String> {
-    let nfd: Vec<char> = stem.nfd().collect();
-    let Some(&first) = nfd.first() else {
-        return vec![stem.to_string()];
+/// Faithful port of C `augmentit`/`do_tempaug`/`do_syllaug`: returns every
+/// augmented variant with its dialect restriction (`Dialect::empty()` =
+/// unrestricted). Identity rows ("h)"→"h)") yield the unchanged stem — the
+/// augment is real but invisible. Returns the bare stem if nothing matches.
+pub fn apply_augment(stem: &str, flags: &crate::types::MorphFlags) -> Vec<(String, crate::types::Dialect)> {
+    use crate::types::{Dialect, MorphFlags};
+    use crate::unicode::betacode::{beta_to_unicode, unicode_to_beta};
+
+    let beta = unicode_to_beta(stem);
+    let b = beta.as_bytes();
+    let Some(&first) = b.first() else {
+        return vec![(stem.to_string(), Dialect::empty())];
     };
 
-    // ── Syllabic augment for consonant-initial stems ───────────────────
-    if !is_greek_vowel(first) {
-        // Initial ρ doubles and loses its breathing: ῥαπτ → ἐρραπτ.
-        if first == 'ρ' {
-            let rest: String = nfd[1..]
-                .iter()
-                .skip_while(|c| is_combining(**c))
-                .collect::<String>()
-                .nfc()
-                .collect();
-            return vec![format!("ἐρρ{rest}")];
-        }
-        return vec![format!("ἐ{stem}")];
+    let is_beta_vowel = |c: u8| matches!(c, b'a' | b'e' | b'h' | b'i' | b'o' | b'u' | b'w');
+
+    // ── Consonant-initial: syllabic ἐ- ──────────────────────────────────
+    if !is_beta_vowel(first) {
+        let aug = if beta.starts_with("r(") {
+            if flags.has(MorphFlags::RAW_SONANT) {
+                // strip the breathing: ῥ → ἐρ-
+                format!("e)r{}", &beta[2..])
+            } else {
+                // ρ doubles after the augment: ῥαπτ → ἐρραπτ
+                format!("e)rr{}", &beta[2..])
+            }
+        } else if flags.has(MorphFlags::SYLL_AUGMENT) {
+            // doubled initial consonant: λαβ → ἐλλαβ (Smyth 429a D)
+            format!("e){}{}", first as char, beta)
+        } else {
+            format!("e){beta}")
+        };
+        return vec![(beta_to_unicode(&aug), Dialect::empty())];
     }
 
-    // ── Temporal augment for vowel-initial stems ───────────────────────
-    // Split off the first vowel, its combining marks, and (for diphthongs)
-    // the second vowel with its marks.
-    let mut i = 1;
-    while i < nfd.len() && is_combining(nfd[i]) {
-        i += 1;
-    }
-    let marks1: String = nfd[1..i].iter().collect();
-    let second = nfd.get(i).copied();
-    let mut j = i;
-    let mut marks2 = String::new();
-    if let Some(s) = second {
-        if is_greek_vowel(s) {
-            j = i + 1;
-            while j < nfd.len() && is_combining(nfd[j]) {
-                marks2.push(nfd[j]);
-                j += 1;
-            }
+    // ── Vowel-initial: table lookup ─────────────────────────────────────
+    let table = if flags.has(MorphFlags::SYLL_AUGMENT) {
+        SYLL_AUGMENTS
+    } else {
+        TEMP_AUGMENTS
+    };
+
+    let mut out: Vec<(String, Dialect)> = Vec::new();
+    for &(noaug, withaug, dial, unique) in table {
+        if !beta.starts_with(noaug) {
+            continue;
+        }
+        // the augmented vowel is long — drop an explicit breve after it
+        let mut rest = &beta[noaug.len()..];
+        if rest.as_bytes().first() == Some(&b'^') {
+            rest = &rest[1..];
+        }
+        // Stems are word-internal fragments: a trailing sigma stays medial
+        // (ὁρισ → ὡρισ, not ὡρις).
+        let mut variant = beta_to_unicode(&format!("{withaug}{rest}"));
+        if let Some(base) = variant.strip_suffix('ς') {
+            variant = format!("{base}σ");
+        }
+        let d = Dialect::from_bits_truncate(dial);
+        if !out.iter().any(|(v, vd)| *v == variant && *vd == d) {
+            out.push((variant, d));
+        }
+        if unique {
+            break;
         }
     }
-    let nfc = |s: String| -> String { s.nfc().collect() };
-
-    // Diphthongs: αι → ῃ, οι → ῳ, αυ/ευ → ηυ (breathing/accent marks of both
-    // vowels move onto the lengthened first vowel; ῃ/ῳ keep the iota as
-    // subscript U+0345, which sorts after the other marks).
-    if let Some(s) = second.filter(|&s| is_greek_vowel(s)) {
-        let rest: String = nfd[j..].iter().collect();
-        match (first, s) {
-            ('α', 'ι') => return vec![nfc(format!("η{marks1}{marks2}\u{0345}{rest}"))],
-            ('ο', 'ι') => return vec![nfc(format!("ω{marks1}{marks2}\u{0345}{rest}"))],
-            ('α', 'υ') | ('ε', 'υ') => {
-                return vec![nfc(format!("η{marks1}υ{marks2}{rest}"))]
-            }
-            ('ε', 'ι') => {
-                // Already long — no visible augment.
-                return vec![stem.to_string()];
-            }
-            _ => {}
-        }
+    if out.is_empty() {
+        out.push((stem.to_string(), Dialect::empty()));
     }
-
-    // Single vowels: α/ε → η, ο → ω; η/ω/ι/υ unchanged (length is unwritten).
-    let rest: String = nfd[i..].iter().collect();
-    match first {
-        'α' => vec![nfc(format!("η{marks1}{rest}"))],
-        'ε' => vec![
-            nfc(format!("η{marks1}{rest}")),
-            // ε + ε contraction: ἔχω → εἶχον. The breathing moves onto the
-            // second vowel of the resulting diphthong (εἰ).
-            nfc(format!("ει{marks1}{rest}")),
-        ],
-        'ο' => vec![nfc(format!("ω{marks1}{rest}"))],
-        _ => vec![stem.to_string()],
-    }
+    out
 }
 
 #[inline]

@@ -3,10 +3,11 @@
 //! endings instead of word → stem+ending splits). Counterpart of the C
 //! `gener` binary (src/gener/gensynform.c).
 //!
-//! Caveat: stems carry breathings but only sporadic accents, and endings are
-//! mostly unaccented (the C accent engine `addaccent.c` has no Rust port yet),
-//! so generated forms are orthographically correct *except for accents*.
-//! Compare accent-insensitively.
+//! Forms are fully accented via `crate::accent` (port of the C accent engine:
+//! recessive accent for finite verbs, persistent accent for nominals, plus
+//! mkend-style ending accentuation at stemlib load time). Validated against
+//! C `gener` output at ≈99.4% accent agreement (`tests/compare_accents.py`);
+//! the residue is mostly missing vowel-quantity data (C's `setquant` step).
 
 use hashbrown::HashSet;
 
@@ -79,10 +80,24 @@ pub fn generate_for_entry(
     match entry.kind {
         StemKind::Weak => {}
         StemKind::WholeWord => {
-            // :wd:/:vb: entries are complete surface forms already.
+            // :wd:/:vb: entries are complete surface forms already, but C
+            // gener still recessive-accents unaccented conjugated verb forms
+            // (BuildAVerb's zero-ending branch); enclitics stay bare.
             let features = parse_key_string(&entry.key_str);
+            let mut form = entry.stem.clone();
+            if features.form.is_verbal() && !entry.morph_flags.has(MorphFlags::ENCLITIC) {
+                form = crate::accent::accent_generated(&crate::accent::GenAccent {
+                    stem:       &form,
+                    ending:     "",
+                    form:       &features.form,
+                    stem_type:  features.stem_type,
+                    stem_flags: entry.morph_flags,
+                    end_flags:  MorphFlags::default(),
+                    augmented:  false,
+                });
+            }
             out.push(GeneratedForm {
-                form:        entry.stem.clone(),
+                form,
                 lemma:       entry.lemma.clone(),
                 pos:         pos_of(features.stem_type, &features.form),
                 word_form:   features.form,
@@ -133,7 +148,7 @@ pub fn generate_for_entry(
                     flags.merge(&end.morph_flags);
 
                     emit_surface_forms(
-                        entry, &end.ending, form, dialect, flags, stem_type,
+                        entry, end, form, dialect, flags, stem_type,
                         stemtype_name, opts, &mut out,
                     );
                 }
@@ -150,7 +165,7 @@ pub fn generate_for_entry(
 #[allow(clippy::too_many_arguments)]
 fn emit_surface_forms(
     entry: &StemEntry,
-    ending: &str,
+    end: &crate::stemlib::end_table::EndEntry,
     form: WordForm,
     dialect: Dialect,
     flags: MorphFlags,
@@ -159,31 +174,64 @@ fn emit_surface_forms(
     opts: &GenerateOptions,
     out: &mut Vec<GeneratedForm>,
 ) {
+    let ending = &end.ending;
     // Past indicatives carry the augment, which analysis strips via
-    // `unaugment` and the stem dict therefore lacks.
+    // `unaugment` and the stem dict therefore lacks. C `needs_augment2`:
+    // ε/η-initial pluperfects stay unaugmented (ἐστάλκη, Smyth 444) unless
+    // attic-reduplicated.
+    let plup_skip = form.tense == tense::PLUPERF
+        && !entry.morph_flags.has(MorphFlags::ATTIC_REDUPL)
+        && matches!(
+            crate::unicode::normalize::strip_diacritics(&entry.stem)
+                .chars()
+                .next(),
+            Some('ε') | Some('η')
+        );
     let needs_augment = form.mood == mood::INDICATIVE
-        && matches!(form.tense, tense::IMPERF | tense::AORIST | tense::PLUPERF);
+        && matches!(form.tense, tense::IMPERF | tense::AORIST | tense::PLUPERF)
+        && !plup_skip;
 
-    let mut stems: Vec<(String, bool)> = Vec::new(); // (stem, is_unaugmented)
+    // (stem, is_unaugmented, augment dialect restriction)
+    let mut stems: Vec<(String, bool, Dialect)> = Vec::new();
     if needs_augment {
-        for v in apply_augment(&entry.stem) {
-            stems.push((v, false));
+        for (v, d) in apply_augment(&entry.stem, &entry.morph_flags) {
+            stems.push((v, false, d));
         }
         if opts.unaugmented {
-            stems.push((entry.stem.clone(), true));
+            stems.push((entry.stem.clone(), true, Dialect::empty()));
         }
     } else {
-        stems.push((entry.stem.clone(), false));
+        stems.push((entry.stem.clone(), false, Dialect::empty()));
     }
 
-    for (mut stem, unaugmented) in stems {
+    for (mut stem, unaugmented, aug_dial) in stems {
+        // dialect-restricted augments (doric ᾱ̓-) only combine with
+        // compatible endings (C AndDialect in do_tempaug)
+        let mut dialect = dialect;
+        if !aug_dial.is_empty() {
+            if !dialect.compatible_with(aug_dial) {
+                continue;
+            }
+            dialect.and_dialect(aug_dial);
+        }
         // A few dict stems carry a final ς; it becomes medial when an ending
         // follows. Then re-apply the final-sigma rule on the joined word.
         if !ending.is_empty() && stem.ends_with('ς') {
             stem.pop();
             stem.push('σ');
         }
-        let mut surface = format!("{stem}{ending}");
+        // Accent engine (port of C gener BuildANoun/BuildAVerb): persistent
+        // accent for nominal forms, recessive for finite verbs; no-op when
+        // the stem or the (table-accented) ending already carries an accent.
+        let mut surface = crate::accent::accent_generated(&crate::accent::GenAccent {
+            stem:       &stem,
+            ending,
+            form:       &form,
+            stem_type,
+            stem_flags: entry.morph_flags,
+            end_flags:  end.morph_flags,
+            augmented:  needs_augment,
+        });
         apply_final_sigma(&mut surface);
 
         let mut f = flags;
@@ -195,11 +243,13 @@ fn emit_surface_forms(
 
         // Movable nu: dat. pl. / 3rd person forms in -σι/-ξι/-ψι and 3rd
         // person forms in -ε take an optional final ν (mirror of the
-        // analysis-side retry in engine.rs).
-        let movable = surface.ends_with("σι")
-            || surface.ends_with("ξι")
-            || surface.ends_with("ψι")
-            || (form.person & person::PERS3 != 0 && surface.ends_with('ε'));
+        // analysis-side retry in engine.rs). Checked accent-insensitively
+        // (the final vowel may now carry an accent: ποσί).
+        let surface_norm = crate::unicode::normalize::strip_diacritics(&surface);
+        let movable = surface_norm.ends_with("σι")
+            || surface_norm.ends_with("ξι")
+            || surface_norm.ends_with("ψι")
+            || (form.person & person::PERS3 != 0 && surface_norm.ends_with('ε'));
 
         if opts.movable_nu && movable {
             let mut nu_flags = f;
@@ -304,17 +354,33 @@ mod tests {
 
     #[test]
     fn augment_consonant_stem() {
-        assert_eq!(apply_augment("λυ"), vec!["ἐλυ"]);
-        assert_eq!(apply_augment("ῥαπτ"), vec!["ἐρραπτ"]);
+        let f = MorphFlags::default();
+        let forms = |s: &str| -> Vec<String> {
+            apply_augment(s, &f).into_iter().map(|(v, _)| v).collect()
+        };
+        assert_eq!(forms("λυ"), vec!["ἐλυ"]);
+        assert_eq!(forms("ῥαπτ"), vec!["ἐρραπτ"]);
     }
 
     #[test]
     fn augment_temporal() {
-        assert_eq!(apply_augment("ἀγγελλ"), vec!["ἠγγελλ"]);
-        assert_eq!(apply_augment("ὁρισ"), vec!["ὡρισ"]);
-        assert_eq!(apply_augment("ἐθελ"), vec!["ἠθελ", "εἰθελ"]);
-        assert_eq!(apply_augment("αἱρε"), vec!["ᾑρε"]);
-        assert_eq!(apply_augment("αὐξησ"), vec!["ηὐξησ"]);
+        let f = MorphFlags::default();
+        let forms = |s: &str| -> Vec<String> {
+            apply_augment(s, &f).into_iter().map(|(v, _)| v).collect()
+        };
+        // ἀ- yields the attic/ionic/epic ἠ- and the doric/aeolic ᾱ̓-
+        // (smooth breathing precedes the macron — both ccc 230, order kept)
+        assert_eq!(forms("ἀγγελλ"), vec!["ἠγγελλ", "ἀ\u{304}γγελλ"]);
+        assert_eq!(forms("ὁρισ"), vec!["ὡρισ"]);
+        assert_eq!(forms("ἐθελ"), vec!["ἠθελ"]);
+        assert_eq!(forms("αἱρε"), vec!["ᾑρε"]);
+        assert_eq!(forms("αὐξησ"), vec!["ηὐξησ", "αὐξησ"]);
+        // dialect restriction carried on the doric variant
+        let doric = apply_augment("ἀγγελλ", &f)
+            .into_iter()
+            .find(|(v, _)| v.contains('\u{304}'))
+            .unwrap();
+        assert!(doric.1.contains(Dialect::DORIC));
     }
 
     /// Round-trip: every generated form must re-analyze to its source lemma.

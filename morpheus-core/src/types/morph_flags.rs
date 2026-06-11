@@ -89,10 +89,12 @@ impl MorphFlags {
     pub const METRICAL_LONG:      u8 = 81;
     pub const D_PREVB:            u8 = 82;
     pub const T_PREVB:            u8 = 83;
+    /// Rust-only: the surface word was elided (ἀλλ’ → ἀλλά).
+    pub const ELIDED:             u8 = 84;
 
     #[inline]
     pub fn has(&self, flag: u8) -> bool {
-        debug_assert!(flag >= 1 && flag <= 83, "flag {flag} out of range 1..=83");
+        debug_assert!(flag >= 1 && flag <= 84, "flag {flag} out of range 1..=84");
         let idx = (flag as usize - 1) / 8;
         let bit = (flag - 1) % 8;
         self.0[idx] & (1 << bit) != 0
@@ -100,7 +102,7 @@ impl MorphFlags {
 
     #[inline]
     pub fn set(&mut self, flag: u8) {
-        debug_assert!(flag >= 1 && flag <= 83, "flag {flag} out of range 1..=83");
+        debug_assert!(flag >= 1 && flag <= 84, "flag {flag} out of range 1..=84");
         let idx = (flag as usize - 1) / 8;
         let bit = (flag - 1) % 8;
         self.0[idx] |= 1 << bit;
@@ -108,7 +110,7 @@ impl MorphFlags {
 
     #[inline]
     pub fn clear(&mut self, flag: u8) {
-        debug_assert!(flag >= 1 && flag <= 83, "flag {flag} out of range 1..=83");
+        debug_assert!(flag >= 1 && flag <= 84, "flag {flag} out of range 1..=84");
         let idx = (flag as usize - 1) / 8;
         let bit = (flag - 1) % 8;
         self.0[idx] &= !(1 << bit);

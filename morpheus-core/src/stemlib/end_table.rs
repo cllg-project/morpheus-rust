@@ -250,7 +250,7 @@ fn parse_basics_file(path: &Path, cache: &BasicsCache) -> Result<Vec<BasicEntry>
                 // The first token of rest is the ref, extra_keys are extra features.
                 if let Some(basic_entries) = cache.get(ref_name) {
                     for be in basic_entries {
-                        let ending = format!("{}{}", prefix_beta, be.ending_beta);
+                        let ending = compose_prefix_ending(prefix_beta, &be.ending_beta);
                         let key_str = if extra_keys.is_empty() {
                             be.key_str.clone()
                         } else {
@@ -326,7 +326,7 @@ fn parse_source_file(
                     let ending_beta = if prefix_beta.is_empty() {
                         be.ending_beta.clone()
                     } else {
-                        format!("{}{}", prefix_beta, be.ending_beta)
+                        compose_prefix_ending(prefix_beta, &be.ending_beta)
                     };
                     // Merge basic entry keys with any extra keys from the source line.
                     // Extra keys may override stemtype, dialect, features.
@@ -435,14 +435,6 @@ fn apply_dental_euphony(beta: &str) -> std::borrow::Cow<str> {
                 _ => {}
             }
         }
-        // Morpheus diphthong expansion: e_ → ei, o_ → ou (mkend.c rule)
-        if i + 1 < len && bytes[i + 1] == b'_' {
-            match bytes[i] {
-                b'e' => { out.push('e'); out.push('i'); i += 2; continue; }
-                b'o' => { out.push('o'); out.push('u'); i += 2; continue; }
-                _ => {}
-            }
-        }
         out.push(bytes[i] as char);
         i += 1;
     }
@@ -463,9 +455,19 @@ fn emit_entry(
     // Apply consonant euphony before Unicode conversion.
     let ending_beta = apply_dental_euphony(ending_beta);
     let ending_beta = ending_beta.as_ref();
+    let features = parse_key_string(key_str);
+    // mkend accents each ending as a standalone string at table-build time
+    // (join_end → AccComposForm): "eomen" → "e/omen", while one- and
+    // two-syllable endings stay bare (ACCENT_OPTIONAL). Done before the `-`
+    // separators are stripped so contraction matching sees the accent.
+    let accented_beta = if ending_beta.is_empty() {
+        String::new()
+    } else {
+        crate::accent::accent_table_ending(ending_beta, &features.morph_flags, &features.form)
+    };
     // `-` is a morpheme separator (blocks euphony/contraction above) that never
     // appears in the analyzed word: "es-s@decl1_sh" → ending "essan".
-    let ending_beta_clean = ending_beta.replace('-', "");
+    let ending_beta_clean = accented_beta.replace('-', "");
     let ending_unicode = if ending_beta_clean.is_empty() {
         String::new()
     } else {
@@ -473,7 +475,6 @@ fn emit_entry(
     };
 
     let ending_norm = strip_diacritics(&ending_unicode);
-    let features = parse_key_string(key_str);
 
     let entry = EndEntry {
         ending: ending_unicode,
@@ -486,7 +487,7 @@ fn emit_entry(
 
     index.insert(entry);
 
-    emit_contracted_variants(ending_beta, &features, stem_type_name, contr_rules, index);
+    emit_contracted_variants(&accented_beta, &features, stem_type_name, contr_rules, index);
 }
 
 /// Mirror of C `mkend.c`: every uncontracted ending also generates contracted
@@ -506,19 +507,21 @@ fn emit_contracted_variants(
     {
         return;
     }
-    // Accents don't take part in pattern matching (C strips/re-fixes them);
+    // Pattern matching mirrors C contract.c::needs_sub: at each position try
+    // a direct (accent-preserving) prefix match first; failing that, strip
+    // the accent from the tail and retry, remembering its syllable so the
+    // contracted result can be re-accented ("e/omen" → "oumen" → "ou=men").
     // `+` (diaeresis) and `-` (separator) are kept so they block contraction.
-    let stripped: String = ending_beta
-        .chars()
-        .filter(|c| !matches!(c, '/' | '=' | '\\'))
-        .collect();
-
-    for pos in 0..stripped.len() {
-        let tail = &stripped[pos..];
-        let Some(first) = contr_rules.iter().position(|r| tail.starts_with(&r.raw)) else {
-            continue;
-        };
+    for pos in 0..ending_beta.len() {
+        let tail = &ending_beta[pos..];
+        let (stripped_tail, syllno) = crate::accent::strip_accents_beta(tail);
+        let first = contr_rules
+            .iter()
+            .position(|r| tail.starts_with(&r.raw) || stripped_tail.starts_with(&r.raw));
+        let Some(first) = first else { continue };
         let raw = contr_rules[first].raw.clone();
+        let direct = tail.starts_with(&raw);
+
         for rule in contr_rules[first..].iter().take_while(|r| r.raw == raw) {
             // Rows whose cooked form equals the raw pattern are "stays
             // uncontracted in dialect X" markers — nothing new to emit.
@@ -534,13 +537,46 @@ fn emit_contracted_variants(
             {
                 continue;
             }
-            let variant_beta =
-                format!("{}{}{}", &stripped[..pos], rule.cooked_clean, &tail[raw.len()..])
-                    .replace('-', "");
-            let variant_unicode = apply_final_sigma_ending(&beta_to_unicode(&variant_beta));
-            let variant_norm = strip_diacritics(&variant_unicode);
             let mut morph_flags = features.morph_flags;
             morph_flags.merge(&row.morph_flags);
+
+            let remainder = if direct { &tail[raw.len()..] } else { &stripped_tail[raw.len()..] };
+            let mut variant_beta =
+                format!("{}{}{}", &ending_beta[..pos], rule.cooked_clean, remainder);
+            if direct {
+                // Beta-code kludge (contract.c): the subscript follows all
+                // other diacritics, so "aoi/" → "w|" + "/" must become "w/|"
+                // (and a now-redundant long mark after it is dropped).
+                let b = pos + rule.cooked_clean.len();
+                let vb = unsafe { variant_beta.as_mut_vec() }; // ASCII-only edits
+                if b >= 1 && b < vb.len() && vb[b - 1] == b'|' && vb[b] == b'/' {
+                    vb.swap(b - 1, b);
+                    if b + 1 < vb.len() && vb[b + 1] == b'_' {
+                        vb.remove(b + 1);
+                    }
+                }
+            } else {
+                // "aoi_" → "w|_": drop the long mark the contraction absorbed
+                while let Some(i) = variant_beta.find("|_") {
+                    variant_beta.remove(i + 1);
+                }
+                // The contraction swallowed an accented syllable — mark and
+                // re-accent the whole ending (contract.c → FixRecAcc /
+                // AccComposForm with the `contr` flags).
+                if syllno > 0 {
+                    if syllno == crate::accent::nsylls_beta(&variant_beta).saturating_sub(1) {
+                        morph_flags.set(MorphFlags::SUFF_ACC);
+                    }
+                    variant_beta = crate::accent::reaccent_contracted(
+                        &variant_beta,
+                        &morph_flags,
+                        &features.form,
+                    );
+                }
+            }
+            let variant_beta = variant_beta.replace('-', "");
+            let variant_unicode = apply_final_sigma_ending(&beta_to_unicode(&variant_beta));
+            let variant_norm = strip_diacritics(&variant_unicode);
             let dialect = if row.dialect.is_empty() {
                 features.dialect
             } else if features.dialect.is_empty() {
@@ -559,6 +595,43 @@ fn emit_contracted_variants(
         }
         return; // one contraction per ending (mkend.c)
     }
+}
+
+/// Join a prefix and a basics ending the way C `mkend.c::CompStemEnd` does:
+/// the boundary `_` lengthens a preceding e/o into a diphthong ("e"+"_s" →
+/// "eis", "gno"+"_s" → "gnous"), swaps past a breathing ("e)"+"_mi" →
+/// "e_)mi"), and is dropped after an already-long vowel. `_` elsewhere in the
+/// ending is left alone (doric "e_n" keeps its long ε).
+fn compose_prefix_ending(prefix: &str, ending: &str) -> String {
+    let mut p: Vec<u8> = prefix.bytes().collect();
+    let mut e: Vec<u8> = ending.bytes().collect();
+
+    if !p.is_empty() && !e.is_empty() && e[0] == b'_' {
+        // breathing at the join: look at the vowel before it
+        if matches!(p[p.len() - 1], b'(' | b')') && p.len() >= 2 {
+            let breath = p.pop().unwrap();
+            p.push(b'_');
+            e[0] = breath;
+        }
+    }
+    if !p.is_empty() && !e.is_empty() && e[0] == b'_' {
+        match p[p.len() - 1] {
+            b'e' => e[0] = b'i',
+            b'o' => e[0] = b'u',
+            b'h' | b'w' => { e.remove(0); } // already long
+            _ => {}
+        }
+    }
+    // zap_extra_lmarks: h_ / w_ inside the joined prefix
+    let mut i = 0;
+    while i + 1 < p.len() {
+        if matches!(p[i], b'h' | b'w') && p[i + 1] == b'_' {
+            p.remove(i + 1);
+        }
+        i += 1;
+    }
+    p.extend(e);
+    String::from_utf8(p).unwrap_or_else(|_| format!("{prefix}{ending}"))
 }
 
 /// Strip the stemtype token from key_str if it matches the file's stemtype name.
