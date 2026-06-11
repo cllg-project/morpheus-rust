@@ -2,6 +2,7 @@
 //! Edits land in an overlay directory (stemlib source format, beta-code);
 //! the upstream stemlib stays untouched.
 
+pub mod metadata;
 pub mod raw_index;
 pub mod server;
 

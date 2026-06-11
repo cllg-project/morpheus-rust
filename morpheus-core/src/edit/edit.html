@@ -12,9 +12,10 @@
   header span { color:var(--muted); font-size:.85rem; }
   main { display:grid; grid-template-columns: 280px 1fr; gap:0; height:calc(100vh - 49px); }
   #left { border-right:1px solid var(--border); overflow-y:auto; padding:.8rem; }
-  #right { overflow-y:auto; padding:1rem 1.4rem; }
+  #right { overflow-y:auto; padding:1rem 1.4rem 9rem; }
   input, select, textarea, button { font:inherit; }
-  input[type=text] { width:100%; padding:.4rem .5rem; border:1px solid var(--border); border-radius:6px; }
+  input[type=text] { padding:.4rem .5rem; border:1px solid var(--border); border-radius:6px; }
+  #left input[type=text] { width:100%; }
   #results { list-style:none; margin:.6rem 0 0; padding:0; }
   #results li { padding:.25rem .4rem; cursor:pointer; border-radius:4px; font-size:1.05rem; }
   #results li:hover { background:#eef2ff; }
@@ -25,8 +26,6 @@
   .block.overlay { border-color:var(--accent); }
   .block button { margin-top:.3rem; }
   textarea { width:100%; min-height:7rem; padding:.5rem; border:1px solid var(--border); border-radius:6px; font-family:ui-monospace, monospace; font-size:.95rem; }
-  .composer { display:flex; flex-wrap:wrap; gap:.4rem; margin:.4rem 0; align-items:center; }
-  .composer select, .composer input { padding:.3rem .4rem; border:1px solid var(--border); border-radius:6px; }
   button { padding:.35rem .8rem; border:1px solid var(--border); border-radius:6px; background:#fff; cursor:pointer; }
   button.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
   button:disabled { opacity:.5; cursor:default; }
@@ -37,6 +36,36 @@
   th { background:#f3f4f6; font-weight:600; }
   td.form { font-size:1.05rem; }
   .hint { color:var(--muted); font-size:.82rem; }
+  /* ── builder ── */
+  .builder { border:1px solid var(--border); border-radius:8px; padding:.8rem; margin:.5rem 0 .8rem; background:#fff; }
+  .row { display:flex; flex-wrap:wrap; gap:.5rem .6rem; align-items:center; margin:.35rem 0; }
+  .row label.fld { display:flex; flex-direction:column; gap:.15rem; font-size:.8rem; color:var(--muted); }
+  .row label.fld > * { font-size:.95rem; color:var(--fg); }
+  select { padding:.35rem .4rem; border:1px solid var(--border); border-radius:6px; background:#fff; max-width:26rem; }
+  .gk-echo { color:var(--accent); font-size:1rem; min-width:4rem; }
+  /* keyword chips */
+  .kp { margin:.4rem 0 .2rem; }
+  .kp .cat { display:flex; gap:.3rem; align-items:baseline; flex-wrap:wrap; margin:.2rem 0; }
+  .kp .cat > span.catlbl { font-size:.78rem; color:var(--muted); min-width:7.5rem; }
+  .chip { padding:.12rem .55rem; border:1px solid var(--border); border-radius:999px; background:#fff; cursor:pointer; font-size:.85rem; }
+  .chip.on { background:var(--accent); border-color:var(--accent); color:#fff; }
+  .kp details { margin:.3rem 0 0; }
+  .kp summary { cursor:pointer; font-size:.82rem; color:var(--muted); }
+  .tokens { font-family:ui-monospace, monospace; font-size:.85rem; color:var(--accent); }
+  .subcard { border:1px solid var(--border); border-radius:8px; padding:.5rem .7rem; margin:.45rem 0; background:#fafaf7; }
+  .subcard > summary { cursor:pointer; font-size:.9rem; }
+  .pp-row { display:grid; grid-template-columns: 11rem 11rem 16rem 1fr; gap:.5rem; align-items:center; margin:.3rem 0; }
+  .pp-row .pp-name { font-size:.9rem; }
+  .linepreview { font-family:ui-monospace, monospace; font-size:.88rem; background:#f3f4f6; border-radius:6px; padding:.4rem .6rem; margin:.5rem 0; white-space:pre-wrap; }
+  /* ── on-screen Greek keyboard ── */
+  #kbd { position:fixed; left:50%; transform:translateX(-50%); bottom:0; z-index:50; background:#fff;
+         border:1px solid var(--border); border-bottom:none; border-radius:10px 10px 0 0;
+         padding:.45rem .6rem .55rem; box-shadow:0 -2px 12px rgba(0,0,0,.08); display:none; }
+  #kbd.show { display:block; }
+  #kbd .krow { display:flex; gap:.25rem; justify-content:center; margin:.18rem 0; }
+  #kbd button { padding:.25rem .5rem; min-width:2.1rem; font-size:1.05rem; border-radius:6px; }
+  #kbd button.dia { background:#eef2ff; }
+  #kbd .klbl { font-size:.72rem; color:var(--muted); text-align:center; margin-bottom:.1rem; }
 </style>
 </head>
 <body>
@@ -46,81 +75,504 @@
 </header>
 <main>
   <div id="left">
-    <input type="text" id="search" placeholder="search lemma (Unicode or beta-code)…" autocomplete="off">
+    <input type="text" id="search" class="gk" placeholder="search lemma (Unicode or beta-code)…" autocomplete="off">
     <ul id="results"></ul>
   </div>
   <div id="right">
     <h2 id="lemma-title">Select a lemma — or create a new entry below</h2>
     <div id="blocks"></div>
 
-    <h2>Entry editor</h2>
+    <h2>New entry builder</h2>
     <p class="hint">
-      One <code>:le:</code> line (the lemma) followed by stem lines.
-      Greek may be typed in Unicode (converted to beta-code on save) or beta-code.
-      Tags: <code>:no:</code> noun/adj stem &nbsp; <code>:vs:</code> verb stem &nbsp;
-      <code>:de:</code> derivation (regular verb, expands all principal parts) &nbsp;
-      <code>:wd:</code> indeclinable whole word.
+      Fill in the fields — no knowledge of the stemlib file format is needed.
+      Greek fields accept Unicode or beta-code (typed beta-code like <code>sofi/a</code>
+      is converted as you leave the field; an on-screen keyboard appears when a Greek
+      field has focus).
     </p>
-    <div class="composer">
-      <select id="c-tag">
-        <option value=":no:">:no: noun/adj</option>
-        <option value=":de:">:de: derivation (verb)</option>
-        <option value=":vs:">:vs: verb stem</option>
-        <option value=":wd:">:wd: indeclinable</option>
-      </select>
-      <input type="text" id="c-stem" placeholder="stem (e.g. σοφι)" size="14">
-      <select id="c-type"></select>
-      <input type="text" id="c-keys" placeholder="extra keys (e.g. fem)" size="18">
-      <button id="c-add">add line</button>
-      <span class="hint">the dropdown lists the valid stemtypes / derivtypes for the chosen tag</span>
+    <div class="builder">
+      <div class="row">
+        <label class="fld">lemma (dictionary headword, with accents)
+          <span style="display:flex;gap:.4rem;align-items:center">
+            <input type="text" id="b-lemma" class="gk" size="16" placeholder="σοφία">
+            <span class="gk-echo" id="b-lemma-echo"></span>
+          </span>
+        </label>
+        <label class="fld">kind of entry
+          <select id="b-tag">
+            <option value=":no:">noun — declined stem</option>
+            <option value=":aj:">adjective — declined stem</option>
+            <option value=":de:">verb, regular — all principal parts generated</option>
+            <option value=":vs:">verb stem — one tense system only</option>
+            <option value=":vb:">verb form — complete inflected word</option>
+            <option value=":wd:">indeclinable — complete word (adverb, particle…)</option>
+          </select>
+        </label>
+      </div>
+      <div class="row">
+        <label class="fld" id="b-stem-fld">stem (the unchanging part, no ending)
+          <span style="display:flex;gap:.4rem;align-items:center">
+            <input type="text" id="b-stem" class="gk" size="14" placeholder="σοφι">
+            <span class="gk-echo" id="b-stem-echo"></span>
+          </span>
+        </label>
+        <label class="fld" id="b-type-fld">inflection pattern
+          <select id="b-type"></select>
+        </label>
+        <label class="fld" style="flex-direction:row;align-items:center;gap:.3rem" title="stem only occurs in compound words">
+          <input type="checkbox" id="b-dash"> only in compounds
+        </label>
+      </div>
+
+      <div class="kp" id="b-keys"></div>
+      <div class="hint">selected keywords: <span class="tokens" id="b-keys-tokens">—</span></div>
+
+      <details class="subcard" id="b-pp" hidden>
+        <summary>Principal-part adjustments (only when a tense system is irregular)</summary>
+        <p class="hint">Enable a row only to override that tense system: give an
+          irregular stem suffix and/or a different inflection pattern, or restrict
+          it (e.g. middle only). Untouched systems are generated regularly.</p>
+        <div id="b-pp-rows"></div>
+      </details>
+
+      <details class="subcard" id="b-var">
+        <summary>Restrict to specific forms / add form variants (<code>@</code> lines)</summary>
+        <p class="hint">Each variant restricts the stem line to certain forms, or —
+          with an explicit ending — adds a complete extra form
+          (ending in Greek, e.g. <span class="tokens">ρσι</span> for an extra dative plural).</p>
+        <div id="b-var-rows"></div>
+        <button id="b-var-add" type="button">add form variant</button>
+      </details>
+
+      <div class="linepreview" id="b-out"></div>
+      <div class="row">
+        <button id="b-insert" class="primary" type="button">add to editor</button>
+        <span class="hint">appends the generated lines to the raw editor below; the editor content is what gets saved</span>
+      </div>
     </div>
+
+    <h2>Raw editor</h2>
+    <p class="hint">
+      Stemlib source for one lemma: a <code>:le:</code> line followed by stem lines.
+      Editable directly if you know the format; the builder above writes here.
+    </p>
     <textarea id="editor" spellcheck="false" placeholder=":le:σοφία
 :no:σοφι a_hs fem"></textarea>
     <div style="margin-top:.5rem">
       <button id="preview-btn">preview forms</button>
       <button id="save-btn" class="primary">save to overlay</button>
+      <button id="clear-btn">clear</button>
       <span id="status"></span>
     </div>
     <div id="preview"></div>
   </div>
 </main>
+
+<div id="kbd">
+  <div class="klbl">click to insert — diacritics apply to the letter before the cursor</div>
+  <div class="krow" id="kbd-letters"></div>
+  <div class="krow" id="kbd-dia"></div>
+</div>
+
 <script>
 "use strict";
 const $ = (id) => document.getElementById(id);
 let types = { stemtypes: [], derivtypes: [] };
+let keywordCats = [];
 
 async function api(path, opts) {
   const r = await fetch(path, opts);
   return r.json();
 }
 
-// ── types for the composer dropdown ────────────────────────────────────────
-async function loadTypes() {
-  types = await api("/api/types");
-  fillTypeSelect();
+// ── beta-code → unicode (client-side mirror of betacode.rs) ────────────────
+const BETA_LETTERS = {
+  a:"α", b:"β", g:"γ", d:"δ", e:"ε", z:"ζ", h:"η", q:"θ", i:"ι", k:"κ",
+  l:"λ", m:"μ", n:"ν", c:"ξ", o:"ο", p:"π", r:"ρ", s:"σ", t:"τ", u:"υ",
+  f:"φ", x:"χ", y:"ψ", w:"ω", v:"ϝ",
+};
+const BETA_DIA = { ")":"̓", "(":"̔", "/":"́", "\\":"̀",
+                   "=":"͂", "|":"ͅ", "+":"̈", "_":"̄", "^":"̆" };
+function betaToUni(s) {
+  let out = "", upper = false;
+  for (const ch of s) {
+    const lc = ch.toLowerCase();
+    if (ch === "*") { upper = true; continue; }
+    if (BETA_LETTERS[lc]) {
+      let g = BETA_LETTERS[lc];
+      if (upper || ch !== lc) g = g.toUpperCase();
+      upper = false;
+      out += g;
+    } else if (BETA_DIA[ch]) {
+      out += BETA_DIA[ch];
+    } else {
+      out += ch;
+    }
+  }
+  out = out.normalize("NFC");
+  // final sigma
+  return out.replace(/σ(?![Ͱ-Ͽἀ-῿̀-ͅ])/g, "ς");
 }
-function fillTypeSelect() {
-  const tag = $("c-tag").value;
-  const list = tag === ":de:" ? types.derivtypes : types.stemtypes;
-  $("c-type").innerHTML = list
-    .map((t) => `<option value="${t.name}">${t.name} (${t.class})</option>`)
-    .join("");
-}
-$("c-tag").addEventListener("change", fillTypeSelect);
 
-$("c-add").addEventListener("click", () => {
-  const tag = $("c-tag").value;
-  const stem = $("c-stem").value.trim();
-  const type = $("c-type").value;
-  const keys = $("c-keys").value.trim();
-  if (!stem) { setStatus("enter a stem first", true); return; }
-  const line = tag === ":wd:"
-    ? `${tag}${stem} ${keys || "indecl"}`
-    : `${tag}${stem} ${type}${keys ? " " + keys : ""}`;
-  const ed = $("editor");
-  ed.value = (ed.value.trimEnd() ? ed.value.trimEnd() + "\n" : "") + line + "\n";
-  schedulePreview();
+// Greek-enabled inputs: live echo while typing beta, convert on blur.
+function wireGreekInput(input, echo) {
+  input.addEventListener("input", () => {
+    if (echo) {
+      const v = input.value;
+      echo.textContent = /^[\x00-\x7f]*$/.test(v) && v ? betaToUni(v) : "";
+    }
+    kbdAttach(input);
+  });
+  input.addEventListener("focus", () => kbdAttach(input));
+  input.addEventListener("blur", async () => {
+    const v = input.value.trim();
+    if (v && /^[\x00-\x7f]*$/.test(v) && /[a-zA-Z]/.test(v)) {
+      // server is the authority; fall back to the local converter offline
+      try {
+        const d = await api("/api/beta?q=" + encodeURIComponent(v));
+        input.value = d.unicode || betaToUni(v);
+      } catch { input.value = betaToUni(v); }
+      if (echo) echo.textContent = "";
+      input.dispatchEvent(new Event("change"));
+      refreshOut();
+    }
+  });
+}
+
+// ── on-screen keyboard ──────────────────────────────────────────────────────
+let kbdTarget = null;
+function buildKbd() {
+  const letters = "αβγδεζηθικλμνξοπρστυφχψω";
+  $("kbd-letters").innerHTML = [...letters]
+    .map((g) => `<button type="button" data-ins="${g}">${g}</button>`)
+    .join("");
+  const dia = [
+    ["́", "ά", "acute"], ["̀", "ὰ", "grave"], ["͂", "ᾶ", "circumflex"],
+    ["̓", "ἀ", "smooth breathing"], ["̔", "ἁ", "rough breathing"],
+    ["ͅ", "ᾳ", "iota subscript"], ["̈", "ϊ", "diaeresis"],
+    ["̄", "ᾱ", "macron"], ["̆", "ᾰ", "breve"],
+  ];
+  $("kbd-dia").innerHTML =
+    dia.map(([c, lbl, t]) => `<button type="button" class="dia" data-dia="${c}" title="${t}">${lbl}</button>`).join("") +
+    `<button type="button" data-bksp="1" title="backspace">⌫</button>` +
+    `<button type="button" data-close="1" title="hide keyboard">✕</button>`;
+}
+function kbdAttach(input) {
+  kbdTarget = input;
+  $("kbd").classList.add("show");
+}
+$("kbd").addEventListener("mousedown", (e) => e.preventDefault()); // keep focus
+$("kbd").addEventListener("click", (e) => {
+  const b = e.target.closest("button");
+  if (!b || !kbdTarget) return;
+  if (b.dataset.close) { $("kbd").classList.remove("show"); return; }
+  const el = kbdTarget;
+  const start = el.selectionStart ?? el.value.length;
+  const end = el.selectionEnd ?? el.value.length;
+  let v = el.value, caret = start;
+  if (b.dataset.bksp) {
+    if (start === end && start > 0) { v = v.slice(0, start - 1) + v.slice(end); caret = start - 1; }
+    else { v = v.slice(0, start) + v.slice(end); caret = start; }
+  } else if (b.dataset.dia) {
+    // apply combining mark to the char before the caret, recompose
+    if (start > 0) {
+      const head = (v.slice(0, start) + b.dataset.dia).normalize("NFC");
+      v = head + v.slice(end);
+      caret = head.length;
+    }
+  } else if (b.dataset.ins) {
+    let g = b.dataset.ins;
+    v = v.slice(0, start) + g + v.slice(end);
+    caret = start + g.length;
+    // final-sigma fixup around the insertion point
+    v = v.replace(/σ(?![Ͱ-Ͽἀ-῿̀-ͅ])/g, "ς")
+         .replace(/ς(?=[Ͱ-Ͽἀ-῿])/g, "σ");
+  }
+  el.value = v;
+  el.setSelectionRange(caret, caret);
+  el.dispatchEvent(new Event("input"));
+  refreshOut();
 });
+document.addEventListener("focusin", (e) => {
+  const t = e.target;
+  if ((t.classList && t.classList.contains("gk")) || t.id === "editor") {
+    kbdAttach(t);
+  } else if (!$("kbd").contains(t)) {
+    $("kbd").classList.remove("show");
+  }
+});
+
+// ── keyword chip picker (reusable) ──────────────────────────────────────────
+// Renders chip rows into `container`; toggled tokens are kept in `state` (a Set).
+function makeKeyPicker(container, catIds, state, onChange) {
+  const cats = keywordCats.filter((c) => !catIds || catIds.includes(c.id));
+  const render = (list) => list
+    .map((c) => `<div class="cat"><span class="catlbl">${c.label}</span>` +
+      c.keywords.map((k) =>
+        `<button type="button" class="chip" data-tok="${k.token}" title="${k.token}">${k.label}</button>`
+      ).join("") + `</div>`)
+    .join("");
+  const basic = cats.filter((c) => !c.advanced);
+  const adv = cats.filter((c) => c.advanced);
+  container.innerHTML = render(basic) +
+    (adv.length ? `<details><summary>Advanced keywords (accent, augment, usage…)</summary>${render(adv)}</details>` : "");
+  container.addEventListener("click", (e) => {
+    const chip = e.target.closest(".chip");
+    if (!chip) return;
+    const tok = chip.dataset.tok;
+    if (state.has(tok)) { state.delete(tok); chip.classList.remove("on"); }
+    else { state.add(tok); chip.classList.add("on"); }
+    if (onChange) onChange();
+    refreshOut();
+  });
+}
+
+// ── builder state ───────────────────────────────────────────────────────────
+const stemKeys = new Set();
+const PP = [
+  ["pr", "present system"],
+  ["fu", "future"],
+  ["ao", "aorist"],
+  ["pf", "perfect active"],
+  ["pp", "perfect middle/passive"],
+  ["ap", "aorist passive"],
+  ["fp", "future passive"],
+];
+const ppState = {}; // id -> {on, suffix, type, keys:Set}
+let varRows = [];   // [{keys:Set, end:""}]
+let varSeq = 0;
+
+const CLASS_ORDER = ["noun1","noun2","noun3","nounstem","adj1","adj2","adj3",
+  "indecl","indecl1","indecl3","pp_pr","pp_fu","pp_ao","pp_pf","pp_pp","pp_ap",
+  "pp_fp","verbstem","reg_deriv","prim_deriv"];
+const NOMINAL_TAGS = [":no:", ":aj:", ":wd:"];
+const VERB_CLASSES = (c) => c.startsWith("pp_") || c === "verbstem";
+
+function typeOptions(tag) {
+  let list;
+  if (tag === ":de:") list = types.derivtypes;
+  else if (tag === ":vs:") list = types.stemtypes.filter((t) => VERB_CLASSES(t.class));
+  else list = types.stemtypes.filter((t) => !VERB_CLASSES(t.class));
+  // group by class, in CLASS_ORDER
+  const groups = new Map();
+  for (const t of list) {
+    if (!groups.has(t.class)) groups.set(t.class, { label: t.class_label, items: [] });
+    groups.get(t.class).items.push(t);
+  }
+  const order = [...groups.keys()].sort(
+    (a, b) => (CLASS_ORDER.indexOf(a) + 1 || 99) - (CLASS_ORDER.indexOf(b) + 1 || 99));
+  return order.map((cls) => {
+    const g = groups.get(cls);
+    const opts = g.items
+      .map((t) => `<option value="${t.name}">${t.name}${t.label !== t.name ? " — " + t.label : ""}</option>`)
+      .join("");
+    return `<optgroup label="${g.label}">${opts}</optgroup>`;
+  }).join("");
+}
+
+function verbTypeOptions() {
+  return `<option value="">(default pattern)</option>` +
+    typeOptions(":vs:");
+}
+
+function buildPpRows() {
+  $("b-pp-rows").innerHTML = PP.map(([id, label]) => `
+    <div class="pp-row">
+      <label><input type="checkbox" data-pp-on="${id}"> <span class="pp-name">${label}</span></label>
+      <span style="display:flex;gap:.3rem;align-items:center">
+        <input type="text" class="gk" data-pp-suffix="${id}" size="7" placeholder="stem suffix" title="irregular stem suffix for this tense system (Greek), e.g. ηθ">
+      </span>
+      <select data-pp-type="${id}" title="inflection pattern override">${verbTypeOptions()}</select>
+      <span style="display:flex;gap:.3rem;align-items:center;flex-wrap:wrap" data-pp-keys="${id}"></span>
+    </div>`).join("");
+  const PPKEYS = [["mid","middle only"],["pass","passive only"],["attic","Attic"],
+                  ["ionic","Ionic"],["epic","Epic"],["doric","Doric"],["aeolic","Aeolic"],
+                  ["n_infix","nasal infix"],["pres_redupl","pres. reduplication"],["late","late"]];
+  for (const [id] of PP) {
+    ppState[id] = { on: false, suffix: "", type: "", keys: new Set() };
+    const holder = document.querySelector(`[data-pp-keys="${id}"]`);
+    holder.innerHTML = PPKEYS
+      .map(([t, l]) => `<button type="button" class="chip" data-tok="${t}">${l}</button>`).join("");
+    holder.addEventListener("click", (e) => {
+      const chip = e.target.closest(".chip"); if (!chip) return;
+      const tok = chip.dataset.tok;
+      const st = ppState[id];
+      if (st.keys.has(tok)) { st.keys.delete(tok); chip.classList.remove("on"); }
+      else { st.keys.add(tok); chip.classList.add("on"); st.on = true;
+             document.querySelector(`[data-pp-on="${id}"]`).checked = true; }
+      refreshOut();
+    });
+  }
+  $("b-pp-rows").addEventListener("change", (e) => {
+    const t = e.target;
+    if (t.dataset.ppOn) ppState[t.dataset.ppOn].on = t.checked;
+    if (t.dataset.ppType) { ppState[t.dataset.ppType].type = t.value;
+      if (t.value) { ppState[t.dataset.ppType].on = true;
+        document.querySelector(`[data-pp-on="${t.dataset.ppType}"]`).checked = true; } }
+    refreshOut();
+  });
+  $("b-pp-rows").addEventListener("input", (e) => {
+    const t = e.target;
+    if (t.dataset.ppSuffix) { ppState[t.dataset.ppSuffix].suffix = t.value.trim();
+      if (t.value.trim()) { ppState[t.dataset.ppSuffix].on = true;
+        document.querySelector(`[data-pp-on="${t.dataset.ppSuffix}"]`).checked = true; } }
+    refreshOut();
+  });
+  document.querySelectorAll("[data-pp-suffix]").forEach((i) => wireGreekInput(i, null));
+}
+
+function variantCatIds() {
+  const tag = $("b-tag").value;
+  return NOMINAL_TAGS.includes(tag)
+    ? ["case", "gender", "number", "degree", "dialect"]
+    : ["tense", "mood", "voice", "person", "number", "case", "gender", "dialect"];
+}
+
+function addVarRow() {
+  const id = varSeq++;
+  const row = { id, keys: new Set(), end: "" };
+  varRows.push(row);
+  const div = document.createElement("details");
+  div.className = "subcard";
+  div.open = true;
+  div.innerHTML = `
+    <summary>variant <span class="tokens" data-var-sum="${id}">@</span>
+      <button type="button" data-var-del="${id}" style="float:right">remove</button></summary>
+    <div class="row">
+      <label class="fld">explicit ending (optional — makes a complete extra form)
+        <input type="text" class="gk" data-var-end="${id}" size="8" placeholder="e.g. ρσι">
+      </label>
+    </div>
+    <div class="kp" data-var-keys="${id}"></div>`;
+  $("b-var-rows").appendChild(div);
+  makeKeyPicker(div.querySelector(`[data-var-keys="${id}"]`), variantCatIds(), row.keys,
+    () => updateVarSummary(row));
+  const endInput = div.querySelector(`[data-var-end="${id}"]`);
+  wireGreekInput(endInput, null);
+  endInput.addEventListener("input", () => { row.end = endInput.value.trim(); updateVarSummary(row); refreshOut(); });
+  endInput.addEventListener("change", () => { row.end = endInput.value.trim(); updateVarSummary(row); refreshOut(); });
+  div.querySelector(`[data-var-del="${id}"]`).addEventListener("click", (e) => {
+    e.preventDefault();
+    varRows = varRows.filter((r) => r.id !== id);
+    div.remove();
+    refreshOut();
+  });
+  refreshOut();
+}
+function updateVarSummary(row) {
+  const el = document.querySelector(`[data-var-sum="${row.id}"]`);
+  if (el) el.textContent = serializeVar(row) || "@";
+}
+
+// ── serialization ───────────────────────────────────────────────────────────
+function orderedTokens(set) {
+  // keep stemlib-conventional order: same order as the keyword catalogue
+  const all = keywordCats.flatMap((c) => c.keywords.map((k) => k.token));
+  return [...set].sort((a, b) => all.indexOf(a) - all.indexOf(b));
+}
+function serializeVar(row) {
+  const toks = orderedTokens(row.keys);
+  const parts = [];
+  if (row.end) parts.push("end:" + row.end);
+  parts.push(...toks);
+  return parts.length ? "@ " + parts.join(" ") : "";
+}
+function serializeStemLine() {
+  const tag = $("b-tag").value;
+  const stem = $("b-stem").value.trim();
+  if (!stem) return "";
+  const dash = $("b-dash").checked ? "-" : "";
+  const keys = orderedTokens(stemKeys);
+  let parts;
+  if (tag === ":wd:" || tag === ":vb:") {
+    parts = keys.length ? keys : (tag === ":wd:" ? ["indecl"] : []);
+  } else {
+    parts = [$("b-type").value, ...keys].filter(Boolean);
+  }
+  return `${dash}${tag}${stem}${parts.length ? " " + parts.join(" ") : ""}`;
+}
+function serializeBlockLines() {
+  const lines = [];
+  const stemLine = serializeStemLine();
+  if (!stemLine) return lines;
+  lines.push(stemLine);
+  if ($("b-tag").value === ":de:") {
+    for (const [id] of PP) {
+      const st = ppState[id];
+      if (!st.on) continue;
+      let line = ";" + id;
+      if (st.suffix) line += ",-" + st.suffix;
+      const rest = [st.type, ...orderedTokens(st.keys)].filter(Boolean);
+      if (rest.length) line += " " + rest.join(" ");
+      lines.push(line);
+    }
+  }
+  for (const row of varRows) {
+    const v = serializeVar(row);
+    if (v) lines.push(v);
+  }
+  return lines;
+}
+function refreshOut() {
+  $("b-keys-tokens").textContent = orderedTokens(stemKeys).join(" ") || "—";
+  const lemma = $("b-lemma").value.trim();
+  const lines = serializeBlockLines();
+  const all = [];
+  if (lemma) all.push(":le:" + lemma);
+  all.push(...lines);
+  $("b-out").textContent = all.join("\n") || "(fill in lemma + stem to see the generated lines)";
+}
+
+// ── builder wiring ──────────────────────────────────────────────────────────
+function onTagChange() {
+  const tag = $("b-tag").value;
+  const wholeWord = tag === ":wd:" || tag === ":vb:";
+  $("b-type-fld").hidden = wholeWord;
+  $("b-pp").hidden = tag !== ":de:";
+  $("b-stem-fld").querySelector("input").placeholder =
+    wholeWord ? "complete word" : tag === ":de:" ? "verb root, e.g. λυ" : "stem, e.g. σοφι";
+  $("b-stem-fld").childNodes[0].textContent = wholeWord
+    ? "word (the complete form)" : tag === ":de:" ? "verb root (present stem minus -ω/-ομαι)"
+    : "stem (the unchanging part, no ending)";
+  if (!wholeWord) $("b-type").innerHTML = typeOptions(tag);
+  // variant pickers depend on nominal/verbal tag — rebuild them
+  $("b-var-rows").innerHTML = "";
+  varRows = [];
+  refreshOut();
+}
+
+$("b-tag").addEventListener("change", onTagChange);
+$("b-type").addEventListener("change", refreshOut);
+$("b-dash").addEventListener("change", refreshOut);
+$("b-var-add").addEventListener("click", addVarRow);
+$("b-lemma").addEventListener("input", refreshOut);
+$("b-stem").addEventListener("input", refreshOut);
+
+$("b-insert").addEventListener("click", () => {
+  const lemma = $("b-lemma").value.trim();
+  const lines = serializeBlockLines();
+  if (!lines.length) { setStatus("enter a stem first", true); return; }
+  const ed = $("editor");
+  const existing = ed.value.trim();
+  const out = [];
+  if (!existing) {
+    if (!lemma) { setStatus("enter a lemma first", true); return; }
+    out.push(":le:" + lemma);
+  }
+  out.push(...lines);
+  ed.value = (existing ? existing + "\n" : "") + out.join("\n") + "\n";
+  schedulePreview();
+  setStatus("lines added — check the preview, then save", false);
+});
+
+// ── load vocabularies ───────────────────────────────────────────────────────
+async function loadVocab() {
+  const [t, k] = await Promise.all([api("/api/types"), api("/api/keywords")]);
+  types = t;
+  keywordCats = k.categories;
+  makeKeyPicker($("b-keys"), null, stemKeys);
+  buildPpRows();
+  onTagChange();
+}
 
 // ── search ──────────────────────────────────────────────────────────────────
 let searchTimer = null;
@@ -184,6 +636,7 @@ function schedulePreview() {
 }
 $("editor").addEventListener("input", schedulePreview);
 $("preview-btn").addEventListener("click", doPreview);
+$("clear-btn").addEventListener("click", () => { $("editor").value = ""; $("preview").innerHTML = ""; });
 
 async function doPreview() {
   const block = $("editor").value.trim();
@@ -209,8 +662,7 @@ async function doPreview() {
     )
     .join("");
   $("preview").innerHTML = `
-    <p class="hint">${data.forms.length} forms (beta-code: <code>${escapeHtml(data.beta).replace(/\n/g, " ⏎ ")}</code>).
-    Accents are not generated — compare accent-insensitively.</p>
+    <p class="hint">${data.forms.length} forms (beta-code: <code>${escapeHtml(data.beta).replace(/\n/g, " ⏎ ")}</code>).</p>
     <table><thead><tr><th>form</th><th>pos</th><th>tense/mood/voice</th><th>pers · num · case · gend</th><th>dialects</th><th>table</th></tr></thead>
     <tbody>${rows}</tbody></table>`;
 }
@@ -237,7 +689,10 @@ function escapeHtml(s) {
   return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 }
 
-loadTypes();
+buildKbd();
+wireGreekInput($("b-lemma"), $("b-lemma-echo"));
+wireGreekInput($("b-stem"), $("b-stem-echo"));
+loadVocab();
 </script>
 </body>
 </html>

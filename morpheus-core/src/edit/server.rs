@@ -69,6 +69,10 @@ pub fn run_edit_server(
             (Method::Get, "/api/search") => api_search(&state, &query),
             (Method::Get, "/api/lemma") => api_lemma(&state, &query),
             (Method::Get, "/api/types") => api_types(&state),
+            (Method::Get, "/api/keywords") => {
+                json_response(200, &super::metadata::keyword_json())
+            }
+            (Method::Get, "/api/beta") => api_beta(&query),
             (Method::Post, "/api/preview") => {
                 let body = read_body(&mut request);
                 api_preview(&state, &body)
@@ -195,20 +199,40 @@ fn api_lemma(state: &State, query: &str) -> Response<std::io::Cursor<Vec<u8>>> {
 }
 
 fn api_types(state: &State) -> Response<std::io::Cursor<Vec<u8>>> {
+    use super::metadata::{class_label, stemtype_label};
+    let type_json = |name: &str, class: &str| {
+        json!({
+            "name": name,
+            "class": class,
+            "class_label": class_label(class),
+            "label": stemtype_label(name).unwrap_or(name),
+        })
+    };
     let stemlib = state.stemlib.read().unwrap().clone();
     let mut stemtypes: Vec<Value> = stemlib
         .stem_types
         .values()
-        .map(|s| json!({"name": s.name, "class": s.class_str}))
+        .map(|s| type_json(&s.name, &s.class_str))
         .collect();
     stemtypes.sort_by(|a, b| a["name"].as_str().cmp(&b["name"].as_str()));
     let mut derivtypes: Vec<Value> = stemlib
         .deriv_types
         .values()
-        .map(|s| json!({"name": s.name, "class": s.class_str}))
+        .map(|s| type_json(&s.name, &s.class_str))
         .collect();
     derivtypes.sort_by(|a, b| a["name"].as_str().cmp(&b["name"].as_str()));
     json_response(200, &json!({ "stemtypes": stemtypes, "derivtypes": derivtypes }))
+}
+
+/// Authoritative beta↔unicode conversion for the UI.
+fn api_beta(query: &str) -> Response<std::io::Cursor<Vec<u8>>> {
+    let q = query_param(query, "q").unwrap_or_default();
+    let (beta, unicode) = if q.is_ascii() {
+        (q.clone(), beta_to_unicode(&q))
+    } else {
+        (unicode_to_beta(&q), q.clone())
+    };
+    json_response(200, &json!({ "beta": beta, "unicode": unicode }))
 }
 
 fn api_preview(state: &State, body: &str) -> Response<std::io::Cursor<Vec<u8>>> {
@@ -377,6 +401,12 @@ fn block_to_beta(block: &str) -> String {
                     };
                 }
             }
+            // `;` qualifier and `@` continuation lines may carry Greek in
+            // suffix overrides (;ap,-ηθ) or explicit endings (@ end:ρσι);
+            // unicode_to_beta passes ASCII through unchanged.
+            if (trimmed.starts_with(';') || trimmed.starts_with('@')) && !trimmed.is_ascii() {
+                return unicode_to_beta(trimmed);
+            }
             trimmed.to_string()
         })
         .collect::<Vec<_>>()
@@ -512,6 +542,16 @@ mod tests {
     fn beta_block_passes_through() {
         let block = ":le:sofi/a\n:no:sofi a_hs fem";
         assert_eq!(block_to_beta(block), block);
+    }
+
+    #[test]
+    fn qualifier_and_continuation_lines_pass_through() {
+        let block = ":le:δύναμαι\n:de:δυν reg_conj\n;ap,-ηθ aor2 mid\n@ end:ρσι dat pl";
+        let beta = block_to_beta(block);
+        assert_eq!(beta, ":le:du/namai\n:de:dun reg_conj\n;ap,-hq aor2 mid\n@ end:rsi dat pl");
+        // ASCII qualifier lines pass through untouched
+        let ascii = ";ap,-hq aor2 mid\n@ end:rsi dat pl";
+        assert_eq!(block_to_beta(ascii), ascii);
     }
 
     #[test]
