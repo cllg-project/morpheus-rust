@@ -1409,7 +1409,7 @@
       "μεσήμβριος:adjective",
       "μεσημβρία:adjective",
       "μεσημβριάζω:adjective",
-      "μεσημβριάω:adjective"
+      "μεσημβριάω:noun"
     ]
   },
   {
@@ -3014,9 +3014,9 @@
       "ἀνανεάω:verb",
       "ἀνανεόω:participle",
       "ἀναφέρω:participle",
-      "ἀνεάω:participle",
-      "ἀνοίζω:participle",
-      "ἀνοίομαι:participle",
+      "ἀνεάω:verb",
+      "ἀνοίζω:verb",
+      "ἀνοίομαι:verb",
       "ἀνωθέω:verb",
       "ἀνόζω:verb",
       "ἀνώζω:verb",
@@ -5201,15 +5201,15 @@
       "V katame/nw  aor ind act 3rd pl\t\t\taor1"
     ],
     "rust": [
+      "καθέννυμι:verb",
+      "καθενίζω:verb",
+      "καθενόω:verb",
       "καταμένω:verb",
-      "κατεμέννυμι:verb",
-      "κατεμενίζω:participle",
-      "κατεμεναίρω:verb",
-      "κατεμενόω:verb",
-      "κατεμινάω:verb",
-      "κατεμινέω:verb",
-      "κατεμινίζω:verb",
-      "κατεμινόω:participle"
+      "κατεναίρω:verb",
+      "κατενινάω:participle",
+      "κατενινέω:participle",
+      "κατενινίζω:verb",
+      "κατενινόω:verb"
     ]
   },
   {
@@ -7799,12 +7799,12 @@
     "rust": [
       "μαίνομαι:verb",
       "μαίομαι:verb",
-      "ἐμάημι:verb",
       "ἐμέω:verb",
-      "ἐμαάω:verb",
-      "ἐμαίρω:verb",
-      "ἐμεάω:verb",
-      "ἐμός:verb"
+      "ἐμός:verb",
+      "ἐνάημι:verb",
+      "ἐναάω:verb",
+      "ἐναίρω:verb",
+      "ἐνεάω:verb"
     ]
   },
   {
@@ -8027,8 +8027,7 @@
       "N *mou=sai  fem nom/voc pl\taeolic\t\ta_hs"
     ],
     "rust": [
-      "Μοῦσαι:noun",
-      "μαίνομαι:noun",
+      "μαίνομαι:participle",
       "μαίομαι:participle",
       "μυζάω:participle",
       "μύζω:participle",
@@ -8201,16 +8200,11 @@
       "ἐναίρω:verb",
       "ἐνεάω:verb",
       "ἐνειμί:verb",
-      "ἐνεμέννυμι:verb",
       "ἐνεμέω:verb",
-      "ἐνεμίημι:verb",
-      "ἐνεμεάω:verb",
-      "ἐνεμειμί:verb",
-      "ἐνεμεναίρω:verb",
-      "ἐνεμνάω:verb",
-      "ἐνεμνέω:verb",
-      "ἐνεμνέω2:verb",
-      "ἐνεμνέω3:verb",
+      "ἐννάω:verb",
+      "ἐννέω:verb",
+      "ἐννέω2:verb",
+      "ἐννέω3:verb",
       "ἑνίζω:verb",
       "ἑνόω:verb",
       "ἕννυμι:verb"
@@ -8530,9 +8524,9 @@
     ],
     "rust": [
       "ἐκμάσσω:verb",
-      "ἐξεμάγνυμι:verb",
-      "ἐξεμάγω:verb",
-      "ἐξεμαξιάω:verb"
+      "ἐξενάγνυμι:verb",
+      "ἐξενάγω:verb",
+      "ἐξεναξιάω:verb"
     ]
   },
   {
@@ -9125,7 +9119,8 @@
     "rust": [
       "Βορέας:noun",
       "βορά:noun",
-      "βοράω:noun"
+      "βοράω:noun",
+      "βορός:noun"
     ]
   },
   {
@@ -9139,7 +9134,9 @@
       "V a)ntai/rw  pres inf act\tattic epic\tcontr elide_preverb\tw_stem,airw"
     ],
     "rust": [
-      "ἀνθαιρέω:verb"
+      "ἀνθαιρέω:verb",
+      "ἀντάρνυμαι:verb",
+      "ἀνταίρω:verb"
     ]
   },
   {
@@ -9723,7 +9720,7 @@
     ],
     "rust": [
       "μνηστεύω:verb",
-      "ἐμνηστεύω:verb"
+      "ἐννηστεύω:verb"
     ]
   },
   {
@@ -13901,7 +13898,7 @@
       "ἁπλόω:adjective",
       "ἁπολάζω:adjective",
       "ἁπολάσκω:adjective",
-      "ἁπολάω:adjective",
+      "ἁπολάω:verb",
       "ἁπολάω2:verb",
       "ἁπολίζω:verb",
       "ἁπολεάζω:verb",
@@ -17196,8 +17193,8 @@
     ],
     "rust": [
       "μιμέομαι:verb",
-      "ἐμιμάω:verb",
-      "ἐμιμείρω:verb"
+      "ἐνιμάω:verb",
+      "ἐνιμείρω:verb"
     ]
   },
   {
@@ -18289,8 +18286,7 @@
     "rust": [
       "πέλας:adjective",
       "πελάζω:adjective",
-      "πελάω:verb",
-      "πελός:verb"
+      "πελάω:verb"
     ]
   },
   {
@@ -21541,11 +21537,11 @@
       "μυζάω:verb",
       "μύζω:verb",
       "μύρω:verb",
-      "ἐμέννυμι:verb",
       "ἐμέω:verb",
-      "ἐμεάω:verb",
-      "ἐμεναίρω:verb",
-      "ἐμιαίνω:verb"
+      "ἐναίρω:verb",
+      "ἐνεάω:verb",
+      "ἐνιαίνω:verb",
+      "ἕννυμι:verb"
     ]
   },
   {
@@ -23071,8 +23067,8 @@
       "P sunestramme/na_,sustre/fw  perf part mp fem nom/voc sg\tdoric aeolic\t\tperfp_p,reg_conj"
     ],
     "rust": [
-      "συνστράπτω:participle",
-      "συνστρέφω:participle"
+      "συστράπτω:participle",
+      "συστρέφω:participle"
     ]
   },
   {
@@ -23546,9 +23542,9 @@
     ],
     "rust": [
       "μισέω:verb",
-      "ἐμίζω:verb",
-      "ἐμισάζω:verb",
-      "ἐμισόω:verb"
+      "ἐνίζω:verb",
+      "ἐνισάζω:verb",
+      "ἐνισόω:verb"
     ]
   },
   {
@@ -24160,11 +24156,11 @@
       "V pro+emh/nu_se,promhnu/w  aor ind act 3rd sg\t\traw_preverb\taor1,reg_conj"
     ],
     "rust": [
-      "προεμέννυμι:participle",
-      "προεμαίνυμαι:participle",
-      "προεμαινέω:participle",
-      "προεμανύω:participle",
-      "προεμεναίρω:participle",
+      "προέννυμι:participle",
+      "προεναίνυμαι:participle",
+      "προεναίρω:participle",
+      "προεναινέω:participle",
+      "προενανύω:participle",
       "προμηνύω:participle"
     ]
   },
@@ -24390,7 +24386,8 @@
     ],
     "rust": [
       "ἐρυθραίνω:verb",
-      "ἐρυθριάω:verb"
+      "ἐρυθριάω:verb",
+      "ἐρυθρός:verb"
     ]
   },
   {
@@ -24778,7 +24775,6 @@
       "καταγάομαι:participle",
       "καταγαιόω:participle",
       "καταγείρω:participle",
-      "καταγεόομαι:participle",
       "καταγοάω:participle"
     ]
   },
@@ -24976,7 +24972,9 @@
       "P ai)/rw  pres part mp masc acc pl\t\t\tw_stem,airw"
     ],
     "rust": [
-      "αἱρέω:participle"
+      "αἱρέω:participle",
+      "αἴρω:participle",
+      "ἄρνυμαι:participle"
     ]
   },
   {
@@ -27261,7 +27259,7 @@
     "rust": [
       "χήρα:noun",
       "χηρεύω:noun",
-      "χηρόω:adjective",
+      "χηρόω:verb",
       "χῆρος:verb"
     ]
   },
@@ -27628,8 +27626,7 @@
       "N eu)qei=ai,eu)qu/s1  fem nom/voc pl\t\t\tus_eia_u"
     ],
     "rust": [
-      "εὐθεῖα:noun",
-      "εὐθύς:noun"
+      "εὐθεῖα:noun"
     ]
   },
   {
@@ -27906,8 +27903,8 @@
       "μύρω:verb",
       "ἐγώ:verb",
       "ἐμέω:verb",
-      "ἐμεάω:verb",
-      "ἐμός:verb"
+      "ἐμός:verb",
+      "ἐνεάω:verb"
     ]
   },
   {
@@ -30372,10 +30369,10 @@
       "μύρω:verb",
       "ἐγώ:verb",
       "ἐμέω:verb",
-      "ἐμίημι:verb",
-      "ἐμεάω:verb",
-      "ἐμοίζω:verb",
-      "ἐμός:verb"
+      "ἐμός:verb",
+      "ἐνίημι:verb",
+      "ἐνεάω:verb",
+      "ἐνοίζω:verb"
     ]
   },
   {
@@ -31015,7 +31012,7 @@
       "P e)n-lamba/nw  perf part mp masc nom/voc pl\t\t\tperfp_p"
     ],
     "rust": [
-      "ἐλλαμβάνω:participle"
+      "ἐνλαμβάνω:participle"
     ]
   },
   {
@@ -32671,15 +32668,15 @@
       "V u(pome/nw  aor ind act 3rd pl\t\t\taor1"
     ],
     "rust": [
-      "ὑπεμέννυμι:verb",
-      "ὑπεμενίζω:verb",
-      "ὑπεμεναίρω:verb",
-      "ὑπεμενόω:verb",
-      "ὑπεμινάω:verb",
-      "ὑπεμινέω:participle",
-      "ὑπεμινίζω:participle",
-      "ὑπεμινόω:verb",
-      "ὑπομένω:verb"
+      "ὑπεναίρω:verb",
+      "ὑπενινάω:verb",
+      "ὑπενινέω:verb",
+      "ὑπενινίζω:verb",
+      "ὑπενινόω:verb",
+      "ὑπομένω:verb",
+      "ὑφέννυμι:participle",
+      "ὑφενίζω:verb",
+      "ὑφενόω:verb"
     ]
   },
   {
@@ -33466,7 +33463,7 @@
       "φίλων:adjective",
       "φιλέω:adjective",
       "φιλόω:adjective",
-      "φῖλος:adjective"
+      "φῖλος:noun"
     ]
   },
   {
@@ -33979,15 +33976,15 @@
       "V diame/nw  aor ind act 3rd pl\t\t\taor1"
     ],
     "rust": [
+      "διέννυμι:verb",
       "διαμένω:verb",
-      "διεμέννυμι:verb",
-      "διεμενίζω:participle",
-      "διεμεναίρω:verb",
-      "διεμενόω:verb",
-      "διεμινάω:verb",
-      "διεμινέω:verb",
-      "διεμινίζω:verb",
-      "διεμινόω:participle"
+      "διενίζω:verb",
+      "διεναίρω:verb",
+      "διενινάω:verb",
+      "διενινέω:participle",
+      "διενινίζω:participle",
+      "διενινόω:verb",
+      "διενόω:verb"
     ]
   },
   {
@@ -35726,7 +35723,7 @@
       "P e)mfagw/n,e)nesqi/w  aor part act masc nom/voc sg\t\t\taor2"
     ],
     "rust": [
-      "ἐμεσθίω:participle"
+      "ἐνεσθίω:participle"
     ]
   },
   {
@@ -35826,8 +35823,7 @@
     "word": "δάρας",
     "c": [],
     "rust": [
-      "δαήρ:noun",
-      "δηρός:noun"
+      "δαήρ:noun"
     ]
   },
   {
@@ -36170,6 +36166,8 @@
       "P e)cai/rw  pres part act masc/neut gen sg\t\t\tw_stem,airw"
     ],
     "rust": [
+      "ἐξάρνυμαι:participle",
+      "ἐξαίρω:participle",
       "ἐξαιρέω:participle"
     ]
   },
@@ -36310,8 +36308,8 @@
     ],
     "rust": [
       "μηνύω:verb",
-      "ἐμαίνυμαι:verb",
-      "ἐμανύω:verb"
+      "ἐναίνυμαι:verb",
+      "ἐνανύω:verb"
     ]
   },
   {
@@ -36993,7 +36991,7 @@
     "rust": [
       "λάσκω:participle",
       "λούω:participle",
-      "λύω:participle"
+      "λύω:verb"
     ]
   },
   {
@@ -37242,7 +37240,6 @@
     ],
     "rust": [
       "ποιήεις:adjective",
-      "ποιός:adjective",
       "ποῖος:adjective",
       "πόα:adjective"
     ]
@@ -39017,7 +39014,8 @@
       "N makro/s  fem gen sg\tattic doric aeolic\t\tos_h_on"
     ],
     "rust": [
-      "μακρύνω:verb"
+      "μακρός:adjective",
+      "μακρύνω:adjective"
     ]
   },
   {
@@ -41133,7 +41131,7 @@
     ],
     "rust": [
       "μοχθέω:verb",
-      "ἐμοχθέω:verb"
+      "ἐνοχθέω:verb"
     ]
   },
   {
@@ -41939,8 +41937,7 @@
     ],
     "rust": [
       "πείθω:verb",
-      "πείρω:verb",
-      "πεῖσα:verb"
+      "πείρω:verb"
     ]
   },
   {

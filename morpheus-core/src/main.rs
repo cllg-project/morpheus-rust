@@ -63,6 +63,12 @@ enum Command {
     /// upstream stemlib is never modified). Pass the overlay to the analyzer
     /// with --overlay (or MORPHEUS_OVERLAY).
     Edit(EditArgs),
+    /// Convert Unicode Greek words to beta-code (for C cruncher input).
+    ///
+    /// Reads words from arguments or stdin (one per line) and prints the
+    /// corresponding beta-code. Useful for feeding input to the C morpheus
+    /// binary (e.g. `morpheus beta ἀγκῶνα` → `a)gkw=na`).
+    Beta,
 }
 
 #[derive(Args, Debug)]
@@ -131,6 +137,17 @@ fn main() -> anyhow::Result<()> {
                 language,
                 args.port,
             )?;
+            Ok(())
+        }
+        Some(Command::Beta) => {
+            use morpheus_core::unicode::unicode_to_beta;
+            let stdin = io::stdin();
+            for line in stdin.lock().lines() {
+                let word = line?;
+                for w in word.split_whitespace() {
+                    println!("{}", unicode_to_beta(w));
+                }
+            }
             Ok(())
         }
         None => run_analyze(cli),

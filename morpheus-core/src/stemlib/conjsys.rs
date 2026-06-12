@@ -234,6 +234,8 @@ fn apply_reduplication(root: &str) -> String {
     if matches!(first, 'ζ' | 'ξ' | 'ψ' | 'ρ')
         || (first == 'σ' && !second_is_vowel)
         || (matches!(first, 'θ' | 'φ' | 'χ') && second_is_aspirate)
+        // γν/γλ initial: C redupit2 uses simple augment (ε-) not full reduplication
+        || (first == 'γ' && matches!(second, Some('ν' | 'λ')))
     {
         return format!("ε{}", root);
     }
@@ -593,6 +595,17 @@ fn insert_nasal_infix(root: &str) -> String {
 /// For `einw` type with consonant-final root (e.g. `κτ`): append `ειν`.
 fn verbstem_present(root: &str, beta_suffix: &str, contracts_alpha_ei: bool) -> String {
     use crate::unicode::betacode::beta_to_unicode;
+
+    // Bare breathing root (":de:) airw"): root is just a breathing marker in
+    // beta-code (`)` or `(`). Apply it to the suffix's first vowel rather than
+    // prepending it as a literal character (which would make the stem_norm wrong).
+    if (root == ")" || root == "(") && !beta_suffix.is_empty() {
+        // Insert the breathing after the first base letter of the suffix.
+        let first = beta_suffix.chars().next().unwrap();
+        let rest = &beta_suffix[first.len_utf8()..];
+        let with_breathing = format!("{first}{root}{rest}");
+        return beta_to_unicode(&with_breathing);
+    }
 
     if contracts_alpha_ei && root.ends_with('α') {
         // α + εἰ... → αι + rest: strip α, prepend αι to suffix-without-leading-ε

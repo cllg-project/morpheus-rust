@@ -178,6 +178,8 @@ fn compose_lemma(preverb: &str, base_lemma: &str) -> String {
         "επαρ" => "παρα".into(),
         "εμετ" | "εμεθ" => "μετα".into(),
         "εσ" => "εισ".into(),
+        // Nasal assimilation: surface εμ- is ἐν- before labials (ἐμφαγὼν → ἐνεσθίω)
+        "εμ" => "εν".into(),
         _ => pv,
     };
 
@@ -242,8 +244,13 @@ fn compose_lemma(preverb: &str, base_lemma: &str) -> String {
             let repl = match base_first {
                 'κ' | 'γ' | 'χ' | 'ξ' => Some('γ'),
                 'π' | 'β' | 'φ' | 'ψ' | 'μ' => Some('μ'),
-                'λ' => Some('λ'),
                 'ρ' => Some('ρ'),
+                // Before σ the nasal drops entirely (συν+σ → συσ, ἐν+σ → ἐσ)
+                'σ' => {
+                    pv.pop();
+                    // pv has had ν removed; nothing to push
+                    None
+                }
                 _ => None,
             };
             if let Some(c) = repl {

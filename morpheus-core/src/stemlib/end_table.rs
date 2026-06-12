@@ -196,6 +196,28 @@ fn load_basics_cache(basics_dir: &Path) -> Result<BasicsCache> {
     Ok(cache)
 }
 
+/// Split `extra_keys` (the part after `@ref` in an `@` reference line) into
+/// positive additions and negation filters ("not X Y").
+/// Returns (positive_keys, negation_keys_without_not_prefix).
+/// E.g. "fem not gen pl" → ("fem", "gen pl").
+fn split_not_keys(extra_keys: &str) -> (String, String) {
+    let tokens: Vec<&str> = extra_keys.split_whitespace().collect();
+    let mut pos = Vec::new();
+    let mut neg = Vec::new();
+    let mut i = 0;
+    while i < tokens.len() {
+        if tokens[i] == "not" {
+            // Consume the next two tokens as negation (e.g. "not gen pl" → neg: "gen pl")
+            if i + 1 < tokens.len() { neg.push(tokens[i + 1]); i += 1; }
+            if i + 1 < tokens.len() { neg.push(tokens[i + 1]); i += 1; }
+        } else {
+            pos.push(tokens[i]);
+        }
+        i += 1;
+    }
+    (pos.join(" "), neg.join(" "))
+}
+
 /// Parse a basics file into raw BasicEntry records.
 /// Basics files can themselves contain `@` references to other basics files
 /// (e.g. `pr_inf_act.end` references `pr_inf_ath`).
@@ -228,16 +250,38 @@ fn parse_basics_file(path: &Path, cache: &BasicsCache) -> Result<Vec<BasicEntry>
             let ref_name = parts.next().unwrap_or("").trim();
             let extra_keys = parts.next().unwrap_or("").trim();
 
+            // Split extra_keys into positive additions and "not X Y" exclusion filters.
+            // "not gen pl" means: skip basic entries whose form has (case=gen AND number=pl).
+            // The negative part must NOT be appended to the key_str or it corrupts the
+            // case/number of the inherited entries (e.g. "gen sg" + "not gen pl" → case=0).
+            let (pos_keys, excl) = split_not_keys(extra_keys);
+            let excl_feats = if excl.is_empty() { None } else {
+                Some(parse_key_string(&excl))
+            };
+            let should_skip = |be_key_str: &str| -> bool {
+                if let Some(ref ef) = excl_feats {
+                    let be_feats = parse_key_string(be_key_str);
+                    // Each specified field in the exclusion must match (AND semantics).
+                    // A field of 0 in the exclusion means "any" (no constraint from that field).
+                    let case_match   = ef.form.case   == 0 || (be_feats.form.case   & ef.form.case)   != 0;
+                    let num_match    = ef.form.number  == 0 || (be_feats.form.number  & ef.form.number)  != 0;
+                    let person_match = ef.form.person  == 0 || (be_feats.form.person  & ef.form.person)  != 0;
+                    let gender_match = ef.form.gender  == 0 || (be_feats.form.gender  & ef.form.gender)  != 0;
+                    case_match && num_match && person_match && gender_match
+                } else {
+                    false
+                }
+            };
+
             if prefix_beta.is_empty() {
                 // Whole-line reference: "@ref_name extra_keys"
-                // The first token after @ is the basics file name;
-                // extra_keys are additional feature constraints.
                 if let Some(basic_entries) = cache.get(ref_name) {
                     for be in basic_entries {
-                        let key_str = if extra_keys.is_empty() {
+                        if should_skip(&be.key_str) { continue; }
+                        let key_str = if pos_keys.is_empty() {
                             be.key_str.clone()
                         } else {
-                            format!("{} {}", be.key_str, extra_keys)
+                            format!("{} {}", be.key_str, pos_keys)
                         };
                         result.push(BasicEntry {
                             ending_beta: be.ending_beta.clone(),
@@ -247,14 +291,14 @@ fn parse_basics_file(path: &Path, cache: &BasicsCache) -> Result<Vec<BasicEntry>
                 }
             } else {
                 // Prefixed reference: "prefix@ref_name extra_keys"
-                // The first token of rest is the ref, extra_keys are extra features.
                 if let Some(basic_entries) = cache.get(ref_name) {
                     for be in basic_entries {
+                        if should_skip(&be.key_str) { continue; }
                         let ending = compose_prefix_ending(prefix_beta, &be.ending_beta);
-                        let key_str = if extra_keys.is_empty() {
+                        let key_str = if pos_keys.is_empty() {
                             be.key_str.clone()
                         } else {
-                            format!("{} {}", be.key_str, extra_keys)
+                            format!("{} {}", be.key_str, pos_keys)
                         };
                         result.push(BasicEntry { ending_beta: ending, key_str });
                     }

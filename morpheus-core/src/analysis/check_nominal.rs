@@ -74,12 +74,10 @@ pub fn check_nom(word: &str, stemlib: &StemlibIndex) -> Vec<Analysis> {
 
             for end_entry in &nom_endings {
                 // Check that stem's stemtype is compatible with this ending's stemtype
-                if !super::check_stem::stemtype_compatible(
+                let stcompat = super::check_stem::stemtype_compatible(
                     &stem_entry.key_str, stem_entry.ppart_mask, end_entry, stemlib
-                ) {
-                    continue;
-                }
-
+                );
+                if !stcompat { continue; }
                 if !ending_compatible(&stem_features, end_entry) {
                     continue;
                 }
@@ -220,6 +218,11 @@ pub(crate) fn accent_compatible_strict(
         end_flags,
         augmented: analysis.morph_flags.has(MorphFlags::HAS_AUGMENT),
     });
+    if std::env::var("MORPHEUS_NOM_DEBUG").is_ok() {
+        if std::env::var("MORPHEUS_ACCENT_DEBUG").is_ok() {
+            eprintln!("  accent_strict: surface={surface:?} stem={stem:?} ending={ending:?} expected={expected:?}");
+        }
+    }
     if !has_accent(&expected) {
         return true;
     }
