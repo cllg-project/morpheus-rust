@@ -23,6 +23,19 @@ MORPHLIB=~/dev/morpheus/stemlib cargo test --release generate::tests::roundtrip 
 
 Use `rtk proxy cargo build` to see full compiler output (RTK filters cargo by default).
 
+### Lemma disagreement workflow
+
+**Always use `./scripts/mdisagree` to see what's still wrong before starting a fix session.**
+
+```bash
+./scripts/mdisagree                # list all corpus disagreements (C lemma vs Rust lemma)
+./scripts/mdisagree ἐξῆν τἀμά     # test specific words against cached C output
+./scripts/mcorpus                  # refresh Rust results + reprint summary metrics
+./scripts/mtest <word>             # run C and Rust side-by-side on one word
+```
+
+`mdisagree` reads `tests/corpus_sample.json` (kept in git). It shows each word where C and Rust find non-overlapping lemma sets, with both sides in normalized beta-code for easy comparison. The per-word mode (`mdisagree word ...`) re-runs the current Rust binary live and compares against cached C output — useful for verifying a fix without a full corpus refresh.
+
 ## Subcommands & Python packaging
 
 - `morpheus generate -m <stemlib> [--lemma λῆμμα|beta] [--no-movable-nu] [--unaugmented] [--limit N]`
