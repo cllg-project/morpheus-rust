@@ -1,8 +1,9 @@
 //! Nominal morphological analysis (nouns, adjectives, indeclinables).
 //! Mirrors C `checknom()` and `checkindecl()` from anal/checknom.c.
 
+use crate::accent::{accent_generated, GenAccent};
 use crate::stemlib::StemlibIndex;
-use crate::types::Analysis;
+use crate::types::{Analysis, MorphFlags};
 use crate::unicode::normalize::strip_diacritics;
 
 use super::{
@@ -102,6 +103,24 @@ pub fn check_nom(word: &str, stemlib: &StemlibIndex) -> Vec<Analysis> {
                     analysis.stem_type = ste.stem_type;
                 }
 
+                // For endings with a macron (long-vowel mark), the accent type on
+                // the stem's penultimate (circumflex vs acute) encodes whether the
+                // ultima is short or long.  Apply a strict accent check here to
+                // reject e.g. stem "ἀγκων" + ending "ᾱ" (→ acute ω) when the
+                // surface "ἀγκῶνα" shows circumflex ω.
+                if ending_has_macron(&end_entry.ending)
+                    && !accent_compatible_strict(
+                        word,
+                        &stem_entry.stem,
+                        &end_entry.ending,
+                        &analysis,
+                        end_entry.morph_flags,
+                        false,
+                    )
+                {
+                    continue;
+                }
+
                 results.push(analysis);
             }
         }
@@ -158,6 +177,108 @@ pub(crate) fn is_verbal_stemtype(name: &str, stemlib: &StemlibIndex) -> bool {
         || name.contains("_inf_") || name.starts_with("pr_") || name.starts_with("a1_")
         || name.starts_with("ath_") || name.starts_with("perf") || name.starts_with("aor")
     }
+}
+
+/// Returns true when the ending from the stemlib dict contains a macron
+/// (U+0304 in NFD), indicating a quantitatively long vowel.  These are the
+/// cases where accent type on the stem (circumflex vs acute) differs based on
+/// whether the ultima is long or short, so we apply a stricter accent check.
+fn ending_has_macron(ending: &str) -> bool {
+    use unicode_normalization::UnicodeNormalization;
+    ending.nfd().any(|c| c == '\u{0304}')
+}
+
+/// Post-match accent validation used only for macron-bearing endings.
+/// Generates the expected accented form and compares with the surface word.
+/// Normalises: strip macron/breve (dict quantity marks), grave → acute
+/// (pre-pause vs mid-phrase form of the same accent).
+/// When `in_preverb_path` is true, circumflex and grave are normalised to
+/// acute (only the syllable *position* of the accent matters for preverb
+/// remainders), and diacritics that may be absent from a stripped remainder
+/// (breathings, diaeresis) are also stripped.  For the macron-ending nominal
+/// check the full acute/circumflex distinction must be preserved.
+pub(crate) fn accent_compatible_strict(
+    surface: &str,
+    stem: &str,
+    ending: &str,
+    analysis: &Analysis,
+    end_flags: MorphFlags,
+    in_preverb_path: bool,
+) -> bool {
+    use unicode_normalization::UnicodeNormalization;
+    let has_accent =
+        |s: &str| s.nfd().any(|c| matches!(c, '\u{0300}' | '\u{0301}' | '\u{0342}'));
+    if !has_accent(surface) {
+        return true;
+    }
+    let expected = accent_generated(&GenAccent {
+        stem,
+        ending,
+        form: &analysis.form,
+        stem_type: analysis.stem_type,
+        stem_flags: analysis.morph_flags,
+        end_flags,
+        augmented: analysis.morph_flags.has(MorphFlags::HAS_AUGMENT),
+    });
+    if !has_accent(&expected) {
+        return true;
+    }
+    // In the preverb path we relax accent-TYPE (circumflex vs acute) to
+    // only compare syllable POSITION — UNLESS the ending itself carries a
+    // macron (long-vowel quantity mark).  A macron-bearing ending such as
+    // "ᾱ" or "ᾱς" means the expected form has a long ultima; the surface
+    // word won't have a macron, so the strict accent-type rule (circumflex
+    // on long penult before short ultima vs acute before long ultima) IS
+    // the right discriminator.  Without this gate, κῶνα (circumflex on ω)
+    // falsely passes for the attic contracted 2sg imperative of κωνάω
+    // (expected κώνᾱ, acute on ω).
+    let relax_accent_type = in_preverb_path && !ending_has_macron(ending);
+    let normalize = |s: &str| -> String {
+        s.to_lowercase()
+            .nfd()
+            .filter_map(|c| match c {
+                '\u{0304}' | '\u{0306}' => None,  // strip macron, breve (dict-only)
+                '\u{0300}' => Some('\u{0301}'),    // grave → acute (pre-pause variant)
+                // preverb path (non-macron endings): circumflex/diaeresis/breathings
+                // may differ on the stripped remainder; only the syllable position matters.
+                '\u{0342}' if relax_accent_type => Some('\u{0301}'), // circumflex → acute
+                '\u{0308}' if in_preverb_path => None,               // diaeresis
+                '\u{0313}' | '\u{0314}' if in_preverb_path => None,  // breathings
+                c => Some(c),
+            })
+            .collect::<String>()
+            .nfc()
+            .collect()
+    };
+    let norm_surf = normalize(surface);
+    let norm_exp  = normalize(&expected);
+    if norm_surf == norm_exp {
+        if std::env::var("MORPHEUS_ACCENT_DEBUG").is_ok() {
+            eprintln!("accent_strict: surface={surface:?} stem={stem:?} end_dict={ending:?} expected={expected:?} ok=true");
+        }
+        return true;
+    }
+    // Also accept if the surface matches after stripping an enclitic-thrown
+    // accent on the ultima (e.g. "τίθημί" from ἀνατίθημί before an enclitic).
+    let strip_ultima_accent = |s: &str| -> String {
+        use unicode_normalization::UnicodeNormalization;
+        let mut chars: Vec<char> = s.nfd().collect();
+        // Find the last acute (U+0301) and remove it only if it's on the ultima
+        // (i.e., no vowel follows it in the NFD sequence).
+        let vowels = "αεηιουωάέήίόύώàèìòùАЕИОУ";
+        if let Some(pos) = chars.iter().rposition(|&c| c == '\u{0301}') {
+            let after_has_vowel = chars[pos + 1..].iter().any(|c| vowels.contains(*c));
+            if !after_has_vowel {
+                chars.remove(pos);
+            }
+        }
+        chars.into_iter().nfc().collect()
+    };
+    let r = strip_ultima_accent(&norm_surf) == norm_exp;
+    if std::env::var("MORPHEUS_ACCENT_DEBUG").is_ok() {
+        eprintln!("accent_strict: surface={surface:?} stem={stem:?} end_dict={ending:?} expected={expected:?} ok={r}");
+    }
+    r
 }
 
 fn find_stemtype_name<'a>(key_str: &'a str, stemlib: &StemlibIndex) -> Option<&'a str> {

@@ -187,6 +187,23 @@ static PERFECT_EXPANSIONS: &[(&str, &[(&str, &str)])] = &[
     ("reg_conj", &[("κ",  "perf_act"), ("",  "perfp_vow"), ("",  "perfp_s")]),
 ];
 
+/// Grassmann's Law (mirrors C `do_dissim.c`): de-aspirate the initial stop of a
+/// root when a later consonant in the root is also aspirate (θ/φ/χ).
+/// Applied when building the *present* w_stem for `reg_conj` roots.
+fn do_dissim(root: &str) -> String {
+    let chars: Vec<char> = root.chars().collect();
+    if !matches!(chars.first(), Some('θ' | 'φ' | 'χ')) {
+        return root.to_string();
+    }
+    if !chars[1..].iter().any(|c| matches!(c, 'θ' | 'φ' | 'χ')) {
+        return root.to_string();
+    }
+    let replacement = match chars[0] { 'θ' => 'τ', 'φ' => 'π', 'χ' => 'κ', _ => unreachable!() };
+    let mut s = root.to_string();
+    s.replace_range(0..chars[0].len_utf8(), &replacement.to_string());
+    s
+}
+
 /// Apply standard Greek perfect reduplication to a root (consonant-initial).
 /// Returns `C + ε + root` where aspirates are deaspirated (φ→π, θ→τ, χ→κ).
 /// Vowel-initial roots are returned unchanged (temporal augment not handled here).
@@ -212,7 +229,12 @@ fn apply_reduplication(root: &str) -> String {
     );
     // Other stop+consonant clusters keep full reduplication
     // (κέκτημαι, πέπτωκα, μέμνημαι, τέτμημαι, γέγραφα).
-    if matches!(first, 'ζ' | 'ξ' | 'ψ' | 'ρ') || (first == 'σ' && !second_is_vowel) {
+    // aspirate+aspirate (φθ, etc.): C generates εφθαρ not πεφθαρ
+    let second_is_aspirate = matches!(second, Some('θ' | 'φ' | 'χ'));
+    if matches!(first, 'ζ' | 'ξ' | 'ψ' | 'ρ')
+        || (first == 'σ' && !second_is_vowel)
+        || (matches!(first, 'θ' | 'φ' | 'χ') && second_is_aspirate)
+    {
         return format!("ε{}", root);
     }
     // For pres_redupl roots that already start with the reduplication syllable
@@ -300,6 +322,10 @@ pub fn expand_one_entry(entry: &StemEntry, deriv_tables: &DerivTables) -> Vec<St
                         entry.stem.clone()
                     };
                     let mut stem = join_suffix_euphony(&root, &suffix);
+                    // reg_conj present stem: apply Grassmann's Law (θρεφ → τρεφ)
+                    if class_bit == 1 << 0 && token == "reg_conj" {
+                        stem = do_dissim(&stem);
+                    }
                     // Labial/velar-final roots take the second perfect: no κ,
                     // final stop aspirated (γραφ → γέγραφα, not *γεγραφκα).
                     if class_bit == 1 << 3 && suffix == "κ" {

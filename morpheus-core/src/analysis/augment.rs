@@ -27,6 +27,9 @@ pub fn unaugment(stem: &str) -> Vec<String> {
         if chars.len() >= 2 && base(chars[0]) == 'ρ' && base(chars[1]) == 'ρ' {
             variants.push(chars[1..].iter().collect());
         }
+        // Chain temporal unaugment on the syllabic-stripped remainder:
+        // ε+ωρ- (ἑώρων) → ωρ- → ορ- (ὁράω augment chain).
+        variants.extend(temporal_unaugment(&rest));
         variants.push(rest);
     }
 

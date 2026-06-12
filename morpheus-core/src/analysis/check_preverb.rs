@@ -157,6 +157,40 @@ fn compose_lemma(preverb: &str, base_lemma: &str) -> String {
     let bare = strip_diacritics(preverb);
     let mut pv: String = bare.clone();
 
+    // Dialect/poetic surface forms normalize to the standard preverb.
+    pv = match pv.as_str() {
+        s if s.starts_with("ξυ") => format!("σ{}", &s["ξ".len()..]), // ξύν → σύν
+        "υπειρ" => "υπερ".into(),
+        "παραι" => "παρα".into(),
+        "προτι" | "ποτι" | "προτ" | "ποτ" => "προσ".into(),
+        "πεδα" => "μετα".into(),
+        "πεδ" => "μετ".into(),
+        "ενι" => "εν".into(),
+        "υπαι" | "υπα" => "υπο".into(),
+        // prevb_augment surfaces
+        "ην" | "ηνα" => "ανα".into(),
+        "ηντ" => "αντι".into(),
+        "ημφι" => "αμφι".into(),
+        "ημφ" => "αμφ".into(),
+        "ημπι" => "αμπι".into(),
+        "ημπ" => "αμπ".into(),
+        "ηφ" => "απο".into(),
+        "επαρ" => "παρα".into(),
+        "εμετ" | "εμεθ" => "μετα".into(),
+        "εσ" => "εισ".into(),
+        _ => pv,
+    };
+
+    // Double-preverb guard: if the base lemma already starts with this preverb
+    // (ἀπολαύω when preverb is ἀπο-), return the base lemma unchanged.
+    {
+        let base_stripped = strip_diacritics(base_lemma).to_lowercase();
+        let pv_stripped = strip_diacritics(&pv).to_lowercase();
+        if !pv_stripped.is_empty() && base_stripped.starts_with(&pv_stripped) {
+            return base_lemma.to_string();
+        }
+    }
+
     if base_is_vowel {
         // Before a vowel-initial lemma the full preverb elides (ἀνα + ἔχω →
         // ἀνέχω); already-elided surfaces (δι, κατ, …) are kept as-is.

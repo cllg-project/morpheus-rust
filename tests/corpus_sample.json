@@ -19,8 +19,7 @@
       "N a)gkw/n  masc acc sg\t\t\tn_nos"
     ],
     "rust": [
-      "ἀγκών:noun",
-      "ἀγκώνη:noun"
+      "ἀγκών:noun"
     ]
   },
   {
@@ -241,10 +240,10 @@
     ],
     "rust": [
       "εἰμί:verb",
+      "εἰστίνυμαι:verb",
       "σαίνω:verb",
       "σαίρω:verb",
-      "σεύω:verb",
-      "ἐστίνυμαι:verb"
+      "σεύω:verb"
     ]
   },
   {
@@ -931,8 +930,8 @@
     ],
     "rust": [
       "ἀφεάω:verb",
-      "ἀφεσεῖμι:verb",
-      "ἀφεσιαίνω:verb",
+      "ἀφεισεῖμι:verb",
+      "ἀφεισιαίνω:verb",
       "ἄφεσις:verb"
     ]
   },
@@ -1158,8 +1157,7 @@
       "N a)nagwga_/s,a)nagwgh/  fem acc pl\t\t\th_hs"
     ],
     "rust": [
-      "ἀναγωγή:noun",
-      "ἀναγωγεύς:noun"
+      "ἀναγωγή:noun"
     ]
   },
   {
@@ -1524,8 +1522,7 @@
     ],
     "rust": [
       "γραφή:noun",
-      "γραφής:noun",
-      "γραφεύς:noun"
+      "γραφής:noun"
     ]
   },
   {
@@ -2018,8 +2015,7 @@
       "N h(/rw^as,h(/rws  masc acc pl\t\t\tws_wos"
     ],
     "rust": [
-      "ἡρῷος:adjective",
-      "ἥρως:adjective"
+      "ἥρως:noun"
     ]
   },
   {
@@ -2286,15 +2282,15 @@
     ],
     "rust": [
       "πίπτω:verb",
-      "ἐπεσέννυμι:verb",
-      "ἐπεσίημι:verb",
-      "ἐπεσεάω:verb",
-      "ἐπεσειμί:verb",
-      "ἐπεσεναίρω:verb",
-      "ἐπεσνάω:participle",
-      "ἐπεσνέω:verb",
-      "ἐπεσνέω2:verb",
-      "ἐπεσνέω3:verb",
+      "ἐπεισέννυμι:verb",
+      "ἐπεισίημι:verb",
+      "ἐπεισεάω:verb",
+      "ἐπεισειμί:verb",
+      "ἐπεισεναίρω:verb",
+      "ἐπεισνάω:participle",
+      "ἐπεισνέω:verb",
+      "ἐπεισνέω2:verb",
+      "ἐπεισνέω3:verb",
       "ἐπιθέω:verb",
       "ἐπισίζω:verb",
       "ἐπισαίνω:verb",
@@ -2382,7 +2378,6 @@
     ],
     "rust": [
       "δέσμα:noun",
-      "δέσμη:noun",
       "δεσμός:noun"
     ]
   },
@@ -2684,7 +2679,7 @@
       "παρασαίρω:verb",
       "παρασεύω:verb",
       "παρειμί:verb",
-      "παρεστίνυμαι:verb"
+      "παρειστίνυμαι:verb"
     ]
   },
   {
@@ -2745,7 +2740,7 @@
     "rust": [
       "ἀγάπη:noun",
       "ἀγαπάζω:noun",
-      "ἀγαπάω:noun"
+      "ἀγαπάω:verb"
     ]
   },
   {
@@ -3015,13 +3010,17 @@
       "V a)naneo/omai  aor inf act\t\t\taor1,ow_denom"
     ],
     "rust": [
-      "ἀνανίημι:verb",
+      "ἀνίημι:verb",
       "ἀνανεάω:verb",
       "ἀνανεόω:participle",
-      "ἀνανωθέω:participle",
-      "ἀνανόζω:participle",
-      "ἀνανώζω:participle",
-      "ἀνανῴζω:participle"
+      "ἀναφέρω:participle",
+      "ἀνεάω:participle",
+      "ἀνοίζω:participle",
+      "ἀνοίομαι:participle",
+      "ἀνωθέω:verb",
+      "ἀνόζω:verb",
+      "ἀνώζω:verb",
+      "ἀνῴζω:verb"
     ]
   },
   {
@@ -3874,7 +3873,8 @@
     ],
     "rust": [
       "ἑωλίζω:verb",
-      "ἕωλος:verb"
+      "ἕωλος:verb",
+      "ὁλίζω:verb"
     ]
   },
   {
@@ -4166,7 +4166,7 @@
     "word": "ἔσθλ",
     "c": [],
     "rust": [
-      "ἐσθλάω:verb"
+      "εἰσθλάω:verb"
     ]
   },
   {
@@ -4216,16 +4216,16 @@
       "V e)/xw  aor ind act 3rd sg\t\tnu_movable\taor2"
     ],
     "rust": [
+      "εἰσκιχάνω:participle",
+      "εἰσχάσκω:participle",
+      "εἰσχέω:verb",
+      "εἰσχαίρω:verb",
+      "εἰσχεύω:participle",
+      "εἰσχόω:verb",
       "σχάζω:participle",
-      "σχάω:participle",
+      "σχάω:verb",
       "σχίζω:verb",
-      "ἐσκιχάνω:verb",
-      "ἐσχάσκω:participle",
-      "ἐσχέω:verb",
-      "ἐσχαίρω:verb",
-      "ἐσχεύω:verb",
-      "ἐσχόω:verb",
-      "ἔχω:verb"
+      "ἔχω:participle"
     ]
   },
   {
@@ -5488,9 +5488,8 @@
       "N faidra_/,faidro/s  fem nom/voc sg\tattic doric aeolic\t\tos_h_on"
     ],
     "rust": [
-      "φαίδρα:noun",
-      "φαιδρός:noun",
-      "φαιδρύνω:noun"
+      "φαιδρός:adjective",
+      "φαιδρύνω:adjective"
     ]
   },
   {
@@ -5602,10 +5601,10 @@
     ],
     "rust": [
       "εἰμί:verb",
+      "εἰστίνυμαι:verb",
       "σαίνω:verb",
       "σαίρω:verb",
-      "σεύω:verb",
-      "ἐστίνυμαι:verb"
+      "σεύω:verb"
     ]
   },
   {
@@ -5832,7 +5831,6 @@
       "οἰδίσκω:verb",
       "οἰδαίνω:verb",
       "οἶδα:verb",
-      "οἶδος:verb",
       "ὄις:verb"
     ]
   },
@@ -6247,7 +6245,7 @@
     ],
     "rust": [
       "καθίστημι:verb",
-      "καθεστήκω:verb",
+      "καθειστήκω:verb",
       "καταστήκω:verb"
     ]
   },
@@ -7202,8 +7200,7 @@
       "N qei=os  neut nom/voc/acc pl\t\t\tos_h_on"
     ],
     "rust": [
-      "θεία:noun",
-      "θεῖος:noun"
+      "θεῖος:adjective"
     ]
   },
   {
@@ -7592,14 +7589,14 @@
       "N e(smo/n,e(smo/s  masc acc sg\t\t\tos_ou"
     ],
     "rust": [
+      "εἱσμαίνομαι:verb",
+      "εἱσμαίομαι:verb",
+      "εἱσμυζάω:verb",
+      "εἱσμύζω:participle",
+      "εἱσμύρω:verb",
       "σμάω:verb",
-      "σμόω:verb",
-      "ἑσμαίνομαι:verb",
-      "ἑσμαίομαι:participle",
-      "ἑσμυζάω:verb",
-      "ἑσμός:verb",
-      "ἑσμύζω:participle",
-      "ἑσμύρω:verb"
+      "σμόω:participle",
+      "ἑσμός:verb"
     ]
   },
   {
@@ -8032,7 +8029,7 @@
     "rust": [
       "Μοῦσαι:noun",
       "μαίνομαι:noun",
-      "μαίομαι:noun",
+      "μαίομαι:participle",
       "μυζάω:participle",
       "μύζω:participle",
       "μύρω:participle"
@@ -8179,7 +8176,6 @@
       "N ou)=ron2  neut nom/voc/acc pl\tepic ionic\t\tos_ou"
     ],
     "rust": [
-      "οὐρά:noun",
       "οὖρον1:noun",
       "οὖρον2:noun"
     ]
@@ -8536,7 +8532,6 @@
       "ἐκμάσσω:verb",
       "ἐξεμάγνυμι:verb",
       "ἐξεμάγω:verb",
-      "ἐξεμαΐσσω:verb",
       "ἐξεμαξιάω:verb"
     ]
   },
@@ -8836,10 +8831,8 @@
       "N su/mbolon  neut nom/voc/acc pl\t\t\tos_ou"
     ],
     "rust": [
-      "συμβολή:noun",
-      "συμβολεύς:noun",
-      "συμβούλομαι:noun",
-      "σύμβολον:noun"
+      "συμβούλομαι:verb",
+      "σύμβολον:verb"
     ]
   },
   {
@@ -8912,7 +8905,6 @@
       "N pantodapa_/,pantodapo/s  fem nom/voc sg\tdoric aeolic\t\tos_h_on"
     ],
     "rust": [
-      "παντοδαπής:adjective",
       "παντοδαπός:adjective"
     ]
   },
@@ -9133,8 +9125,7 @@
     "rust": [
       "Βορέας:noun",
       "βορά:noun",
-      "βοράω:noun",
-      "βορός:noun"
+      "βοράω:noun"
     ]
   },
   {
@@ -9268,8 +9259,7 @@
     ],
     "rust": [
       "δίαιτα:noun",
-      "διαδιαιτάω:noun",
-      "διαιτάω:verb"
+      "διαιτάω:noun"
     ]
   },
   {
@@ -9337,7 +9327,7 @@
     "rust": [
       "διαφορά:noun",
       "διαφοράω:noun",
-      "διαφορύνω:noun",
+      "διαφορύνω:verb",
       "διαφόρνυμι:verb"
     ]
   },
@@ -9894,7 +9884,8 @@
       "P tre/fw  pres part act masc nom/voc sg\t\t\tw_stem,reg_conj"
     ],
     "rust": [
-      "τρέφος:noun"
+      "τρέφος:noun",
+      "τρέφω:noun"
     ]
   },
   {
@@ -10535,8 +10526,8 @@
       "καθίστημι:verb",
       "καθεστιάω:verb",
       "καταστείνω:verb",
-      "κατεστείνω:verb",
-      "κατεστείρω:verb"
+      "κατειστείνω:verb",
+      "κατειστείρω:verb"
     ]
   },
   {
@@ -10699,10 +10690,8 @@
       "N r(a/c  fem acc sg\t\t\tc_gos"
     ],
     "rust": [
-      "ῥάγος:noun",
       "ῥάξ:noun",
-      "ῥαγάς:noun",
-      "ῥαγή:noun"
+      "ῥαγάς:noun"
     ]
   },
   {
@@ -10786,8 +10775,7 @@
       "N stegana_/,stegano/s  fem nom/voc sg\tdoric aeolic\t\tos_h_on"
     ],
     "rust": [
-      "στεγάνη:noun",
-      "στεγανός:noun"
+      "στεγανός:adjective"
     ]
   },
   {
@@ -10938,8 +10926,7 @@
       "N xlwra_/,xlwro/s  fem nom/voc sg\tattic doric aeolic\t\tos_h_on"
     ],
     "rust": [
-      "χλωρεύς:noun",
-      "χλωριάω:noun",
+      "χλωριάω:verb",
       "χλωρός:verb"
     ]
   },
@@ -11445,8 +11432,7 @@
     "word": "μαρία",
     "c": [],
     "rust": [
-      "μάρις:noun",
-      "μαριεύς:noun"
+      "μάρις:noun"
     ]
   },
   {
@@ -12905,7 +12891,6 @@
       "V a)cio/w  pres ind act 1st sg\t\tcontr\tow_pr,ow_denom"
     ],
     "rust": [
-      "ἀΐσσω:verb",
       "ἀξιάω:verb",
       "ἀξιόω:verb",
       "ἄγνυμι:verb",
@@ -13551,7 +13536,6 @@
       "V dida/skw  pres imperat act 3rd pl\t\tpres_redupl\tw_stem,skw"
     ],
     "rust": [
-      "διαδιδάσκω:verb",
       "διδάσκω:verb"
     ]
   },
@@ -13564,10 +13548,10 @@
       "κατασπάω:participle",
       "κατασπαίρω:participle",
       "κατασπείρω:participle",
-      "κατεσπάομαι:verb",
-      "κατεσπάσσω:verb",
-      "κατεσπατέομαι:verb",
-      "κατεσπείρω:participle"
+      "κατεισπάομαι:verb",
+      "κατεισπάσσω:verb",
+      "κατεισπατέομαι:verb",
+      "κατεισπείρω:participle"
     ]
   },
   {
@@ -14218,12 +14202,11 @@
       "V dida/skw  imperf ind mp 1st pl\thomeric ionic\tunaugmented pres_redupl\tw_stem,skw"
     ],
     "rust": [
+      "δίδημι:verb",
+      "δίδωμι:verb",
       "διαδέρω:verb",
       "διαδέω:verb",
       "διαδέω2:verb",
-      "διαδίδημι:verb",
-      "διαδίδωμι:verb",
-      "διαδιδάσκω:verb",
       "διδάσκω:verb"
     ]
   },
@@ -14337,7 +14320,6 @@
     ],
     "rust": [
       "οἰάω:verb",
-      "οἴη:verb",
       "οἶος:verb",
       "οἷος:verb",
       "ὄις:verb"
@@ -14604,8 +14586,7 @@
       "N nh/pios  neut nom/voc/acc pl\t\t\tos_h_on"
     ],
     "rust": [
-      "νήπιος:adjective",
-      "νηπιάα:adjective"
+      "νήπιος:adjective"
     ]
   },
   {
@@ -14731,9 +14712,9 @@
       "V i(/sthmi  perf inf act\t\t\tperf2_act"
     ],
     "rust": [
+      "εἱστείνω:verb",
+      "εἱστείρω:verb",
       "στείνω:verb",
-      "ἑστείνω:verb",
-      "ἑστείρω:verb",
       "ἵστημι:verb"
     ]
   },
@@ -14890,7 +14871,7 @@
       "V a)poste/llw  aor ind act 3rd sg\t\t\taor1,ellw"
     ],
     "rust": [
-      "ἀπεστέλλω:verb",
+      "ἀπειστέλλω:verb",
       "ἀποστέλλω:verb"
     ]
   },
@@ -15105,8 +15086,6 @@
       "N lh|sta_/s,lh|sth/s  masc nom sg\tepic doric ionic aeolic\t\ths_ou"
     ],
     "rust": [
-      "ληιστής:noun",
-      "ληιστός:noun",
       "λῃστής:noun"
     ]
   },
@@ -15124,7 +15103,8 @@
     "word": "ἀσκά",
     "c": [],
     "rust": [
-      "ἄσκη:noun"
+      "ἀσκέω:verb",
+      "ἄσκη:verb"
     ]
   },
   {
@@ -15446,10 +15426,10 @@
     ],
     "rust": [
       "εἰμί:verb",
+      "εἰστίνυμαι:verb",
       "σαίνω:verb",
       "σαίρω:verb",
-      "σεύω:verb",
-      "ἐστίνυμαι:verb"
+      "σεύω:verb"
     ]
   },
   {
@@ -16037,7 +16017,6 @@
       "N to/con  neut nom/voc/acc pl\t\t\tos_ou"
     ],
     "rust": [
-      "τοξεύς:noun",
       "τόξον:noun"
     ]
   },
@@ -16713,7 +16692,7 @@
     "rust": [
       "ἀναφορά:noun",
       "ἀναφοράω:noun",
-      "ἀναφορεύς:noun",
+      "ἀναφορεύς:verb",
       "ἀναφορύνω:verb",
       "ἀναφόρνυμι:verb"
     ]
@@ -16873,10 +16852,7 @@
       "ἀναίνομαι:verb",
       "ἀναίρω:verb",
       "ἀνιάω:verb",
-      "ἄνα:verb",
-      "ἄναξ:verb",
-      "ἄνη:verb",
-      "ἄνοος:verb"
+      "ἄναξ:verb"
     ]
   },
   {
@@ -17388,7 +17364,6 @@
       "ἐνάημι:verb",
       "ἐνάπτω:verb",
       "ἐνάω:verb",
-      "ἐνέννυμι:verb",
       "ἐνίημι:verb",
       "ἐναΐσσω:verb",
       "ἐναάζω:verb",
@@ -17398,7 +17373,6 @@
       "ἐνεάζω:verb",
       "ἐνεάω:verb",
       "ἐνειμί:verb",
-      "ἐνεναίρω:verb",
       "ἐνεῖμι:verb",
       "ἐνημί:verb",
       "ἑνίζω:verb",
@@ -17439,9 +17413,9 @@
     "word": "ἔστ",
     "c": [],
     "rust": [
-      "στείνω:verb",
-      "ἐστείνω:verb",
-      "ἐστείρω:verb"
+      "εἰστείνω:verb",
+      "εἰστείρω:verb",
+      "στείνω:verb"
     ]
   },
   {
@@ -18092,7 +18066,6 @@
     "word": "καδεμόνα",
     "c": [],
     "rust": [
-      "κηδεμονεύς:noun",
       "κηδεμών:noun"
     ]
   },
@@ -18412,7 +18385,6 @@
       "N zw=|on  neut nom/voc/acc pl\t\t\tos_ou"
     ],
     "rust": [
-      "ζωή:noun",
       "ζώιον:noun",
       "ζῷον:noun"
     ]
@@ -18612,11 +18584,11 @@
       "V seu/w  pres ind mid 3rd sg\t\tpoetic\tath_primary"
     ],
     "rust": [
-      "ἐσσαίνω:verb",
-      "ἐσσαίρω:verb",
-      "ἐσσεύω:verb",
-      "ἐσσυτείνω:verb",
-      "ἐσσυτείρω:verb"
+      "εἰσσαίνω:verb",
+      "εἰσσαίρω:verb",
+      "εἰσσεύω:verb",
+      "εἰσσυτείνω:verb",
+      "εἰσσυτείρω:verb"
     ]
   },
   {
@@ -19269,7 +19241,7 @@
       "V a)poste/llw  imperf ind mp 3rd sg\t\t\tw_stem,ellw"
     ],
     "rust": [
-      "ἀπεστέλλω:verb",
+      "ἀπειστέλλω:verb",
       "ἀποστέλλω:verb"
     ]
   },
@@ -19524,8 +19496,7 @@
       "N kala_/,kalo/s  fem nom/voc sg\tdoric aeolic\t\tos_h_on"
     ],
     "rust": [
-      "κήλη:noun",
-      "καλέω:noun",
+      "καλέω:verb",
       "καλός:verb",
       "κᾶλον:verb"
     ]
@@ -19584,7 +19555,7 @@
       "πέρας:noun",
       "πέρνημι:noun",
       "περάω:noun",
-      "περάω2:noun",
+      "περάω2:verb",
       "περαίνω:verb"
     ]
   },
@@ -20418,16 +20389,16 @@
       "V i(/zw  aor ind mid 2nd sg\thomeric ionic\tunaugmented poetic\taor1"
     ],
     "rust": [
-      "ἑσθέω:verb",
-      "ἑσσάσσω:verb",
-      "ἑσσάττω:verb",
-      "ἑσσίζω:verb",
-      "ἑσσαίνω:verb",
-      "ἑσσαίρω:verb",
-      "ἑσσεύω:verb",
-      "ἑσσοέω:verb",
-      "ἑσσύρω:verb",
-      "ἑσσῴζω:verb",
+      "εἱσθέω:verb",
+      "εἱσσάσσω:verb",
+      "εἱσσάττω:verb",
+      "εἱσσίζω:verb",
+      "εἱσσαίνω:verb",
+      "εἱσσαίρω:verb",
+      "εἱσσεύω:verb",
+      "εἱσσοέω:verb",
+      "εἱσσύρω:verb",
+      "εἱσσῴζω:verb",
       "ἕζομαι:verb",
       "ἕννυμι:verb",
       "ἡσσάομαι:verb",
@@ -20529,11 +20500,10 @@
       "P a)/gw  fut part act masc nom/voc sg\t\t\treg_fut,reg_conj"
     ],
     "rust": [
-      "ἀΐσσω:participle",
-      "ἀξιάω:participle",
+      "ἀξιάω:verb",
       "ἄγνυμι:verb",
       "ἄγω:verb",
-      "ἄξος:verb",
+      "ἄξος:participle",
       "ἄξων:participle"
     ]
   },
@@ -20734,8 +20704,8 @@
       "V e)spa/qa_,spaqa/w  imperf ind act 3rd sg\t\tcontr\taw_pr,aw_denom"
     ],
     "rust": [
-      "σπαθάω:verb",
-      "ἐσπάσχω:verb"
+      "εἰσπάσχω:verb",
+      "σπαθάω:verb"
     ]
   },
   {
@@ -21042,11 +21012,9 @@
       "N a)/ra_,a)/ros  neut nom/voc/acc pl\tdoric aeolic\tcontr\ths_eos"
     ],
     "rust": [
-      "ἀρά:noun",
-      "ἀράομαι:noun",
-      "ἀρέσκω:noun",
-      "ἀρή:noun",
-      "ἀρόω:noun",
+      "ἀράομαι:verb",
+      "ἀρέσκω:verb",
+      "ἀρόω:verb",
       "ἄρα:verb",
       "ἄρνυμαι:verb",
       "ἄρον:verb",
@@ -21194,7 +21162,8 @@
       "N a)qei/a_s,a)qei/a  fem gen sg\tattic doric aeolic\t\th_hs"
     ],
     "rust": [
-      "ἀθεία:noun"
+      "ἀθεία:noun",
+      "ἄημι:noun"
     ]
   },
   {
@@ -21363,10 +21332,8 @@
       "ἀλέομαι:verb",
       "ἀλέω:verb",
       "ἀλαίνω:verb",
-      "ἁλή:verb",
       "ἁλίσκομαι:verb",
       "ἁλίσκω:verb",
-      "ἄλη:verb",
       "ἅλς:verb"
     ]
   },
@@ -21461,10 +21428,10 @@
     ],
     "rust": [
       "εἰμί:verb",
+      "εἰστίνυμαι:verb",
       "σαίνω:verb",
       "σαίρω:verb",
-      "σεύω:verb",
-      "ἐστίνυμαι:verb"
+      "σεύω:verb"
     ]
   },
   {
@@ -21592,7 +21559,7 @@
       "V a)postre/fw  aor ind act 3rd sg\t\t\taor1,reg_conj"
     ],
     "rust": [
-      "ἀπεστρέπω:verb",
+      "ἀπειστρέπω:verb",
       "ἀποστρέφω:verb"
     ]
   },
@@ -21734,9 +21701,7 @@
   {
     "word": "κνημίδος",
     "c": [],
-    "rust": [
-      "κνημίς:noun"
-    ]
+    "rust": []
   },
   {
     "word": "περιορίζοντας",
@@ -21818,11 +21783,9 @@
       "N kou/ra_s,ko/rh  fem gen sg\tattic epic doric ionic aeolic\t\th_hs"
     ],
     "rust": [
-      "κουρά:noun",
       "κουράς:noun",
-      "κουρεύς:noun",
       "κουριάω:noun",
-      "κόρη:noun"
+      "κόρη:verb"
     ]
   },
   {
@@ -22082,7 +22045,6 @@
     ],
     "rust": [
       "βάιον:noun",
-      "βαία:noun",
       "βαιός:noun"
     ]
   },
@@ -22206,8 +22168,7 @@
       "N ku_/ria,ku/rios  neut nom/voc/acc pl\t\t\tos_on"
     ],
     "rust": [
-      "κυρία:noun",
-      "κύριος:noun"
+      "κύριος:adjective"
     ]
   },
   {
@@ -22522,11 +22483,10 @@
       "N a)/grios  neut nom/voc/acc pl\t\t\tos_on"
     ],
     "rust": [
-      "ἀγρία:noun",
       "ἀγριάς:noun",
       "ἀγριάω:noun",
-      "ἀγριαίνω:noun",
-      "ἄγριος:noun"
+      "ἀγριαίνω:verb",
+      "ἄγριος:verb"
     ]
   },
   {
@@ -22950,9 +22910,7 @@
       "N trofa_/s,trofh/  fem acc pl\t\t\th_hs"
     ],
     "rust": [
-      "τροφή:noun",
-      "τροφεύς:noun",
-      "τρόφις:noun"
+      "τροφή:noun"
     ]
   },
   {
@@ -23943,7 +23901,7 @@
       "V a)polau/w  aor inf act\t\t\taor1,reg_conj"
     ],
     "rust": [
-      "ἀπαπολαύω:verb"
+      "ἀπολαύω:verb"
     ]
   },
   {
@@ -24432,8 +24390,7 @@
     ],
     "rust": [
       "ἐρυθραίνω:verb",
-      "ἐρυθριάω:verb",
-      "ἐρυθρός:verb"
+      "ἐρυθριάω:verb"
     ]
   },
   {
@@ -24540,7 +24497,6 @@
     ],
     "rust": [
       "ἐμπεδάω:verb",
-      "ἐμπεδής:verb",
       "ἔμπεδα:verb",
       "ἔμπεδος:verb"
     ]
@@ -24663,8 +24619,7 @@
       "N gra/mma  neut nom/voc/acc pl\t\t\tma_matos"
     ],
     "rust": [
-      "γράμμα:noun",
-      "γραμματεύς:noun"
+      "γράμμα:noun"
     ]
   },
   {
@@ -24903,7 +24858,8 @@
       "V lanqa/nw  fut ind mid 2nd sg\tepic ionic\t\treg_fut,reg_conj"
     ],
     "rust": [
-      "λανθάνω:verb"
+      "λανθάνω:verb",
+      "ληΐζομαι:verb"
     ]
   },
   {
@@ -25660,8 +25616,7 @@
       "N eu)agge/lion  neut nom/voc/acc pl\t\t\tos_ou"
     ],
     "rust": [
-      "εὐαγγέλιον:noun",
-      "εὐαγγελία:noun"
+      "εὐαγγέλιον:noun"
     ]
   },
   {
@@ -25893,8 +25848,7 @@
       "N o)/lbios  neut nom/voc/acc pl\t\t\tos_on"
     ],
     "rust": [
-      "ὀλβία:noun",
-      "ὄλβιος:noun"
+      "ὄλβιος:adjective"
     ]
   },
   {
@@ -26006,7 +25960,6 @@
       "V a)xqe/w  pres imperat act 2nd sg\tdoric aeolic\tcontr\tew_pr,ew_denom"
     ],
     "rust": [
-      "ἀΐσσω:verb",
       "ἀχθέω:verb",
       "ἄγνυμι:verb",
       "ἄγω:verb",
@@ -26205,7 +26158,7 @@
       "μαθητής:noun",
       "μαθητιάω:noun",
       "μαθητός:noun",
-      "μανθάνω:noun"
+      "μανθάνω:verb"
     ]
   },
   {
@@ -26285,7 +26238,6 @@
     ],
     "rust": [
       "θέλημα:noun",
-      "θελήμη:noun",
       "θελημός:noun"
     ]
   },
@@ -26623,7 +26575,7 @@
     "rust": [
       "ἀγορά:noun",
       "ἀγοράζω:noun",
-      "ἀγοράομαι:noun"
+      "ἀγοράομαι:verb"
     ]
   },
   {
@@ -29130,10 +29082,10 @@
       "V a)pospa/w  aor ind act 3rd pl\t\t\taor1,a_stem"
     ],
     "rust": [
-      "ἀπεσπάομαι:verb",
-      "ἀπεσπάσσω:verb",
-      "ἀπεσπατέομαι:verb",
-      "ἀπεσπείρω:verb",
+      "ἀπεισπάομαι:verb",
+      "ἀπεισπάσσω:verb",
+      "ἀπεισπατέομαι:verb",
+      "ἀπεισπείρω:verb",
       "ἀποσπάω:participle",
       "ἀποσπαίρω:participle",
       "ἀποσπείρω:participle"
@@ -29436,6 +29388,7 @@
       "N e)sxatia/  fem dat sg\tattic doric ionic aeolic\t\th_hs"
     ],
     "rust": [
+      "εἰσχατίζω:verb",
       "ἐσχατίζω:verb",
       "ἐσχατιά:verb"
     ]
@@ -29830,7 +29783,6 @@
       "V dida/skw  pres inf act\tattic epic\tcontr pres_redupl\tw_stem,skw"
     ],
     "rust": [
-      "διαδιδάσκω:verb",
       "διδάσκω:verb"
     ]
   },
@@ -29885,7 +29837,7 @@
     "rust": [
       "ἀμφιέννυμι:verb",
       "ἀμφιειμί:verb",
-      "ἀμφιεσόνομαι:verb",
+      "ἀμφιεισόνομαι:verb",
       "ἀμφιθέω:verb",
       "ἀμφισίζω:verb",
       "ἀμφισίνομαι:verb",
@@ -29947,7 +29899,10 @@
     "word": "εη",
     "c": [],
     "rust": [
+      "αἴρω:verb",
       "εἰμί:verb",
+      "ἀάω:verb",
+      "ἄημι:verb",
       "ἐάω:verb",
       "ἐή:verb",
       "ἑός:verb",
@@ -30814,7 +30769,7 @@
     "rust": [
       "βία:noun",
       "βιάω:noun",
-      "βιόω:noun"
+      "βιόω:verb"
     ]
   },
   {
@@ -31051,7 +31006,6 @@
     "word": "λιπάρα",
     "c": [],
     "rust": [
-      "λιπαρής:adjective",
       "λιπαρός:adjective"
     ]
   },
@@ -31142,8 +31096,7 @@
       "N au)ga_/s,au)gh/  fem acc pl\t\t\th_hs"
     ],
     "rust": [
-      "αὐγή:noun",
-      "αὐγής:noun"
+      "αὐγή:noun"
     ]
   },
   {
@@ -31247,10 +31200,10 @@
       "κατασπείρω:verb",
       "κατασπειράομαι:verb",
       "κατασπειρόω:verb",
-      "κατεσπείρω:participle",
-      "κατεσπειράζω:verb",
-      "κατεσπειράω:verb",
-      "κατεσπεραίνω:verb"
+      "κατεισπείρω:participle",
+      "κατεισπειράζω:verb",
+      "κατεισπειράω:verb",
+      "κατεισπεραίνω:verb"
     ]
   },
   {
@@ -31750,8 +31703,7 @@
       "N sa_/,so/s  fem nom/voc sg\tdoric aeolic\t\tos_h_on"
     ],
     "rust": [
-      "σής:noun",
-      "σαίνω:noun",
+      "σαίνω:verb",
       "σαίρω:verb",
       "σεύω:verb",
       "σός:verb",
@@ -32759,7 +32711,7 @@
       "V e)pistomi/zw  aor ind act 3rd sg\t\tcomp_only nu_movable\taor1,izw"
     ],
     "rust": [
-      "ἐπεστομίζω:verb",
+      "ἐπειστομίζω:verb",
       "ἐπιστομίζομαι:verb",
       "ἐπιστομίζω:verb"
     ]
@@ -32965,7 +32917,9 @@
     "word": "έειν",
     "c": [],
     "rust": [
-      "ἐάω:verb"
+      "ἐάω:verb",
+      "ἐναίρω:verb",
+      "ἕννυμι:verb"
     ]
   },
   {
@@ -32999,8 +32953,7 @@
       "P e)qe/lw  pres part act masc acc pl\t\t\tw_stem"
     ],
     "rust": [
-      "ἐθέλω:participle",
-      "ἐθελοντής:participle"
+      "ἐθέλω:participle"
     ]
   },
   {
@@ -33177,8 +33130,8 @@
     "rust": [
       "παρίστημι:verb",
       "παραστείνω:verb",
-      "παρεστείνω:verb",
-      "παρεστείρω:verb"
+      "παρειστείνω:verb",
+      "παρειστείρω:verb"
     ]
   },
   {
@@ -33188,9 +33141,14 @@
       "P metewre/w  pres part mp neut nom/voc/acc pl\tattic epic doric\tcontr\tew_pr,ew_denom"
     ],
     "rust": [
+      "μεθοράω:participle",
+      "μεθορέω:participle",
       "μεταιωρέω:participle",
       "μετεωρέω:participle",
-      "μετωρέω:participle"
+      "μετορούω:participle",
+      "μετορόω:participle",
+      "μετωρέω:participle",
+      "μετόρνυμι:participle"
     ]
   },
   {
@@ -33352,8 +33310,7 @@
       "P e)kkli_/na_s,e)kkli/nw  aor part act masc nom/voc sg\tattic epic ionic\t\taor1,inw"
     ],
     "rust": [
-      "ἐκκλίνω:verb",
-      "ἐκκλινής:verb"
+      "ἐκκλίνω:verb"
     ]
   },
   {
@@ -33589,7 +33546,6 @@
       "N shmei=on  neut nom/voc/acc pl\t\t\tos_ou"
     ],
     "rust": [
-      "σημεία:noun",
       "σημεῖον:noun"
     ]
   },
@@ -33769,7 +33725,7 @@
       "N sunamfo/teron,sunamfo/teroi  neut nom/voc/acc sg\t\t\tos_h_on"
     ],
     "rust": [
-      "ξυναμφοτερίζω:verb"
+      "συναμφοτερίζω:verb"
     ]
   },
   {
@@ -34439,8 +34395,6 @@
       "ἀμείρω:verb",
       "ἀμύνω:verb",
       "ἁμός:verb",
-      "ἄμη:verb",
-      "ἄμι:verb",
       "ἅμα:verb",
       "ἡμός:verb"
     ]
@@ -34485,7 +34439,6 @@
     ],
     "rust": [
       "δίαιτα:noun",
-      "διαδιαιτάω:noun",
       "διαιτάω:noun",
       "διαιτέω:noun"
     ]
@@ -35123,7 +35076,7 @@
       "N e)/fesis  fem gen sg\tepic doric ionic aeolic\t\tis_ews"
     ],
     "rust": [
-      "ἐφεσιαίνω:verb",
+      "ἐφεισιαίνω:verb",
       "ἔφεσις:verb"
     ]
   },
@@ -36076,13 +36029,13 @@
     ],
     "rust": [
       "εἰμί:verb",
-      "ἐσθέω:verb",
-      "ἐσσίζω:verb",
-      "ἐσσίνομαι:verb",
-      "ἐσσαίνω:verb",
-      "ἐσσαίρω:verb",
-      "ἐσσεύω:verb",
-      "ἐσσύρω:verb",
+      "εἰσθέω:verb",
+      "εἰσσίζω:verb",
+      "εἰσσίνομαι:verb",
+      "εἰσσαίνω:verb",
+      "εἰσσαίρω:verb",
+      "εἰσσεύω:verb",
+      "εἰσσύρω:verb",
       "ἕζομαι:verb",
       "ἕννυμι:verb",
       "ἡσσάομαι:verb",
@@ -36096,7 +36049,7 @@
       "N e)sqlo/n,e)sqlo/s  neut nom/voc/acc sg\t\t\tos_h_on"
     ],
     "rust": [
-      "ἐσθλάω:verb",
+      "εἰσθλάω:verb",
       "ἐσθλός:verb"
     ]
   },
@@ -36504,7 +36457,6 @@
       "N ko/rac  masc acc pl\t\t\tc_kos"
     ],
     "rust": [
-      "κορακεύς:noun",
       "κόραξ:noun"
     ]
   },
@@ -37303,9 +37255,8 @@
       "N kaka_/,kako/s  fem nom/voc sg\tdoric aeolic\t\tos_h_on"
     ],
     "rust": [
-      "κάκη:noun",
-      "κακός:noun",
-      "κακύνω:noun"
+      "κακός:adjective",
+      "κακύνω:adjective"
     ]
   },
   {
@@ -37617,12 +37568,12 @@
       "παρασχάζω:verb",
       "παρασχάω:participle",
       "παρασχίζω:participle",
-      "παρεσκιχάνω:verb",
-      "παρεσχάσκω:verb",
-      "παρεσχέω:participle",
-      "παρεσχαίρω:verb",
-      "παρεσχεύω:verb",
-      "παρεσχόω:verb"
+      "παρεισκιχάνω:verb",
+      "παρεισχάσκω:verb",
+      "παρεισχέω:participle",
+      "παρεισχαίρω:verb",
+      "παρεισχεύω:verb",
+      "παρεισχόω:verb"
     ]
   },
   {
@@ -37769,8 +37720,7 @@
       "N qa/lassa  fem nom/voc sg\t\t\ta_hs"
     ],
     "rust": [
-      "θάλασσα:noun",
-      "θαλασσεύς:noun"
+      "θάλασσα:noun"
     ]
   },
   {
@@ -38311,7 +38261,6 @@
       "V a)cio/w  pres ind act 2nd sg\t\tcontr\tow_pr,ow_denom"
     ],
     "rust": [
-      "ἀΐσσω:verb",
       "ἀξιόω:verb",
       "ἄγνυμι:verb",
       "ἄγω:verb",
@@ -39015,9 +38964,7 @@
   {
     "word": "παλλὰς",
     "c": [],
-    "rust": [
-      "πάλλα:noun"
-    ]
+    "rust": []
   },
   {
     "word": "ἀνατολαῖς",
@@ -39070,9 +39017,7 @@
       "N makro/s  fem gen sg\tattic doric aeolic\t\tos_h_on"
     ],
     "rust": [
-      "μάκρα:noun",
-      "μακρός:noun",
-      "μακρύνω:noun"
+      "μακρύνω:verb"
     ]
   },
   {
@@ -39883,8 +39828,8 @@
     ],
     "rust": [
       "εἰμί:verb",
-      "ἐσσύ:verb",
-      "ἐστίνυμαι:adjective"
+      "εἰσσύ:verb",
+      "εἰστίνυμαι:adjective"
     ]
   },
   {
@@ -40129,9 +40074,7 @@
       "N po/lis  fem acc pl\tepic doric ionic aeolic\t\tis_ews"
     ],
     "rust": [
-      "πολιά:noun",
       "πολιάς:noun",
-      "πολιός:noun",
       "πόλις:noun"
     ]
   },
@@ -40931,14 +40874,14 @@
       "V ei)sora/w  pres inf act\tattic epic doric\tcontr short_eis\taw_pr,a_stem"
     ],
     "rust": [
-      "ἐσοράω:verb",
-      "ἐσορέω:verb",
-      "ἐσορίζω:verb",
-      "ἐσορίνω:verb",
-      "ἐσορεύω:verb",
-      "ἐσορόω:participle",
-      "ἐσόρνυμι:participle",
-      "ἐσόρομαι:verb"
+      "εἰσοράω:verb",
+      "εἰσορέω:verb",
+      "εἰσορίζω:verb",
+      "εἰσορίνω:verb",
+      "εἰσορεύω:verb",
+      "εἰσορόω:participle",
+      "εἰσόρνυμι:participle",
+      "εἰσόρομαι:verb"
     ]
   },
   {
@@ -41689,7 +41632,6 @@
     ],
     "rust": [
       "ἀριστάω:verb",
-      "ἀριστεύς:verb",
       "ἄριστον:verb",
       "ἄριστος:verb"
     ]
@@ -41824,9 +41766,9 @@
     "rust": [
       "πάλα:noun",
       "πάλαι:noun",
-      "πάλη:noun",
+      "πάλη:adjective",
       "πάλη2:adjective",
-      "πάλλω:adjective",
+      "πάλλω:noun",
       "παλέω:noun",
       "παλύνω:noun"
     ]
@@ -41970,8 +41912,8 @@
     "rust": [
       "συνάφεια:noun",
       "συναφεάω:noun",
-      "συναφιάομαι:noun",
-      "συναφιαίνω:noun"
+      "συναφιάομαι:verb",
+      "συναφιαίνω:verb"
     ]
   },
   {
@@ -42035,15 +41977,15 @@
       "N cu_nh/,cuno/s  fem nom/voc sg\tattic epic ionic\t\tos_h_on"
     ],
     "rust": [
-      "ξυγκάθημαι:verb",
-      "ξυνάημι:verb",
-      "ξυνίημι:verb",
-      "ξυναάω:verb",
-      "ξυναίρω:verb",
-      "ξυνεάω:verb",
-      "ξυνειμί:verb",
-      "ξυνημί:verb",
-      "ξυνός:verb"
+      "ξυνός:adjective",
+      "συγκάθημαι:adjective",
+      "συνάημι:verb",
+      "συνίημι:verb",
+      "συναάω:verb",
+      "συναίρω:verb",
+      "συνεάω:verb",
+      "συνειμί:verb",
+      "συνημί:verb"
     ]
   },
   {
@@ -42215,8 +42157,15 @@
     "rust": [
       "αἰωρέω:participle",
       "ἐώρα:participle",
-      "ὠρέω:noun",
-      "ὠρίζω:noun",
+      "ὀρίνω:noun",
+      "ὀρόω:noun",
+      "ὁράω:participle",
+      "ὁρέω:participle",
+      "ὁρίζω:participle",
+      "ὁρεύω:participle",
+      "ὄρνυμι:verb",
+      "ὠρέω:verb",
+      "ὠρίζω:verb",
       "ὠρεύω:participle",
       "ὡρίζω:participle"
     ]
@@ -42280,8 +42229,7 @@
       "V a)namimnh/skw  fut ind act 1st pl\t\t\treg_fut,a_stem"
     ],
     "rust": [
-      "ἀναμιμνήσκω:verb",
-      "ἀναναμιμνήσκω:verb"
+      "ἀναμιμνήσκω:verb"
     ]
   },
   {
