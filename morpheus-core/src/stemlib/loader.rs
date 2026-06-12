@@ -265,13 +265,20 @@ fn load_compound_lemma_map(stemsrc_dir: &Path) -> HashMap<String, String> {
         let lemma_unicode = beta_to_unicode_word(lemma_field);
 
         if preverbs.len() == 1 {
-            // Single preverb: key is (preverb_norm, base_norm).
+            // Single preverb: key is "preverb_norm:base_norm".
             let key = format!("{last_pv_norm}:{base_norm}");
             map.insert(key, lemma_unicode);
+        } else if preverbs.len() == 2 {
+            // Double preverb (e.g. "dia/,a)na/-i(/sthmi diani/stamai").
+            // Key: "outer_norm:inner_norm:base_norm" for combined lookup in check_preverb.
+            let outer_pv_unicode = beta_to_unicode_word(preverbs[0]);
+            let outer_pv_norm = norm(&outer_pv_unicode);
+            let key = format!("{outer_pv_norm}:{last_pv_norm}:{base_norm}");
+            map.insert(key, lemma_unicode.clone());
+            // Also store with single inner key so inner-only lookups work.
+            let inner_key = format!("{last_pv_norm}:{base_norm}");
+            map.entry(inner_key).or_insert(lemma_unicode);
         }
-        // Double-preverb entries are not keyed here: the inner lookup would need
-        // the inner-compound lemma as the "base", which requires compose_lemma.
-        // Those cases are rare and handled by the general compose_lemma path.
     }
     map
 }

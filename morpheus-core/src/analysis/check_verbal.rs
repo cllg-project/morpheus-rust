@@ -36,7 +36,18 @@ pub fn check_verb(word: &str, stemlib: &StemlibIndex, _check_preverb: bool) -> V
 /// Try to analyze (stem_prefix, ending) as a valid verb stem + verbal ending.
 fn analyzed_verb(stem_prefix: &str, ending: &str, stemlib: &StemlibIndex) -> Vec<Analysis> {
     let mut results = Vec::new();
-    let ending_norm = strip_diacritics(ending);
+    // Ending table stores final sigma as ς; normalize σ→ς at word end to match.
+    let ending_norm = {
+        let s = strip_diacritics(ending);
+        if s.ends_with('σ') {
+            let idx = s.len() - 'σ'.len_utf8();
+            let mut owned = s;
+            owned.replace_range(idx.., "ς");
+            owned
+        } else {
+            s
+        }
+    };
 
     // Look up this ending in the verbal ending tables
     let end_entries = stemlib.end_index.get_by_ending(&ending_norm);

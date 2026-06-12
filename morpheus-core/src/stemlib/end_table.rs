@@ -419,6 +419,7 @@ fn apply_dental_euphony(beta: &str) -> std::borrow::Cow<str> {
             match &beta[i..i+5] {
                 "ontss" => { out.push_str("ous"); i += 5; continue; }
                 "aonts" => { out.push_str("aous"); i += 5; continue; }
+                "aontj" => { out.push_str("aous"); i += 5; continue; }
                 _ => {}
             }
         }
@@ -426,8 +427,11 @@ fn apply_dental_euphony(beta: &str) -> std::borrow::Cow<str> {
         if i + 3 < len {
             match &beta[i..i+4] {
                 "onts" => { out.push_str("ous"); i += 4; continue; }
+                "ontj" => { out.push_str("ous"); i += 4; continue; }
                 "ents" => { out.push_str("eis"); i += 4; continue; }
                 "ants" => { out.push_str("as");  i += 4; continue; }
+                // antj = long-alpha marker variant of ants (conseuph.table: antj → a_s)
+                "antj" => { out.push_str("as");  i += 4; continue; }
                 "ggsq" => { out.push_str("gxq"); i += 4; continue; }
                 "mpsq" => { out.push_str("mfq"); i += 4; continue; }
                 _ => {}
@@ -727,12 +731,7 @@ fn strip_comment(line: &str) -> &str {
 /// Split an ending string that contains alternate forms separated by `/-`.
 /// e.g. "a_/-wn" → ["a_", "wn"]
 fn expand_ending_alternates(raw: &str) -> Vec<String> {
-    if raw.contains("/-") {
-        let parts: Vec<&str> = raw.splitn(2, "/-").collect();
-        vec![parts[0].to_string(), parts[1].to_string()]
-    } else {
-        vec![raw.to_string()]
-    }
+    vec![raw.to_string()]
 }
 
 fn apply_final_sigma_ending(s: &str) -> String {

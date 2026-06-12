@@ -323,7 +323,18 @@ pub fn expand_one_entry(entry: &StemEntry, deriv_tables: &DerivTables) -> Vec<St
                     } else {
                         entry.stem.clone()
                     };
-                    let mut stem = join_suffix_euphony(&root, &suffix);
+                    // Bare-breathing root (":de:) airw" etc.): root is a single `)` or `(` character.
+                    // Apply the breathing to the suffix's first vowel, same as verbstem_present.
+                    let mut stem = if (root == ")" || root == "(") && !suffix.is_empty() {
+                        use crate::unicode::betacode::beta_to_unicode;
+                        let breathing = if root == ")" { ")" } else { "(" };
+                        let first = line.suffix_beta.chars().next().unwrap_or('a');
+                        let rest = &line.suffix_beta[first.len_utf8()..];
+                        let with_breathing = format!("{first}{breathing}{rest}");
+                        beta_to_unicode(&with_breathing)
+                    } else {
+                        join_suffix_euphony(&root, &suffix)
+                    };
                     // reg_conj present stem: apply Grassmann's Law (θρεφ → τρεφ)
                     if class_bit == 1 << 0 && token == "reg_conj" {
                         stem = do_dissim(&stem);

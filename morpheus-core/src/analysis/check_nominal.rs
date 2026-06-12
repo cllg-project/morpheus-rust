@@ -30,7 +30,18 @@ pub fn check_nom(word: &str, stemlib: &StemlibIndex) -> Vec<Analysis> {
     for &split in &split_points {
         let stem_str   = &word[..split];
         let ending_str = &word[split..];
-        let ending_norm = strip_diacritics(ending_str);
+        // Ending table stores final sigma as ς; normalize σ→ς at word end to match.
+        let ending_norm = {
+            let s = strip_diacritics(ending_str);
+            if s.ends_with('σ') {
+                let idx = s.len() - 'σ'.len_utf8();
+                let mut owned = s;
+                owned.replace_range(idx.., "ς");
+                owned
+            } else {
+                s
+            }
+        };
 
         // Look up this ending in the reverse ending index
         let end_entries = stemlib.end_index.get_by_ending(&ending_norm);

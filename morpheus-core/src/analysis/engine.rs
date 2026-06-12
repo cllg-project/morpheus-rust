@@ -286,10 +286,8 @@ fn check_string_inner(
     // Recursing into check_string_inner gives the remainder preverb handling
     // (κἀφαγιστεύσας = καὶ ἐφ-αγιστεύσας); crasis_splits of the remainder is
     // empty, so the recursion terminates.
-    if results.is_empty() {
-        for candidate in crasis_splits(word) {
-            results.extend(check_string_inner(&candidate, stemlib, opts));
-        }
+    for candidate in crasis_splits(word) {
+        results.extend(check_string_inner(&candidate, stemlib, opts));
     }
 
     // Doric/Aeolic ᾱ for η (ἀλλάλαις = ἀλλήλαις): retry with each single
@@ -318,25 +316,23 @@ fn check_string_inner(
         }
     }
 
-    // Enclitic -περ (οἷόσπερ, ὥσπερ when not in the dictionary): strip it and
-    // keep only noun/adjective readings, mirroring C checkstring3's GreekSuff.
-    // The enclitic adds an acute on the host's ultima; retry without it.
-    if results.is_empty() {
-        if let Some(host) = word.strip_suffix("περ").filter(|h| !h.is_empty()) {
-            // Restore the word-final sigma form (οἷόσπερ → οἷός).
-            let host = match host.strip_suffix('σ') {
-                Some(h) => format!("{h}ς"),
-                None => host.to_string(),
-            };
-            for candidate in [host.clone(), strip_ultima_acute(&host)] {
-                let mut r = check_string_inner_base(&candidate, stemlib, opts);
-                r.retain(|a| {
-                    a.stem_type.intersects(StemType::NOUNSTEM | StemType::ADJSTEM)
-                });
+    // Enclitic -περ (οἷόσπερ, ὥσπερ, ἅπερ): strip it and keep only nominal
+    // readings, mirroring C checkstring3's GreekSuff.  Run unconditionally so
+    // that ἅπερ finds ὅς even when the full form also has spurious verb matches.
+    if let Some(host) = word.strip_suffix("περ").filter(|h| !h.is_empty()) {
+        // Restore the word-final sigma form (οἷόσπερ → οἷός).
+        let host = match host.strip_suffix('σ') {
+            Some(h) => format!("{h}ς"),
+            None => host.to_string(),
+        };
+        for candidate in [host.clone(), strip_ultima_acute(&host)] {
+            let mut r = check_string_inner_base(&candidate, stemlib, opts);
+            r.retain(|a| {
+                a.stem_type.intersects(StemType::NOUNSTEM | StemType::ADJSTEM)
+            });
+            if !r.is_empty() {
                 results.extend(r);
-                if !results.is_empty() {
-                    break;
-                }
+                break;
             }
         }
     }
@@ -371,15 +367,44 @@ fn crasis_splits(word: &str) -> Vec<String> {
             .unwrap_or(c)
     };
     let has_psili = |c: char| c.to_string().nfd().any(|x| x == '\u{0313}' || x == '\u{0343}');
+    let mut out: Vec<String> = Vec::new();
+    // Also handle ε-initial crasis: ἐγᾦδα = ἐγώ + οἶδα (smooth breathing on
+    // ω at position 2, base cluster "γω" → second word is "ω" + tail = ωδα).
+    let is_egw_crasis = matches!(base(chars[0]), 'ε' | 'η')
+        && chars.len() >= 4
+        && (1..=3).any(|i| i < chars.len() && has_psili(chars[i]));
+    if is_egw_crasis {
+        // Find the smooth-breathing position
+        if let Some(idx) = (1..=3.min(chars.len() - 1)).find(|&i| has_psili(chars[i])) {
+            use unicode_normalization::UnicodeNormalization;
+            let tail: String = chars[idx + 1..].iter().collect();
+            let bv = base(chars[idx]);
+            let second: String = chars[idx..].iter().collect();
+            out.push(second);
+            if bv == 'ω' {
+                // Check for iota subscript (U+0345) in ᾦ → ω+ο+ι contraction
+                // (ἐγᾦδα = ἐγώ + οἶδα where ω+ο→ω and ί subscript = the ι of οἶ)
+                let has_ypog = chars[idx].to_string().nfd().any(|c| c == '\u{0345}');
+                if has_ypog {
+                    // Recover: "ο" + "ι" + tail = οιδα → finds οἶδα
+                    out.push(format!("οι{tail}"));
+                } else {
+                    out.push(format!("ο{tail}"));
+                }
+            }
+            return out;
+        }
+    }
+
     if !matches!(base(chars[0]), 'κ' | 'τ' | 'θ' | 'χ') {
-        return Vec::new();
+        return out;
     }
     // Find the breathing-bearing vowel at position 1 (κἀκεῖνος) or 2 (τοὔνομα).
-    let Some(idx) = (1..=2.min(chars.len() - 2)).find(|&i| has_psili(chars[i])) else {
-        return Vec::new();
+    // Allow idx up to len-1 to handle short second words like κεἴ = καὶ+εἰ.
+    let Some(idx) = (1..=2.min(chars.len() - 1)).find(|&i| has_psili(chars[i])) else {
+        return out;
     };
     let tail: String = chars[idx + 1..].iter().collect();
-    let mut out = Vec::new();
     if idx == 1 {
         // The remainder is itself the second word (τἀνθρώπων → ἀνθρώπων) …
         out.push(chars[1..].iter().collect());
@@ -401,6 +426,11 @@ fn crasis_splits(word: &str) -> Vec<String> {
         if cluster == "αυ" {
             // τὸ αὐτό → ταὐτό keeps αυ
             out.push(format!("αυ{tail}"));
+        }
+        if cluster == "ει" {
+            // κεἴ = καὶ εἰ: αι+ε→ε, ι retains smooth breathing from ε of εἰ
+            // Recover εἰ: ε + (smooth-bearing ι + tail)
+            out.push(format!("ε{}", chars[idx..].iter().collect::<String>()));
         }
     }
     out

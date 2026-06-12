@@ -1,3 +1,33 @@
+:le:du/w
+:vb:du/seto aor2 aor ind mid 3rd sg epic unaugmented
+
+:le:e)kseu/omai
+:vb:e)ce/ssuto ath_primary imperf ind mid 3rd sg poetic unaugmented
+
+:le:a)naere/ugomai
+:vb:e)panereugo/menos w_stem pres part mp masc nom sg
+
+:le:a)ne/xw
+:vb:h)ne/sxeto aor2 aor ind mid 3rd sg prevb_aug
+
+:le:proti/qhmi
+:vb:prou)/qeto emi_aor aor ind mid 3rd sg raw_preverb
+
+:le:u(perempi/plhmi
+:vb:u(perempipla=sqai aw_pr pres inf mp contr pres_redupl
+
+:le:a)paisxu/nomai
+:vb:a)ph|sxumme/nos perfp_un perf part mp masc nom sg
+
+:le:bdelu/ssomai
+:vb:e)bde/luktai perfp_g perf ind mp 3rd sg
+
+:le:ne/mw
+:vs:neim aor1
+
+:le:bou/lomai
+:vs:boul w_stem mp
+
 :le:seu/w
 :vb:e)/ssutai ath_primary pres ind mid sg 3rd poetic
 

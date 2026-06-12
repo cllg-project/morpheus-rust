@@ -31,6 +31,11 @@ static GREEK_PREVERBS: &[&str] = &[
     "προσ",   // πρός (before προ)
     // 3 chars
     "ξυν",    // ξύν (Doric/poetic σύν)
+    "ξυμ",    // ξύν before β/π/φ/μ
+    "ξυγ",    // ξύν before γ/κ/χ
+    "ξυλ",    // ξύν before λ
+    "ξυρ",    // ξύν before ρ
+    "ξυσ",    // ξύν before σ
     "συν",    // σύν (before short assimilation forms)
     "συμ",    // σύν before β/π/φ/μ
     "συγ",    // σύν before γ/κ/χ
@@ -69,7 +74,7 @@ static GREEK_PREVERBS: &[&str] = &[
 /// Try stripping known preverbs from `word` and return
 /// `(surface_preverb, remainder)` pairs (with original diacritics preserved).
 fn preverb_splits(word: &str) -> Vec<(String, String)> {
-    let bare = strip_diacritics(&word.to_lowercase());
+    let bare = strip_diacritics(&word.to_lowercase()).replace('ς', "σ");
     let graphemes: Vec<&str> = word.graphemes(true).collect();
     let mut remainders = Vec::new();
 
@@ -298,8 +303,9 @@ fn analyze_remainder(remainder: &str, stemlib: &StemlibIndex) -> Vec<Analysis> {
     });
     results.extend(vb);
 
-    // Nu-movable retry
-    if results.is_empty() && remainder.ends_with('ν') {
+    // Nu-movable retry — always try (not just when empty) to catch cases like
+    // ἀπένειμεν where base verb (νέμω) is only found without the final ν.
+    if remainder.ends_with('ν') {
         let without_nu = &remainder[..remainder.len() - 'ν'.len_utf8()];
         if !without_nu.is_empty() {
             let mut nu = check_verb(without_nu, stemlib, false);
@@ -426,25 +432,67 @@ fn canonicalize_preverb(pv: &str) -> &str {
         "αντ" | "ανθ" => "αντι",
         "αμφ" => "αμφι",
         "αν" => "ανα",
+        "δι" => "δια",
+        "εξ" => "εκ",
         "εγ" | "εμ" | "ελ" => "εν",
         "εσ" => "εισ",
         "συμ" | "συγ" | "συλ" | "συρ" | "συσ" | "συ" => "συν",
+        "ξυμ" | "ξυγ" | "ξυλ" | "ξυρ" | "ξυσ" | "ξυν" | "ξυ" => "συν",
         other => other,
+    }
+}
+
+/// Look up a double-preverb+base triple in the vbs.cmp.ml override map.
+/// Returns Some(lemma) if found, None if no entry.
+fn override_double_compound_lemma(outer_pv: &str, inner_pv: &str, base_lemma: &str, _composed: &str, stemlib: &StemlibIndex) -> Option<String> {
+    let outer_raw = strip_diacritics(&outer_pv.to_lowercase()).replace('ς', "σ");
+    let outer_norm = canonicalize_preverb(&outer_raw);
+    let inner_raw = strip_diacritics(&inner_pv.to_lowercase()).replace('ς', "σ");
+    let inner_norm = canonicalize_preverb(&inner_raw);
+    let base_norm = strip_diacritics(&base_lemma.to_lowercase()).replace('ς', "σ");
+    let key = format!("{outer_norm}:{inner_norm}:{base_norm}");
+    stemlib.compound_lemma_map.get(&key).cloned()
+}
+
+/// Return the full unelided Unicode form of a surface preverb.
+/// This mirrors C's "preverb/-base" display format for compounds not in
+/// vbs.cmp.ml: the full preverb is prepended to the base without elision.
+fn full_preverb_unicode(preverb: &str) -> &str {
+    // Common elided/assimilated surfaces → full form.
+    match preverb {
+        "δι" | "δί" => "δια",
+        "ἀν" | "ἄν" => "ἀνα",
+        "κατ" | "κάτ" | "καθ" | "κάθ" => "κατα",
+        "μετ" | "μέτ" | "μεθ" | "μέθ" => "μετα",
+        "παρ" | "πάρ" => "παρα",
+        "ἐπ" | "ἔπ" | "ἐφ" | "ἔφ" => "ἐπι",
+        "ὑπ" | "ὕπ" | "ὑφ" | "ὕφ" => "ὑπο",
+        "ἀπ" | "ἄπ" | "ἀφ" | "ἄφ" => "ἀπο",
+        "ἀντ" | "ἄντ" | "ἀνθ" | "ἄνθ" => "ἀντι",
+        "ἀμφ" | "ἄμφ" => "ἀμφι",
+        "πρός" | "πρoς" => "προσ",
+        _ => preverb,
     }
 }
 
 /// Look up a preverb+base pair in the vbs.cmp.ml override map.
 /// Both preverb and base_lemma are raw Unicode strings; we strip diacritics
 /// to build the key so that surface accent variations don't affect lookup.
-fn override_compound_lemma(preverb: &str, base_lemma: &str, composed: &str, stemlib: &StemlibIndex) -> String {
+/// Fallback (no map entry): use the full unelided preverb prepended to the
+/// base, matching C's "preverb/-base" display format which Python normalizes
+/// to "full_preverb + base" (no elision).
+fn override_compound_lemma(preverb: &str, base_lemma: &str, _composed: &str, stemlib: &StemlibIndex) -> String {
     let pv_raw = strip_diacritics(&preverb.to_lowercase()).replace('ς', "σ");
     let pv_norm = canonicalize_preverb(&pv_raw);
     let base_norm = strip_diacritics(&base_lemma.to_lowercase()).replace('ς', "σ");
     let key = format!("{pv_norm}:{base_norm}");
+    if std::env::var("MORPHEUS_CMP_DEBUG").is_ok() {
+        eprintln!("cmp_lookup: pv={preverb:?} base={base_lemma:?} key={key:?} hit={}", stemlib.compound_lemma_map.contains_key(&key));
+    }
     stemlib.compound_lemma_map
         .get(&key)
         .cloned()
-        .unwrap_or_else(|| composed.to_string())
+        .unwrap_or_else(|| format!("{}{}", full_preverb_unicode(preverb), base_lemma))
 }
 
 pub fn check_with_preverb(word: &str, stemlib: &StemlibIndex) -> Vec<Analysis> {
@@ -471,7 +519,9 @@ pub fn check_with_preverb(word: &str, stemlib: &StemlibIndex) -> Vec<Analysis> {
                     let inner = compose_lemma(&preverb2, &a.lemma);
                     let inner_overridden = override_compound_lemma(&preverb2, &a.lemma, &inner, stemlib);
                     let composed = compose_lemma(&preverb, &inner_overridden);
-                    a.lemma = override_compound_lemma(&preverb, &inner_overridden, &composed, stemlib);
+                    // Try double-preverb key "outer:inner:base" first.
+                    a.lemma = override_double_compound_lemma(&preverb, &preverb2, &a.lemma, &composed, stemlib)
+                        .unwrap_or_else(|| override_compound_lemma(&preverb, &inner_overridden, &composed, stemlib));
                 }
                 results.extend(double);
             }

@@ -85,7 +85,13 @@ pub fn stemtype_compatible(
                         return true;
                     }
                     // Fallback: uncontracted reg_deriv types (izw, azw, euw…) use w_stem.
-                    if is_pp_pr && end_num == 1 {
+                    // Exclude contracted denominals that have their own pp_pr stemtype
+                    // (ew_denom→ew_pr, ow_denom→ow_pr, aw_denom→aw_pr, iaw_denom→ajw_pr);
+                    // those must not spuriously match w_stem endings.
+                    let is_contracted_denom = stem_keys.split_whitespace().any(|t| {
+                        matches!(t, "ew_denom" | "ow_denom" | "aw_denom" | "iaw_denom" | "euw")
+                    });
+                    if is_pp_pr && end_num == 1 && !is_contracted_denom {
                         return true;
                     }
                 // prim_deriv (reg_conj): the stem is the present stem → allow w_stem
