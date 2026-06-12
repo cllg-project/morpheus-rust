@@ -42,8 +42,10 @@ def load_disagree() -> list[dict]:
 
 def test_word(word: str) -> dict | None:
     """Run Rust on a single word and return its lemma set."""
+    overlay_dir = ROOT / "stemlib-overrides"
+    overlay_args = ["--overlay", str(overlay_dir)] if overlay_dir.is_dir() else []
     result = subprocess.run(
-        [str(RUST_BIN), "-m", str(STEMLIB), word],
+        [str(RUST_BIN), "-m", str(STEMLIB)] + overlay_args + [word],
         capture_output=True, text=True,
     )
     import re

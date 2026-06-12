@@ -206,8 +206,10 @@ def run_rust_morpheus(words: list[str]) -> dict[str, list[str]]:
     """
     results: dict[str, list[str]] = {}
     stdin = '\n'.join(words) + '\n'
+    overlay_dir = Path(__file__).resolve().parent.parent / "stemlib-overrides"
+    overlay_args = ['--overlay', str(overlay_dir)] if overlay_dir.is_dir() else []
     proc = subprocess.run(
-        [str(RUST_BIN), '-m', str(MORPHLIB_RUST)],
+        [str(RUST_BIN), '-m', str(MORPHLIB_RUST)] + overlay_args,
         input=stdin,
         capture_output=True,
         text=True,

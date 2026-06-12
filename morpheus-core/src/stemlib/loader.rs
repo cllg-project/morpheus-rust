@@ -9,6 +9,7 @@ use crate::stemlib::{
     },
     stem_dict::{StemDict, load_stem_files},
 };
+use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -51,6 +52,10 @@ pub struct StemlibIndex {
     /// Overlay directories whose stemsrc files were loaded on top of the
     /// main stemlib (additive: they extend the stem dict).
     pub overlay_dirs: Vec<PathBuf>,
+    /// Compound-lemma overrides from vbs.cmp.ml.
+    /// Key: strip_diacritics(composed_compound_form_norm) → canonical lemma (Unicode).
+    /// Used by check_preverb to correct active/deponent lemma choice.
+    pub compound_lemma_map: HashMap<String, String>,
 }
 
 impl StemlibIndex {
@@ -144,6 +149,9 @@ impl StemlibIndex {
             eprintln!("deriv expansion: {:?}", t.elapsed());
         }
 
+        // ── Compound-lemma map from vbs.cmp.ml ─────────────────────────
+        let compound_lemma_map = load_compound_lemma_map(&stemsrc_dir);
+
         Ok(StemlibIndex {
             language,
             stem_dict,
@@ -154,6 +162,7 @@ impl StemlibIndex {
             contractions,
             deriv_tables,
             overlay_dirs: overlays.to_vec(),
+            compound_lemma_map,
         })
     }
 }
@@ -205,4 +214,64 @@ pub(crate) fn collect_stem_files(stemsrc_dir: &Path, language: Language) -> Vec<
     }
 
     paths
+}
+
+/// Parse vbs.cmp.ml to build a compound-lemma override map.
+///
+/// vbs.cmp.ml format: `preverb1,preverb2-base_verb lemma`
+/// Key: `"preverb_norm:base_norm"` where preverb_norm = strip_diacritics of the
+/// last/only preverb and base_norm = strip_diacritics of the base verb lemma.
+/// This matches the (surface_preverb_stripped, analysis_lemma_stripped) pair that
+/// check_preverb has available, avoiding the nasal-assimilation mismatch that
+/// would occur if we keyed on the pre-assembled compound form.
+fn load_compound_lemma_map(stemsrc_dir: &Path) -> HashMap<String, String> {
+    use crate::stemlib::stem_dict::beta_to_unicode_word;
+    use crate::unicode::normalize::strip_diacritics;
+
+    fn norm(s: &str) -> String {
+        strip_diacritics(s).replace('ς', "σ").to_lowercase()
+    }
+
+    let mut map = HashMap::new();
+    let path = stemsrc_dir.join("vbs.cmp.ml");
+    let Ok(content) = std::fs::read_to_string(&path) else { return map; };
+
+    for line in content.lines() {
+        let line = line.trim();
+        if line.is_empty() || line.starts_with('#') { continue; }
+        let mut parts = line.split_ascii_whitespace();
+        let Some(form_field) = parts.next() else { continue };
+        let Some(lemma_field) = parts.next() else { continue };
+
+        // Split on the last '-' to separate preverb chain from base verb.
+        // The base verb may contain '/' (accent marks) but not '-'.
+        let Some(dash_pos) = form_field.rfind('-') else { continue };
+        let preverb_chain = &form_field[..dash_pos];
+        let base_beta = &form_field[dash_pos + 1..];
+
+        // The preverb used as key is the last preverb in the chain (innermost).
+        // For single-preverb entries like "e)n-kure/w" it's the only preverb.
+        // For double-preverb entries like "a)mfi/,kata/-e(/zomai" we store
+        // both (outer, inner:base) and (inner, base) pairs.
+        let preverbs: Vec<&str> = preverb_chain.split(',').collect();
+        let last_preverb_beta = preverbs.last().copied().unwrap_or(preverb_chain);
+
+        let base_unicode = beta_to_unicode_word(base_beta);
+        let base_norm = norm(&base_unicode);
+
+        let last_pv_unicode = beta_to_unicode_word(last_preverb_beta);
+        let last_pv_norm = norm(&last_pv_unicode);
+
+        let lemma_unicode = beta_to_unicode_word(lemma_field);
+
+        if preverbs.len() == 1 {
+            // Single preverb: key is (preverb_norm, base_norm).
+            let key = format!("{last_pv_norm}:{base_norm}");
+            map.insert(key, lemma_unicode);
+        }
+        // Double-preverb entries are not keyed here: the inner lookup would need
+        // the inner-compound lemma as the "base", which requires compose_lemma.
+        // Those cases are rare and handled by the general compose_lemma path.
+    }
+    map
 }

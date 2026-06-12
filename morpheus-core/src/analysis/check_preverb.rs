@@ -46,6 +46,7 @@ static GREEK_PREVERBS: &[&str] = &[
     "ανθ",    // ἀντ- + rough breathing
     "εμ",     // ἐν before β/π/φ/μ
     "εγ",     // ἐν before γ/κ/χ/ξ (ἐγκαλέω, ἐγχρίμπτω)
+    "ελ",     // ἐν before λ (ἐλλείπω)
     "αμφ",    // ἀμφ (elided)
     "αντ",    // ἀντ (elided)
     "προ",    // πρό
@@ -410,6 +411,42 @@ mod tests {
     }
 }
 
+/// Canonicalize an elided surface preverb to its full form for map lookup.
+/// Elided preverbs (e.g. απ, επ, κατ) must match the unelided forms stored in
+/// vbs.cmp.ml (απο, επι, κατα).
+fn canonicalize_preverb(pv: &str) -> &str {
+    match pv {
+        "απ" | "αφ" => "απο",
+        "επ" | "εφ" => "επι",
+        "κατ" | "καθ" => "κατα",
+        "μετ" | "μεθ" => "μετα",
+        "παρ" => "παρα",
+        "περ" => "περι",
+        "υπ" | "υφ" => "υπο",
+        "αντ" | "ανθ" => "αντι",
+        "αμφ" => "αμφι",
+        "αν" => "ανα",
+        "εγ" | "εμ" | "ελ" => "εν",
+        "εσ" => "εισ",
+        "συμ" | "συγ" | "συλ" | "συρ" | "συσ" | "συ" => "συν",
+        other => other,
+    }
+}
+
+/// Look up a preverb+base pair in the vbs.cmp.ml override map.
+/// Both preverb and base_lemma are raw Unicode strings; we strip diacritics
+/// to build the key so that surface accent variations don't affect lookup.
+fn override_compound_lemma(preverb: &str, base_lemma: &str, composed: &str, stemlib: &StemlibIndex) -> String {
+    let pv_raw = strip_diacritics(&preverb.to_lowercase()).replace('ς', "σ");
+    let pv_norm = canonicalize_preverb(&pv_raw);
+    let base_norm = strip_diacritics(&base_lemma.to_lowercase()).replace('ς', "σ");
+    let key = format!("{pv_norm}:{base_norm}");
+    stemlib.compound_lemma_map
+        .get(&key)
+        .cloned()
+        .unwrap_or_else(|| composed.to_string())
+}
+
 pub fn check_with_preverb(word: &str, stemlib: &StemlibIndex) -> Vec<Analysis> {
     let mut results = Vec::new();
 
@@ -419,7 +456,8 @@ pub fn check_with_preverb(word: &str, stemlib: &StemlibIndex) -> Vec<Analysis> {
         if !single.is_empty() {
             for a in &mut single {
                 a.morph_flags.set(MorphFlags::HAS_PREVERB);
-                a.lemma = compose_lemma(&preverb, &a.lemma);
+                let composed = compose_lemma(&preverb, &a.lemma);
+                a.lemma = override_compound_lemma(&preverb, &a.lemma, &composed, stemlib);
             }
             results.extend(single);
         }
@@ -430,8 +468,10 @@ pub fn check_with_preverb(word: &str, stemlib: &StemlibIndex) -> Vec<Analysis> {
             if !double.is_empty() {
                 for a in &mut double {
                     a.morph_flags.set(MorphFlags::HAS_PREVERB);
-                    a.lemma =
-                        compose_lemma(&preverb, &compose_lemma(&preverb2, &a.lemma));
+                    let inner = compose_lemma(&preverb2, &a.lemma);
+                    let inner_overridden = override_compound_lemma(&preverb2, &a.lemma, &inner, stemlib);
+                    let composed = compose_lemma(&preverb, &inner_overridden);
+                    a.lemma = override_compound_lemma(&preverb, &inner_overridden, &composed, stemlib);
                 }
                 results.extend(double);
             }
