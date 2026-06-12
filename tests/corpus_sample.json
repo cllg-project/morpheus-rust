@@ -1248,7 +1248,8 @@
       "N a)ma_/,h(mo/s  fem nom/voc sg\tdoric aeolic\t\tos_h_on"
     ],
     "rust": [
-      "τέμνω:verb"
+      "τέμνω:verb",
+      "ἐμός:verb"
     ]
   },
   {
@@ -8049,7 +8050,8 @@
       "N *mou=sai  fem nom/voc pl\taeolic\t\ta_hs"
     ],
     "rust": [
-      "μαίνομαι:participle",
+      "Μοῦσαι:noun",
+      "μαίνομαι:noun",
       "μαίομαι:participle",
       "μυζάω:participle",
       "μύζω:participle",
@@ -14828,6 +14830,7 @@
     "rust": [
       "μετέραμαι:verb",
       "μετέρομαι:verb",
+      "μεταέραμαι:verb",
       "μεταρρέω:verb",
       "μεταρραίνω:verb",
       "μεταρρώννυμι:verb",
@@ -18450,7 +18453,8 @@
       "ξέω:verb",
       "ξαίνω:verb",
       "ἐξειμί:verb",
-      "ἔχω:participle"
+      "ἔξεστι:participle",
+      "ἔχω:verb"
     ]
   },
   {
@@ -18664,7 +18668,8 @@
       "εἰσσαίρω:verb",
       "εἰσσεύω:verb",
       "εἰσσυντείνω:verb",
-      "εἰσσυτείρω:verb"
+      "εἰσσυτείρω:verb",
+      "σεύω:verb"
     ]
   },
   {
@@ -18965,6 +18970,7 @@
       "V pe/lw  imperf ind mp 3rd sg\tepic\tsyncope\tw_stem"
     ],
     "rust": [
+      "πέλω:verb",
       "πίμπλημι:verb",
       "πελάζω:verb",
       "πλέω:verb",
@@ -22317,6 +22323,7 @@
     "rust": [
       "ἐξέπομαι:verb",
       "ἐξέπω:verb",
+      "ἐξαγορεύω:verb",
       "ἐξεῖπον:verb",
       "ἐξιπόω:verb"
     ]
@@ -36917,6 +36924,7 @@
       "ἐξεῖμι:verb",
       "ἐξημί:verb",
       "ἐξωθέω:verb",
+      "ἔξεστι:verb",
       "ἔχω:verb"
     ]
   },
