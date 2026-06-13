@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# mbuild
+# Build morpheus release binary, show only errors and final status.
+# Use `rtk proxy cargo build` to see full output.
+
+set -euo pipefail
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+cd "$SCRIPT_DIR/.."
+
+if cargo build --release 2>&1 | tee /tmp/mbuild.log | grep -E '^error' ; then
+  echo "BUILD FAILED" >&2
+  exit 1
+else
+  echo "Build OK: $(ls -lh target/release/morpheus | awk '{print $5, $9}')"
+fi

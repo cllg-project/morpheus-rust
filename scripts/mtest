@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# mtest WORD [WORD ...]
+# Compare C vs Rust morpheus for Greek words (Unicode input).
+# Shows C's NL lines and Rust's lemmas side by side.
+# Env overrides: MORPHLIB (C dist stemlib), STEMLIB (Rust raw stemlib), BINARY
+
+set -euo pipefail
+MORPHLIB="${MORPHLIB:-$HOME/dev/morpheus/dist/stemlib}"
+STEMLIB="${STEMLIB:-$HOME/dev/morpheus/stemlib}"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+BINARY="${BINARY:-$SCRIPT_DIR/../target/release/morpheus}"
+
+if [[ $# -eq 0 ]]; then
+  echo "Usage: mtest WORD [WORD ...]" >&2
+  exit 1
+fi
+
+for word in "$@"; do
+  beta=$(echo "$word" | "$BINARY" beta)
+  echo "=== $word (β: $beta) ==="
+
+  echo "C:"
+  printf '%s\n' "$beta" \
+    | MORPHLIB="$MORPHLIB" "$HOME/dev/morpheus/bin/cruncher" 2>/dev/null \
+    | grep '<NL>' | sed 's/<NL>[[:space:]]*/  /; s/<\/NL>//' \
+    || echo "  (no output)"
+
+  echo "Rust lemmas:"
+  echo "$word" | "$BINARY" -m "$STEMLIB" 2>/dev/null \
+    | grep -oP '(?<=<hdwd xml:lang="grc">)[^<]+' | sort -u | sed 's/^/  /' \
+    || echo "  (no output)"
+  echo ""
+done

@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# maccent WORD [WORD ...]
+# Run morpheus with MORPHEUS_ACCENT_DEBUG=1 and filter the accent debug lines.
+# Useful for diagnosing accent filter pass/fail without reading full XML output.
+
+set -euo pipefail
+STEMLIB="${STEMLIB:-$HOME/dev/morpheus/stemlib}"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+BINARY="${BINARY:-$SCRIPT_DIR/../target/release/morpheus}"
+
+if [[ $# -eq 0 ]]; then
+  echo "Usage: maccent WORD [WORD ...]" >&2
+  exit 1
+fi
+
+for word in "$@"; do
+  echo "=== $word ==="
+  echo "$word" | MORPHEUS_ACCENT_DEBUG=1 "$BINARY" -m "$STEMLIB" 2>&1 \
+    | grep -v '^<\|^$' | head -40
+  echo ""
+done
